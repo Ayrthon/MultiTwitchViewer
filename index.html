@@ -1042,11 +1042,32 @@
           alert("This stream is already added");
           return;
         }
-        const stream = { id: Date.now(), channel: channelLogin, locked: false };
+
+        const stream = {
+          id: Date.now(),
+          channel: channelLogin,
+          locked: false,
+        };
+
         streams.push(stream);
         saveStreamsToStorage();
-        updateUI();
 
+        // ⬇️ Incremental DOM add (no full rebuild, players keep playing)
+        const grid = document.getElementById("streamsGrid");
+
+        // remove placeholder once, if present
+        const empty = grid.querySelector(".no-streams");
+        if (empty) empty.remove();
+
+        // create just the new card and append
+        const card = createStreamElement(stream, streams.length - 1);
+        grid.appendChild(card);
+
+        // ensure DnD is wired and indices are correct
+        enableDragAndDrop(grid);
+        refreshItemIndices(grid);
+
+        // little visual tickle on the clicked sidebar item (optional)
         const channelItem = document.querySelector(
           `[data-channel="${channelLogin}"]`
         );
