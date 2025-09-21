@@ -1312,11 +1312,33 @@
 
         const stream = { id: Date.now(), channel: channelName, locked: false };
         streams.push(stream);
+        saveStreamsToStorage();
+
+        const grid = document.getElementById("streamsGrid");
+        if (grid.querySelector(".no-streams")) grid.innerHTML = ""; // remove placeholder once
+        const card = createStreamElement(stream, streams.length - 1);
+        grid.appendChild(card);
+        enableDragAndDrop(grid);
+        refreshItemIndices(grid);
+        showEmptyState(false);
+
         input.value = "";
         hideSuggestions();
+      }
 
+      function removeStream(streamId) {
+        const idx = streams.findIndex((s) => s.id === streamId);
+        if (idx === -1) return;
+
+        streams.splice(idx, 1);
         saveStreamsToStorage();
-        updateUI();
+
+        const card = findCardById(streamId);
+        if (card) card.remove();
+
+        const grid = document.getElementById("streamsGrid");
+        refreshItemIndices(grid);
+        showEmptyState(streams.length === 0);
       }
 
       function removeStream(streamId) {
@@ -1329,66 +1351,123 @@
       }
 
       function updateUI() {
-        const streamsGrid = document.getElementById("streamsGrid");
+        const grid = document.getElementById("streamsGrid");
 
-        if (streams.length === 0) {
-          streamsGrid.innerHTML = `
-            <div class="no-streams">
-              No streams added yet. Add a Twitch channel to get started!
-            </div>
-          `;
+        // First render: if there are no cards yet
+        const existingCards = grid.querySelectorAll(".stream-item");
+        if (existingCards.length === 0) {
+          if (streams.length === 0) {
+            grid.innerHTML = "";
+            showEmptyState(true);
+            return;
+          }
+          grid.innerHTML = ""; // only once on initial render
+          streams.forEach((stream, idx) => {
+            const card = createStreamElement(stream, idx);
+            grid.appendChild(card);
+          });
+          enableDragAndDrop(grid);
+          showEmptyState(false);
           return;
         }
 
-        streamsGrid.innerHTML = "";
-
-        streams.forEach((stream, idx) => {
-          const streamDiv = document.createElement("div");
-          streamDiv.className = "stream-item";
-          streamDiv.setAttribute("draggable", "true");
-          streamDiv.dataset.index = String(idx);
-
-          streamDiv.innerHTML = `
-            <div class="stream-header">
-              <span class="stream-title">${stream.channel}</span>
-              <div class="stream-controls">
-                <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${stream.id})">Remove</button>
-              </div>
-            </div>
-            <div class="stream-video-container" data-stream-id="${stream.id}">
-              <iframe
-                src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-                class="stream-video"
-                frameborder="0"
-                allowfullscreen="true"
-                scrolling="no">
-              </iframe>
-            </div>
-            <div class="stream-chat">
-              <iframe
-                src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-                frameborder="0"
-                scrolling="no">
-              </iframe>
-            </div>
-          `;
-
-          streamsGrid.appendChild(streamDiv);
+        // Remove cards no longer in streams[]
+        Array.from(existingCards).forEach((card) => {
+          const id = Number(card.dataset.id);
+          if (!streams.some((s) => s.id === id)) {
+            card.remove();
+          }
         });
 
-        enableDragAndDrop(streamsGrid);
+        // Add new cards that don't exist yet
+        streams.forEach((s, idx) => {
+          if (!findCardById(s.id)) {
+            const card = createStreamElement(s, idx);
+            document.getElementById("streamsGrid").appendChild(card);
+          }
+        });
+
+        // Reorder DOM to match streams[] (no iframe reloads)
+        const gridNow = document.getElementById("streamsGrid");
+        const orderMap = new Map(streams.map((s, i) => [String(s.id), i]));
+        Array.from(gridNow.querySelectorAll(".stream-item"))
+          .sort(
+            (a, b) => orderMap.get(a.dataset.id) - orderMap.get(b.dataset.id)
+          )
+          .forEach((el) => gridNow.appendChild(el));
+
+        refreshItemIndices(gridNow);
+        enableDragAndDrop(gridNow);
+        showEmptyState(streams.length === 0);
       }
 
       function enableDragAndDrop(container) {
         const items = container.querySelectorAll(".stream-item");
-
         items.forEach((item) => {
-          item.addEventListener("dragstart", onDragStart);
-          item.addEventListener("dragover", onDragOver);
-          item.addEventListener("dragleave", onDragLeave);
-          item.addEventListener("drop", onDrop);
-          item.addEventListener("dragend", onDragEnd);
+          if (!item._dndBound) {
+            item.addEventListener("dragstart", onDragStart);
+            item.addEventListener("dragover", onDragOver);
+            item.addEventListener("dragleave", onDragLeave);
+            item.addEventListener("drop", onDrop);
+            item.addEventListener("dragend", onDragEnd);
+            item._dndBound = true; // avoid double-binding
+          }
         });
+      }
+
+      function onDragStart(e) {
+        const item = e.currentTarget;
+        dragIndex = Number(item.dataset.index);
+        item.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(dragIndex));
+      }
+
+      function onDragOver(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        if (!target.classList.contains("drop-target")) {
+          target.classList.add("drop-target");
+        }
+      }
+
+      function onDragLeave(e) {
+        e.currentTarget.classList.remove("drop-target");
+      }
+
+      function onDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove("drop-target");
+
+        const from = dragIndex;
+        const to = Number(target.dataset.index);
+        if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
+          return;
+
+        // Update array order
+        const [moved] = streams.splice(from, 1);
+        streams.splice(to, 0, moved);
+        saveStreamsToStorage();
+
+        // Move the DOM node (no iframe reload)
+        const grid = document.getElementById("streamsGrid");
+        const nodes = Array.from(grid.querySelectorAll(".stream-item"));
+        const movingEl = nodes[from];
+        const referenceEl = nodes[to];
+
+        if (from < to) {
+          grid.insertBefore(movingEl, referenceEl.nextSibling);
+        } else {
+          grid.insertBefore(movingEl, referenceEl);
+        }
+
+        refreshItemIndices(grid);
+      }
+
+      function onDragEnd(e) {
+        e.currentTarget.classList.remove("dragging");
+        dragIndex = null;
       }
 
       function onDragStart(e) {
@@ -1444,6 +1523,71 @@
             locked: stream.locked || false,
           }));
         }
+      }
+
+      // --- helpers ---------------------------------------------------------------
+
+      function findCardById(id) {
+        return document.querySelector(`.stream-item[data-id="${id}"]`);
+      }
+
+      function showEmptyState(show) {
+        const grid = document.getElementById("streamsGrid");
+        const empty = grid.querySelector(".no-streams");
+        if (show) {
+          if (!empty) {
+            const n = document.createElement("div");
+            n.className = "no-streams";
+            n.textContent =
+              "No streams added yet. Add a Twitch channel to get started!";
+            grid.appendChild(n);
+          }
+        } else if (empty) {
+          empty.remove();
+        }
+      }
+
+      function createStreamElement(stream, index) {
+        const card = document.createElement("div");
+        card.className = "stream-item";
+        card.setAttribute("draggable", "true");
+        card.dataset.index = String(index);
+        card.dataset.id = String(stream.id);
+
+        card.innerHTML = `
+    <div class="stream-header">
+      <span class="stream-title">${stream.channel}</span>
+      <div class="stream-controls">
+        <button class="remove-btn"
+                onclick="event.stopPropagation(); removeStream(${stream.id})">
+          Remove
+        </button>
+      </div>
+    </div>
+    <div class="stream-video-container" data-stream-id="${stream.id}">
+      <iframe
+        src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
+        class="stream-video"
+        frameborder="0"
+        allowfullscreen="true"
+        scrolling="no">
+      </iframe>
+    </div>
+    <div class="stream-chat">
+      <iframe
+        src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+        frameborder="0"
+        scrolling="no">
+      </iframe>
+    </div>
+  `;
+        return card;
+      }
+
+      function refreshItemIndices(container) {
+        container.querySelectorAll(".stream-item").forEach((el, i) => {
+          el.dataset.index = String(i);
+        });
       }
     </script>
   </body>
