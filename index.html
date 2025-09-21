@@ -1253,9 +1253,10 @@
           `?client_id=${CLIENT_ID}` +
           `&redirect_uri=${encodeURIComponent(window.location.origin)}` +
           `&response_type=token` +
-          `&scope=user:read:email channel:read:subscriptions` +
+          `&scope=user:read:email user:read:follows channel:read:subscriptions` +
           `&force_verify=true`;
 
+        console.log("Redirecting to Twitch OAuth:", authUrl);
         window.location.href = authUrl;
       }
 
@@ -1277,6 +1278,11 @@
       }
 
       async function fetchUserData(token) {
+        console.log(
+          "Fetching user data with token:",
+          token ? "present" : "missing"
+        );
+
         try {
           const response = await fetch("https://api.twitch.tv/helix/users", {
             headers: {
@@ -1285,31 +1291,29 @@
             },
           });
 
+          console.log("User data response status:", response.status);
+
           if (response.ok) {
             const data = await response.json();
-            user = data.data[0];
-            updateUserInfo();
-          } else {
-            console.error("Failed to fetch user data:", response.status);
-            // If API fails, create a demo user for testing
-            user = {
-              id: "demo_user",
-              display_name: "Demo User",
-              profile_image_url:
-                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-            };
-            updateUserInfo();
+            console.log("User data received:", data);
+
+            if (data.data && data.data.length > 0) {
+              user = data.data[0];
+              console.log("User set to:", user);
+              updateUserInfo();
+              return; // Exit early on success
+            }
           }
+
+          throw new Error(`API response not ok: ${response.status}`);
         } catch (error) {
           console.error("Error fetching user data:", error);
-          // Fallback to demo user
-          user = {
-            id: "demo_user",
-            display_name: "Demo User",
-            profile_image_url:
-              "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-          };
-          updateUserInfo();
+          // Remove invalid token
+          localStorage.removeItem("twitch_token");
+
+          // Only show demo user message, don't set demo user
+          console.log("Authentication failed - please try logging in again");
+          alert("Authentication failed. Please try logging in again.");
         }
       }
 
