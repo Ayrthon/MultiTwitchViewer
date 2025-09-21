@@ -590,11 +590,7 @@
       <!-- Main Content -->
       <div class="main-wrapper">
         <div class="main-content">
-          <div class="streams-grid" id="streamsGrid">
-            <div class="no-streams" id="noStreams">
-              No streams added yet. Add a Twitch channel to get started!
-            </div>
-          </div>
+          <div class="streams-grid" id="streamsGrid"></div>
         </div>
       </div>
     </div>
@@ -1323,42 +1319,59 @@
       }
 
       function updateUI() {
-        const grid = document.getElementById("streamsGrid");
+        const streamsGrid = document.getElementById("streamsGrid");
 
-        if (!streams || streams.length === 0) {
-          grid.innerHTML = `
-            <div class="no-streams">
-              No streams added yet. Add a Twitch channel to get started!
-            </div>
-          `;
+        if (streams.length === 0) {
+          streamsGrid.innerHTML = `
+      <div class="no-streams">
+        No streams added yet. Add a Twitch channel to get started!
+      </div>
+    `;
           return;
         }
 
-        const desiredIds = new Set(streams.map((s) => String(s.id)));
+        // Clear grid
+        streamsGrid.innerHTML = "";
 
-        // Remove cards that no longer exist
-        grid.querySelectorAll(".stream-item").forEach((card) => {
-          const id = card.getAttribute("data-stream-id");
-          if (!desiredIds.has(id)) card.remove();
+        // Render active streams
+        streams.forEach((stream, idx) => {
+          const streamDiv = document.createElement("div");
+          streamDiv.className = "stream-item";
+          streamDiv.setAttribute("draggable", "true");
+          streamDiv.dataset.index = String(idx);
+
+          streamDiv.innerHTML = `
+      <div class="stream-header">
+        <span class="stream-title">${stream.channel}</span>
+        <div class="stream-controls">
+          <button class="remove-btn" 
+                  onclick="event.stopPropagation(); removeStream(${stream.id})">
+            Remove
+          </button>
+        </div>
+      </div>
+      <div class="stream-video-container" data-stream-id="${stream.id}">
+        <iframe 
+          src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
+          class="stream-video"
+          frameborder="0"
+          allowfullscreen="true"
+          scrolling="no">
+        </iframe>
+      </div>
+      <div class="stream-chat">
+        <iframe 
+          src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+          frameborder="0"
+          scrolling="no">
+        </iframe>
+      </div>
+    `;
+
+          streamsGrid.appendChild(streamDiv);
         });
 
-        // Add/update/reorder
-        streams.forEach((stream) => {
-          const key = String(stream.id);
-          let card = grid.querySelector(
-            `.stream-item[data-stream-id="${key}"]`
-          );
-          if (!card) {
-            card = createStreamCard(stream); // create with iframe once
-            grid.appendChild(card);
-          } else {
-            updateStreamCard(card, stream); // update text only
-            grid.appendChild(card); // move to new order without re-creating
-          }
-        });
-
-        // Enable DnD on current items
-        enableDragAndDrop(grid);
+        enableDragAndDrop(streamsGrid);
       }
 
       function createStreamCard(stream) {
