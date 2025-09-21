@@ -1295,45 +1295,104 @@
           '<div class="loading-suggestion">🔍 Searching channels...</div>';
         dropdown.style.display = "block";
 
-        const popularChannels = [
-          {
-            broadcaster_name: "ninja",
-            display_name: "Ninja",
-            game_name: "Fortnite",
-            thumbnail_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
-          },
-          {
-            broadcaster_name: "pokimane",
-            display_name: "Pokimane",
-            game_name: "Just Chatting",
-            thumbnail_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
-          },
-          {
-            broadcaster_name: "shroud",
-            display_name: "shroud",
-            game_name: "VALORANT",
-            thumbnail_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
-          },
-          {
-            broadcaster_name: "xqc",
-            display_name: "xQc",
-            game_name: "Grand Theft Auto V",
-            thumbnail_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
-          },
-        ];
+        // If not logged in, gracefully fall back to a small local list
+        const token = localStorage.getItem("twitch_token");
+        if (!token) {
+          const fallback = [
+            {
+              id: "19571641",
+              broadcaster_login: "ninja",
+              display_name: "Ninja",
+              game_name: "Fortnite",
+              is_live: false,
+              thumbnail_url:
+                "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-70x70.png",
+            },
+            {
+              id: "44445592",
+              broadcaster_login: "pokimane",
+              display_name: "Pokimane",
+              game_name: "Just Chatting",
+              is_live: false,
+              thumbnail_url:
+                "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-70x70.png",
+            },
+            {
+              id: "37402112",
+              broadcaster_login: "shroud",
+              display_name: "shroud",
+              game_name: "VALORANT",
+              is_live: false,
+              thumbnail_url:
+                "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-70x70.png",
+            },
+            {
+              id: "71092938",
+              broadcaster_login: "xqc",
+              display_name: "xQc",
+              game_name: "Grand Theft Auto V",
+              is_live: false,
+              thumbnail_url:
+                "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-70x70.png",
+            },
+          ].filter(
+            (c) =>
+              c.display_name.toLowerCase().includes(query.toLowerCase()) ||
+              c.broadcaster_login.toLowerCase().includes(query.toLowerCase())
+          );
 
-        const filtered = popularChannels.filter(
-          (channel) =>
-            channel.display_name.toLowerCase().includes(query.toLowerCase()) ||
-            channel.broadcaster_name.toLowerCase().includes(query.toLowerCase())
-        );
+          currentSuggestions = fallback;
+          displaySuggestions(fallback);
+          return;
+        }
 
-        currentSuggestions = filtered;
-        displaySuggestions(filtered);
+        try {
+          // Helix search/channels supports: query, first (max 100), live_only (optional)
+          const url = new URL("https://api.twitch.tv/helix/search/channels");
+          url.searchParams.set("query", query);
+          url.searchParams.set("first", "10");
+          // If you want only live, uncomment:
+          // url.searchParams.set("live_only", "true");
+
+          const res = await fetch(url.toString(), {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Client-Id": CLIENT_ID,
+            },
+          });
+
+          if (res.status === 401 || res.status === 403) {
+            // Token not valid anymore; clear it so user can re-auth
+            localStorage.removeItem("twitch_token");
+            throw new Error(`Auth error ${res.status}`);
+          }
+          if (res.status === 429) {
+            throw new Error("Rate limited (429) — try again in a moment.");
+          }
+          if (!res.ok) {
+            throw new Error(`search/channels failed: ${res.status}`);
+          }
+
+          const json = await res.json();
+          // Map to a shape your UI expects
+          const results = (json.data || []).map((ch) => ({
+            id: ch.id,
+            broadcaster_login: ch.broadcaster_login,
+            display_name: ch.display_name || ch.broadcaster_login,
+            game_name: ch.game_name || "",
+            is_live: !!ch.is_live,
+            // Twitch returns a 50x50/70x70-ish avatar URL in thumbnail_url for this endpoint
+            thumbnail_url: ch.thumbnail_url || "",
+            title: ch.title || "",
+          }));
+
+          currentSuggestions = results;
+          displaySuggestions(results);
+        } catch (err) {
+          console.error("Channel search error:", err);
+          dropdown.innerHTML =
+            '<div class="loading-suggestion">Couldn’t search Twitch right now.</div>';
+        }
       }
 
       function displaySuggestions(channels) {
@@ -1347,17 +1406,22 @@
           return;
         }
 
-        // Build the HTML
         dropdown.innerHTML = channels
           .map(
             (channel, index) => `
-    <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${channel.display_name}">
-      <img src="${channel.thumbnail_url}" alt="${channel.display_name}" class="suggestion-avatar">
+    <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
+              channel.display_name
+            }">
+      <img src="${channel.thumbnail_url || ""}" alt="${
+              channel.display_name
+            }" class="suggestion-avatar">
       <div class="suggestion-info">
         <div class="suggestion-name">${channel.display_name}</div>
-        <div class="suggestion-game">${channel.game_name}</div>
+        <div class="suggestion-game">${channel.game_name || ""}</div>
       </div>
-      <span class="suggestion-viewers">🔴 LIVE</span>
+      <span class="suggestion-viewers">${
+        channel.is_live ? "🔴 LIVE" : ""
+      }</span>
     </div>
   `
           )
@@ -1365,16 +1429,13 @@
 
         dropdown.style.display = "block";
 
-        // Attach click handlers
+        // Attach handlers
         const items = dropdown.querySelectorAll(".suggestion-item");
         items.forEach((item) => {
           item.addEventListener("click", () => {
             const idx = Number(item.getAttribute("data-index"));
-            // Use the array passed in (closure), not a global
             selectSuggestion(channels[idx]);
           });
-
-          // Optional: allow Enter key to select
           item.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
               const idx = Number(item.getAttribute("data-index"));
@@ -1393,8 +1454,12 @@
 
       function selectSuggestion(channel) {
         const input = document.getElementById("streamInput");
-        input.value =
-          channel.broadcaster_name || channel.display_name.toLowerCase();
+        // Prefer broadcaster_login for the actual channel name
+        input.value = (
+          channel.broadcaster_login ||
+          channel.display_name ||
+          ""
+        ).toLowerCase();
         hideSuggestions();
         addStream();
       }
