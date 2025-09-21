@@ -797,13 +797,13 @@
             Login to see followed channels
           </div>
         </div>
-        <button
+        <!-- <button
           class="refresh-button"
           id="refreshButton"
           onclick="refreshFollowedChannels()"
         >
           🔄 Refresh
-        </button>
+        </button> -->
       </div>
 
       <!-- Main Content -->
@@ -1596,14 +1596,6 @@
         document.body.style.overflow = "hidden";
       }
 
-      function closeLightbox() {
-        const overlay = document.getElementById("lightboxOverlay");
-        overlay.classList.remove("active");
-        document.body.style.overflow = "auto";
-        unmuteAllStreams();
-        currentLightboxStream = null;
-      }
-
       function muteBackgroundStreams(activeStreamId) {
         streams.forEach((stream) => {
           if (stream.id !== activeStreamId) {
@@ -1722,11 +1714,11 @@
           const videoContainer = streamDiv.querySelector(
             ".stream-video-container"
           );
-          videoContainer.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openLightbox(stream.id);
-          });
+          //   videoContainer.addEventListener("click", function (e) {
+          //     e.preventDefault();
+          //     e.stopPropagation();
+          //     openLightbox(stream.id);
+          //   });
         });
       }
 
@@ -1771,20 +1763,20 @@
       }
 
       // Event listeners
-      document
-        .getElementById("lightboxOverlay")
-        .addEventListener("click", function (e) {
-          if (e.target === this) closeLightbox();
-        });
+      //   document
+      //     .getElementById("lightboxOverlay")
+      //     .addEventListener("click", function (e) {
+      //       if (e.target === this) closeLightbox();
+      //     });
 
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && currentLightboxStream) closeLightbox();
-      });
+      //   document.addEventListener("keydown", function (e) {
+      //     if (e.key === "Escape" && currentLightboxStream) closeLightbox();
+      //   });
 
-      document.addEventListener("click", function (e) {
-        const inputContainer = document.querySelector(".input-container");
-        if (!inputContainer.contains(e.target)) hideSuggestions();
-      });
+      //   document.addEventListener("click", function (e) {
+      //     const inputContainer = document.querySelector(".input-container");
+      //     if (!inputContainer.contains(e.target)) hideSuggestions();
+      //   });
     </script>
   </body>
 </html>
