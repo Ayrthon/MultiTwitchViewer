@@ -973,7 +973,7 @@
 
           // Use the current working API endpoint
           const followsResponse = await fetch(
-            `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=20`,
+            `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=100`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
