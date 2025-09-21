@@ -1340,28 +1340,48 @@
         const dropdown = document.getElementById("suggestionsDropdown");
         selectedSuggestionIndex = -1;
 
-        if (channels.length === 0) {
+        if (!Array.isArray(channels) || channels.length === 0) {
           dropdown.innerHTML =
             '<div class="loading-suggestion">No channels found</div>';
+          dropdown.style.display = "block";
           return;
         }
 
+        // Build the HTML
         dropdown.innerHTML = channels
           .map(
             (channel, index) => `
-                <div class="suggestion-item" onclick="selectSuggestion(currentSuggestions[${index}])" data-index="${index}">
-                    <img src="${channel.thumbnail_url}" alt="${channel.display_name}" class="suggestion-avatar">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">${channel.display_name}</div>
-                        <div class="suggestion-game">${channel.game_name}</div>
-                    </div>
-                    <span class="suggestion-viewers">🔴 LIVE</span>
-                </div>
-            `
+    <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${channel.display_name}">
+      <img src="${channel.thumbnail_url}" alt="${channel.display_name}" class="suggestion-avatar">
+      <div class="suggestion-info">
+        <div class="suggestion-name">${channel.display_name}</div>
+        <div class="suggestion-game">${channel.game_name}</div>
+      </div>
+      <span class="suggestion-viewers">🔴 LIVE</span>
+    </div>
+  `
           )
           .join("");
 
         dropdown.style.display = "block";
+
+        // Attach click handlers
+        const items = dropdown.querySelectorAll(".suggestion-item");
+        items.forEach((item) => {
+          item.addEventListener("click", () => {
+            const idx = Number(item.getAttribute("data-index"));
+            // Use the array passed in (closure), not a global
+            selectSuggestion(channels[idx]);
+          });
+
+          // Optional: allow Enter key to select
+          item.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              const idx = Number(item.getAttribute("data-index"));
+              selectSuggestion(channels[idx]);
+            }
+          });
+        });
       }
 
       function updateSuggestionSelection() {
