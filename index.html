@@ -896,7 +896,7 @@
           `?client_id=${CLIENT_ID}` +
           `&redirect_uri=${encodeURIComponent(window.location.origin)}` +
           `&response_type=token` +
-          `&scope=user:read:email` +
+          `&scope=user:read:email user:read:follows` +
           `&force_verify=true`;
 
         window.location.href = authUrl;
@@ -938,8 +938,10 @@
             const data = await response.json();
             if (data.data && data.data.length > 0) {
               user = data.data[0];
+              console.log("✅ User authenticated:", user.display_name);
               updateUserInfo();
-              loadFollowedChannels();
+              // Load real followed channels after login
+              fetchRealFollowedChannels();
             }
           } else {
             localStorage.removeItem("twitch_token");
@@ -948,6 +950,147 @@
           console.error("Error fetching user data:", error);
           localStorage.removeItem("twitch_token");
         }
+      }
+
+      async function fetchRealFollowedChannels() {
+        if (!user) {
+          loadDemoFollowedChannels();
+          updateFollowedChannelsUI();
+          return;
+        }
+
+        const refreshButton = document.getElementById("refreshButton");
+        refreshButton.disabled = true;
+        refreshButton.textContent = "🔄 Loading real data...";
+
+        const token = localStorage.getItem("twitch_token");
+
+        try {
+          console.log(
+            "🔍 Fetching real followed channels for:",
+            user.display_name
+          );
+
+          // Try the follows API
+          const followsResponse = await fetch(
+            `https://api.twitch.tv/helix/users/follows?from_id=${user.id}&first=20`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Client-Id": CLIENT_ID,
+              },
+            }
+          );
+
+          if (!followsResponse.ok) {
+            throw new Error(`Follows API returned ${followsResponse.status}`);
+          }
+
+          const followsData = await followsResponse.json();
+          console.log("📋 Follows data:", followsData);
+
+          if (!followsData.data || followsData.data.length === 0) {
+            followedChannels = [
+              {
+                id: "no_follows",
+                login: "no_follows",
+                display_name: "📝 No Follows Found",
+                profile_image_url:
+                  "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
+                is_live: false,
+                game_name: "You are not following any channels",
+                viewer_count: 0,
+              },
+            ];
+            updateFollowedChannelsUI();
+            refreshButton.disabled = false;
+            refreshButton.textContent = "🔄 Refresh";
+            return;
+          }
+
+          // Get channel info
+          const channelIds = followsData.data.map((follow) => follow.to_id);
+          const [usersResponse, streamsResponse] = await Promise.all([
+            fetch(
+              `https://api.twitch.tv/helix/users?${channelIds
+                .map((id) => `id=${id}`)
+                .join("&")}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Client-Id": CLIENT_ID,
+                },
+              }
+            ),
+            fetch(
+              `https://api.twitch.tv/helix/streams?${channelIds
+                .map((id) => `user_id=${id}`)
+                .join("&")}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Client-Id": CLIENT_ID,
+                },
+              }
+            ),
+          ]);
+
+          const usersData = await usersResponse.json();
+          const streamsData = streamsResponse.ok
+            ? await streamsResponse.json()
+            : { data: [] };
+
+          followedChannels = usersData.data.map((channel) => {
+            const liveStream = streamsData.data.find(
+              (stream) => stream.user_id === channel.id
+            );
+            return {
+              id: channel.id,
+              login: channel.login,
+              display_name: channel.display_name,
+              profile_image_url: channel.profile_image_url,
+              is_live: !!liveStream,
+              game_name: liveStream?.game_name || "Offline",
+              viewer_count: liveStream?.viewer_count || 0,
+              title: liveStream?.title || "",
+            };
+          });
+
+          // Add success indicator
+          followedChannels.unshift({
+            id: "real_data",
+            login: "real_data",
+            display_name: "✅ Your Real Follows",
+            profile_image_url: user.profile_image_url,
+            is_live: false,
+            game_name: `${followedChannels.length} channels loaded`,
+            viewer_count: 0,
+          });
+
+          console.log(
+            "✅ Real followed channels loaded:",
+            followedChannels.length - 1
+          );
+        } catch (error) {
+          console.error("❌ Error fetching real follows:", error);
+
+          // Fallback to demo with error message
+          loadDemoFollowedChannels();
+          followedChannels.unshift({
+            id: "api_error",
+            login: "api_error",
+            display_name: "⚠️ API Error",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
+            is_live: false,
+            game_name: "Showing demo data - " + error.message,
+            viewer_count: 0,
+          });
+        }
+
+        updateFollowedChannelsUI();
+        refreshButton.disabled = false;
+        refreshButton.textContent = "🔄 Refresh";
       }
 
       function updateUserInfo() {
@@ -1021,6 +1164,12 @@
       function updateFollowedChannelsUI() {
         const container = document.getElementById("followedChannels");
 
+        if (!user) {
+          container.innerHTML =
+            '<div class="no-channels">Login to see followed channels</div>';
+          return;
+        }
+
         if (followedChannels.length === 0) {
           container.innerHTML =
             '<div class="no-channels">No followed channels found</div>';
@@ -1068,10 +1217,21 @@
         container.innerHTML = html;
 
         container.querySelectorAll(".channel-item").forEach((item) => {
-          item.addEventListener("click", function () {
-            const channelLogin = this.dataset.channel;
-            addStreamFromSidebar(channelLogin);
-          });
+          const channelLogin = item.dataset.channel;
+          // Skip special info items (they have non-standard login names)
+          if (
+            channelLogin &&
+            !channelLogin.includes("_info") &&
+            !channelLogin.includes("_note")
+          ) {
+            item.addEventListener("click", function () {
+              addStreamFromSidebar(channelLogin);
+            });
+          } else {
+            // Make info items non-clickable
+            item.style.cursor = "default";
+            item.style.opacity = "0.7";
+          }
         });
       }
 
@@ -1136,8 +1296,14 @@
       }
 
       function refreshFollowedChannels() {
-        loadDemoFollowedChannels();
-        updateFollowedChannelsUI();
+        if (user) {
+          console.log("🔄 Refreshing real followed channels");
+          fetchRealFollowedChannels();
+        } else {
+          console.log("👤 No user logged in, showing demo data");
+          loadDemoFollowedChannels();
+          updateFollowedChannelsUI();
+        }
       }
 
       function setupAutoSuggest() {
