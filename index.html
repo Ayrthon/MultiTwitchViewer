@@ -265,7 +265,6 @@
       }
 
       .controls {
-        padding: 1rem 2rem;
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(5px);
         display: flex;
@@ -313,7 +312,7 @@
         border-radius: 0 0 10px 10px;
         max-height: 200px;
         overflow-y: auto;
-        z-index: 1000;
+        z-index: 9999999;
         display: none;
       }
 
@@ -692,6 +691,21 @@
   <body>
     <div class="header">
       <div class="logo">MultiViewer</div>
+
+      <div class="controls">
+        <div class="input-container">
+          <input
+            type="text"
+            class="stream-input"
+            id="streamInput"
+            placeholder="Search for Twitch channels..."
+            autocomplete="on"
+          />
+          <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+        </div>
+        <button class="add-stream-btn" onclick="addStream()">Add Stream</button>
+      </div>
+
       <div class="user-info" id="userInfo">
         <button class="login-btn" id="loginBtn" onclick="loginToTwitch()">
           Login with Twitch
@@ -718,7 +732,7 @@
 
       <!-- Main Content -->
       <div class="main-wrapper">
-        <div class="controls">
+        <!-- <div class="controls">
           <div class="input-container">
             <input
               type="text"
@@ -732,7 +746,7 @@
           <button class="add-stream-btn" onclick="addStream()">
             Add Stream
           </button>
-        </div>
+        </div> -->
 
         <div class="main-content">
           <div class="streams-grid" id="streamsGrid">
