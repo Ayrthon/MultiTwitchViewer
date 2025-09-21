@@ -1348,18 +1348,31 @@
       }
 
       function removeStream(streamId) {
+        // 1) update state
         const idx = streams.findIndex((s) => s.id === streamId);
         if (idx === -1) return;
-
         streams.splice(idx, 1);
         saveStreamsToStorage();
 
-        const card = findCardById(streamId);
+        // 2) remove only that DOM node (don’t rebuild the grid)
+        const card = document.querySelector(
+          `.stream-item[data-id="${streamId}"]`
+        );
         if (card) card.remove();
 
+        // 3) tidy up indices + empty state
         const grid = document.getElementById("streamsGrid");
-        refreshItemIndices(grid);
-        showEmptyState(streams.length === 0);
+        grid.querySelectorAll(".stream-item").forEach((el, i) => {
+          el.dataset.index = String(i);
+        });
+
+        if (streams.length === 0 && !grid.querySelector(".no-streams")) {
+          const n = document.createElement("div");
+          n.className = "no-streams";
+          n.textContent =
+            "No streams added yet. Add a Twitch channel to get started!";
+          grid.appendChild(n);
+        }
       }
 
       function removeStream(streamId) {
