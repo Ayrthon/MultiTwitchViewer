@@ -674,6 +674,22 @@
         .offline-page-indicator {
           opacity: 0.8;
         }
+        .show-more-wrap {
+          display: flex;
+          justify-content: center;
+          padding: 10px 0 0;
+        }
+        .show-more-btn {
+          padding: 8px 12px;
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.06);
+          color: inherit;
+          cursor: pointer;
+        }
+        .show-more-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
       }
     </style>
   </head>
@@ -746,6 +762,7 @@
       let followedChannels = [];
       let offlinePage = 0;
       const OFFLINE_PAGE_SIZE = 100;
+      let offlineVisibleCount = OFFLINE_PAGE_SIZE;
 
       // Initialize the app
       document.addEventListener("DOMContentLoaded", function () {
@@ -958,6 +975,7 @@
 
           // 5) Combine for your existing UI; reset to page 0 on refresh
           followedChannels = [...liveList, ...offlineList];
+          offlineVisibleCount = OFFLINE_PAGE_SIZE;
           offlinePage = 0;
 
           console.log(
@@ -1058,7 +1076,7 @@
           return;
         }
 
-        // Sort: live first by viewers desc, then offline alphabetical
+        // Sort: live (by viewers desc) first, offline alphabetical
         const sorted = [...followedChannels].sort((a, b) => {
           if (a.is_live && !b.is_live) return -1;
           if (!a.is_live && b.is_live) return 1;
@@ -1070,21 +1088,15 @@
         const liveChannels = sorted.filter((ch) => ch.is_live);
         const offlineAll = sorted.filter((ch) => !ch.is_live);
 
-        // Pagination calc for offline
+        // Figure out how many offline entries to show
         const totalOffline = offlineAll.length;
-        const totalPages = Math.max(
-          1,
-          Math.ceil(totalOffline / OFFLINE_PAGE_SIZE)
-        );
-        offlinePage = Math.min(Math.max(0, offlinePage), totalPages - 1);
-
-        const start = offlinePage * OFFLINE_PAGE_SIZE;
-        const end = Math.min(start + OFFLINE_PAGE_SIZE, totalOffline);
-        const offlinePageItems = offlineAll.slice(start, end);
+        const toShow = Math.min(offlineVisibleCount, totalOffline);
+        const offlineShown = offlineAll.slice(0, toShow);
+        const hasMore = toShow < totalOffline;
 
         let html = "";
 
-        // LIVE section (no pagination)
+        // LIVE section
         if (liveChannels.length > 0) {
           html += `
       <div class="channel-category">
@@ -1094,34 +1106,32 @@
     `;
         }
 
-        // OFFLINE section (with pagination)
+        // OFFLINE section with "Show more"
         html += `
     <div class="channel-category">
       <div class="category-header">
         Offline (${totalOffline})
-        <span class="offline-pager">
-          <button id="offlinePrev" ${
-            offlinePage === 0 ? "disabled" : ""
-          }>Prev</button>
-          <span class="offline-page-indicator">Page ${
-            offlinePage + 1
-          } / ${totalPages}</span>
-          <button id="offlineNext" ${
-            offlinePage >= totalPages - 1 ? "disabled" : ""
-          }>Next</button>
-        </span>
       </div>
       ${
         totalOffline === 0
           ? '<div class="no-channels">No offline channels 🎉</div>'
-          : offlinePageItems.map((c) => createChannelHTML(c)).join("")
+          : offlineShown.map((c) => createChannelHTML(c)).join("")
+      }
+      ${
+        hasMore
+          ? `<div class="show-more-wrap">
+               <button id="offlineShowMore" class="show-more-btn">
+                 Show ${Math.min(OFFLINE_PAGE_SIZE, totalOffline - toShow)} more
+               </button>
+             </div>`
+          : ""
       }
     </div>
   `;
 
         container.innerHTML = html;
 
-        // Attach clicks for items (skip info-note styles)
+        // Click to add stream from list
         container.querySelectorAll(".channel-item").forEach((item) => {
           const channelLogin = item.dataset.channel;
           if (
@@ -1138,13 +1148,16 @@
           }
         });
 
-        // Wire up pagination buttons
-        const prevBtn = document.getElementById("offlinePrev");
-        const nextBtn = document.getElementById("offlineNext");
-        if (prevBtn)
-          prevBtn.addEventListener("click", () => changeOfflinePage(-1));
-        if (nextBtn)
-          nextBtn.addEventListener("click", () => changeOfflinePage(1));
+        // Wire the "Show more" button
+        const showMoreBtn = document.getElementById("offlineShowMore");
+        if (showMoreBtn) {
+          showMoreBtn.addEventListener("click", () => showMoreOffline());
+        }
+      }
+
+      function showMoreOffline() {
+        offlineVisibleCount += OFFLINE_PAGE_SIZE;
+        updateFollowedChannelsUI();
       }
 
       function createChannelHTML(channel) {
