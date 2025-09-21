@@ -1573,28 +1573,28 @@
         }
       }
 
-      function openLightbox(streamId) {
-        const stream = streams.find((s) => s.id === streamId);
-        if (!stream) return;
+      //   function openLightbox(streamId) {
+      //     const stream = streams.find((s) => s.id === streamId);
+      //     if (!stream) return;
 
-        currentLightboxStream = stream;
+      //     currentLightboxStream = stream;
 
-        document.getElementById(
-          "lightboxTitle"
-        ).textContent = `🎮 ${stream.channel}`;
+      //     document.getElementById(
+      //       "lightboxTitle"
+      //     ).textContent = `🎮 ${stream.channel}`;
 
-        const lightboxVideo = document.getElementById("lightboxVideo");
-        lightboxVideo.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
+      //     const lightboxVideo = document.getElementById("lightboxVideo");
+      //     lightboxVideo.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true&darkpopout`;
 
-        const lightboxChatFrame = document.getElementById("lightboxChatFrame");
-        lightboxChatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?parent=${window.location.hostname}`;
+      //     const lightboxChatFrame = document.getElementById("lightboxChatFrame");
+      //     lightboxChatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}`;
 
-        muteBackgroundStreams(streamId);
+      //     muteBackgroundStreams(streamId);
 
-        const overlay = document.getElementById("lightboxOverlay");
-        overlay.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
+      //     const overlay = document.getElementById("lightboxOverlay");
+      //     overlay.classList.add("active");
+      //     document.body.style.overflow = "hidden";
+      //   }
 
       function muteBackgroundStreams(activeStreamId) {
         streams.forEach((stream) => {
@@ -1703,7 +1703,9 @@
                         <iframe 
                             src="https://www.twitch.tv/embed/${
                               stream.channel
-                            }/chat?parent=${window.location.hostname}"
+                            }/chat?darkpopout&parent=${
+            window.location.hostname
+          }"
                             frameborder="0"
                             scrolling="no">
                         </iframe>
