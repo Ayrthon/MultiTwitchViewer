@@ -812,91 +812,98 @@
         }
 
         const refreshButton = document.getElementById("refreshButton");
-        refreshButton.disabled = true;
-        refreshButton.textContent = "🔄 Loading real data...";
+        if (refreshButton) {
+          refreshButton.disabled = true;
+          refreshButton.textContent = "🔄 Loading live follows...";
+        }
 
         const token = localStorage.getItem("twitch_token");
 
         try {
-          const followsResponse = await fetch(
-            `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=100`,
-            {
+          // 1) Get ONLY live followed streams (paginated)
+          let after = null;
+          let liveStreams = [];
+
+          do {
+            const url = new URL("https://api.twitch.tv/helix/streams/followed");
+            url.searchParams.set("user_id", user.id);
+            url.searchParams.set("first", "100");
+            if (after) url.searchParams.set("after", after);
+
+            const res = await fetch(url.toString(), {
               headers: {
                 Authorization: `Bearer ${token}`,
                 "Client-Id": CLIENT_ID,
               },
+            });
+
+            // If token expired/invalid, clear and bail
+            if (res.status === 401 || res.status === 403) {
+              localStorage.removeItem("twitch_token");
+              throw new Error(
+                `Auth error ${res.status} — please log in again.`
+              );
             }
-          );
 
-          if (!followsResponse.ok) {
-            throw new Error(`Follows API returned ${followsResponse.status}`);
-          }
+            if (!res.ok) throw new Error(`Streams API returned ${res.status}`);
 
-          const followsData = await followsResponse.json();
-          const channelIds = followsData.data.map((f) => f.broadcaster_id);
+            const json = await res.json();
+            liveStreams.push(...json.data);
+            after = json.pagination?.cursor || null;
+          } while (after);
 
-          // --- Fetch user info (no >100 limit here since we usually want profile info for all) ---
-          const usersResponse = await fetch(
-            `https://api.twitch.tv/helix/users?${channelIds
-              .map((id) => `id=${id}`)
-              .join("&")}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Client-Id": CLIENT_ID,
-              },
-            }
-          );
-          const usersData = await usersResponse.json();
+          // 2) Enrich with profile images (via /helix/users in chunks of 100)
+          const ids = liveStreams.map((s) => s.user_id);
+          const idChunks = chunkArray(ids, 100);
 
-          // --- Fetch live streams in chunks of 100 ---
-          let streamsData = { data: [] };
-          const idChunks = chunkArray(channelIds, 100);
-
+          const usersById = new Map();
           for (const chunk of idChunks) {
-            const res = await fetch(
-              `https://api.twitch.tv/helix/streams?${chunk
-                .map((id) => `user_id=${id}`)
-                .join("&")}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Client-Id": CLIENT_ID,
-                },
-              }
-            );
-            if (res.ok) {
-              const json = await res.json();
-              streamsData.data.push(...json.data);
-            }
+            if (chunk.length === 0) continue;
+            const usersUrl =
+              "https://api.twitch.tv/helix/users?" +
+              chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
+
+            const usersRes = await fetch(usersUrl, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Client-Id": CLIENT_ID,
+              },
+            });
+
+            if (!usersRes.ok)
+              throw new Error(`Users API returned ${usersRes.status}`);
+
+            const usersJson = await usersRes.json();
+            usersJson.data.forEach((u) => usersById.set(u.id, u));
           }
 
-          // --- Merge data ---
-          followedChannels = usersData.data.map((channel) => {
-            const liveStream = streamsData.data.find(
-              (stream) => stream.user_id === channel.id
-            );
+          // 3) Build your UI model (only live = is_live true)
+          followedChannels = liveStreams.map((s) => {
+            const u = usersById.get(s.user_id);
             return {
-              id: channel.id,
-              login: channel.login,
-              display_name: channel.display_name,
-              profile_image_url: channel.profile_image_url,
-              is_live: !!liveStream,
-              game_name: liveStream?.game_name || "Offline",
-              viewer_count: liveStream?.viewer_count || 0,
-              title: liveStream?.title || "",
+              id: s.user_id,
+              login: s.user_login,
+              display_name: s.user_name,
+              profile_image_url: u?.profile_image_url || "",
+              is_live: true,
+              game_name: s.game_name,
+              viewer_count: s.viewer_count || 0,
+              title: s.title || "",
             };
           });
 
-          console.log("✅ Loaded followed channels:", followedChannels.length);
+          console.log("✅ Live followed streams:", followedChannels.length);
         } catch (err) {
-          console.error("❌ Error fetching real follows:", err);
+          console.error("❌ Error fetching live followed streams:", err);
+          // Fallback to demo if something goes wrong
           loadDemoFollowedChannels();
+        } finally {
+          updateFollowedChannelsUI();
+          if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.textContent = "🔄 Refresh";
+          }
         }
-
-        updateFollowedChannelsUI();
-        refreshButton.disabled = false;
-        refreshButton.textContent = "🔄 Refresh";
       }
 
       function updateUserInfo() {
