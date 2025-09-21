@@ -1486,10 +1486,11 @@
       }
 
       function updateUI() {
-        const streamsGrid = document.getElementById("streamsGrid");
+        const grid = document.getElementById("streamsGrid");
 
-        if (streams.length === 0) {
-          streamsGrid.innerHTML = `
+        // If no streams, show placeholder and bail.
+        if (!streams || streams.length === 0) {
+          grid.innerHTML = `
       <div class="no-streams">
         No streams added yet. Add a Twitch channel to get started!
       </div>
@@ -1497,49 +1498,35 @@
           return;
         }
 
-        // Clear grid first
-        streamsGrid.innerHTML = "";
+        // Build a Set of desired ids
+        const desiredIds = new Set(streams.map((s) => String(s.id)));
 
-        // Render items with index + draggable
-        streams.forEach((stream, idx) => {
-          const streamDiv = document.createElement("div");
-          streamDiv.className = "stream-item";
-          streamDiv.setAttribute("draggable", "true");
-          streamDiv.dataset.index = String(idx);
-
-          streamDiv.innerHTML = `
-      <div class="stream-header">
-        <span class="stream-title">${stream.channel}</span>
-        <div class="stream-controls">
-          <button class="remove-btn" 
-                  onclick="event.stopPropagation(); removeStream(${stream.id})">
-            Remove
-          </button>
-        </div>
-      </div>
-      <div class="stream-video-container" data-stream-id="${stream.id}">
-        <iframe 
-          src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-          class="stream-video"
-          frameborder="0"
-          allowfullscreen="true"
-          scrolling="no">
-        </iframe>
-      </div>
-      <div class="stream-chat">
-        <iframe 
-          src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-          frameborder="0"
-          scrolling="no">
-        </iframe>
-      </div>
-    `;
-
-          streamsGrid.appendChild(streamDiv);
+        // Remove cards that are no longer present
+        grid.querySelectorAll(".stream-item").forEach((card) => {
+          const id = card.getAttribute("data-stream-id");
+          if (!desiredIds.has(id)) {
+            card.remove(); // removes the iframe too — only for deleted streams
+          }
         });
 
-        // Wire drag & drop after rendering
-        enableDragAndDrop(streamsGrid);
+        // Add or update each stream card, then ensure correct order
+        streams.forEach((stream) => {
+          const key = String(stream.id);
+          let card = grid.querySelector(
+            `.stream-item[data-stream-id="${key}"]`
+          );
+
+          if (!card) {
+            // New card → create once (this creates the iframe once)
+            card = createStreamCard(stream);
+            grid.appendChild(card);
+          } else {
+            // Existing card → update text/controls without touching iframe
+            updateStreamCard(card, stream);
+            // Ensure correct order by re-appending (moves node without recreating it)
+            grid.appendChild(card);
+          }
+        });
       }
 
       function enableDragAndDrop(container) {
@@ -1634,6 +1621,78 @@
             }, 1000);
           }
         }
+      }
+
+      function createStreamCard(stream) {
+        const card = document.createElement("div");
+        card.className = "stream-item";
+        card.setAttribute("data-stream-id", String(stream.id));
+
+        // Header
+        const header = document.createElement("div");
+        header.className = "stream-header";
+
+        const title = document.createElement("span");
+        title.className = "stream-title";
+        title.textContent = stream.channel;
+
+        const controls = document.createElement("div");
+        controls.className = "stream-controls";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeStream(stream.id);
+        });
+
+        controls.appendChild(removeBtn);
+        header.appendChild(title);
+        header.appendChild(controls);
+
+        // Video (create iframe ONCE)
+        const videoWrap = document.createElement("div");
+        videoWrap.className = "stream-video-container";
+        videoWrap.setAttribute("data-stream-id", String(stream.id));
+
+        const video = document.createElement("iframe");
+        video.className = "stream-video";
+        video.setAttribute("frameborder", "0");
+        video.setAttribute("allowfullscreen", "true");
+        video.setAttribute("scrolling", "no");
+        video.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
+
+        videoWrap.appendChild(video);
+
+        // Chat
+        const chat = document.createElement("div");
+        chat.className = "stream-chat";
+
+        const chatFrame = document.createElement("iframe");
+        chatFrame.setAttribute("frameborder", "0");
+        chatFrame.setAttribute("scrolling", "no");
+        chatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}`;
+
+        chat.appendChild(chatFrame);
+
+        // Assemble
+        card.appendChild(header);
+        card.appendChild(videoWrap);
+        card.appendChild(chat);
+
+        return card;
+      }
+
+      // Update only text/labels, never iframe src (prevents reload)
+      function updateStreamCard(card, stream) {
+        const title = card.querySelector(".stream-title");
+        if (title && title.textContent !== stream.channel) {
+          title.textContent = stream.channel;
+        }
+
+        // If you add other per-stream labels later (e.g., status), update them here
+        // but DO NOT touch the <iframe> src.
       }
     </script>
   </body>
