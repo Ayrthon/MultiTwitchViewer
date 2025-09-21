@@ -1,5 +1,4 @@
-// Storage functions function saveStreamsToStorage() {
-localStorage.setItem('multistream_<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,6 +24,64 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         display: flex;
         flex: 1;
         min-height: calc(100vh - 80px);
+      }
+
+      .header {
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        border-bottom: 2px solid #9146ff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #9146ff;
+        text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .login-btn,
+      .add-stream-btn {
+        background: linear-gradient(45deg, #9146ff, #772ce8);
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 25px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .login-btn:hover,
+      .add-stream-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #9146ff;
+      }
+
+      .username {
+        color: #9146ff;
+        font-weight: bold;
       }
 
       /* Sidebar Styles */
@@ -169,20 +226,6 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         flex-shrink: 0;
       }
 
-      .main-wrapper {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .no-channels {
-        text-align: center;
-        padding: 2rem 1rem;
-        color: #adadb8;
-        font-size: 0.8rem;
-        font-style: italic;
-      }
-
       .refresh-button {
         margin: 1rem;
         padding: 0.6rem 1rem;
@@ -207,96 +250,18 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         transform: none;
       }
 
-      /* Mobile responsive */
-      @media (max-width: 1024px) {
-        .sidebar {
-          width: 200px;
-        }
+      .no-channels {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #adadb8;
+        font-size: 0.8rem;
+        font-style: italic;
       }
 
-      @media (max-width: 768px) {
-        .app-container {
-          flex-direction: column;
-        }
-
-        .sidebar {
-          width: 100%;
-          height: 200px;
-          position: static;
-          border-right: none;
-          border-bottom: 2px solid rgba(145, 70, 255, 0.3);
-        }
-
-        .followed-channels {
-          display: flex;
-          overflow-x: auto;
-          overflow-y: hidden;
-          padding: 0.5rem;
-        }
-
-        .channel-category {
-          display: flex;
-          gap: 0.5rem;
-          margin: 0;
-          min-width: max-content;
-        }
-
-        .category-header {
-          display: none;
-        }
-
-        .channel-item {
-          min-width: 150px;
-          flex-direction: column;
-          text-align: center;
-          padding: 0.5rem;
-        }
-      }
-
-      .header {
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        padding: 1rem 2rem;
-        border-bottom: 2px solid #9146ff;
+      .main-wrapper {
+        flex: 1;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
-
-      .logo {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #9146ff;
-        text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
-      }
-
-      .user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .login-btn,
-      .add-stream-btn {
-        background: linear-gradient(45deg, #9146ff, #772ce8);
-        border: none;
-        padding: 0.7rem 1.5rem;
-        border-radius: 25px;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-      }
-
-      .login-btn:hover,
-      .add-stream-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
+        flex-direction: column;
       }
 
       .controls {
@@ -521,28 +486,12 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         transform: none;
       }
 
-      .locked-streams-notice {
-        background: rgba(255, 215, 0, 0.1);
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 10px;
-        padding: 0.8rem 1rem;
-        margin-bottom: 1rem;
-        font-size: 0.85rem;
-        color: #ffd700;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .locked-streams-notice.hidden {
-        display: none;
-      }
-
       .stream-video-container {
         position: relative;
         width: 100%;
         aspect-ratio: 16 / 9;
         background: #000;
+        cursor: pointer;
       }
 
       .stream-video {
@@ -566,6 +515,30 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         height: 100%;
         border: none;
         border-radius: 0 0 15px 15px;
+      }
+
+      .locked-streams-notice {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #ffd700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .locked-streams-notice.hidden {
+        display: none;
+      }
+
+      .no-streams {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.2rem;
       }
 
       /* Lightbox Overlay Styles */
@@ -676,46 +649,11 @@ localStorage.setItem('multistream_<!DOCTYPE html>
       .lightbox-controls {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        justify-content: center;
         padding: 1rem;
         background: rgba(0, 0, 0, 0.6);
         border-radius: 10px;
-      }
-
-      .lightbox-volume-label {
-        color: #9146ff;
-        font-weight: bold;
-        min-width: 80px;
-      }
-
-      .lightbox-volume-slider {
-        flex: 1;
-        height: 8px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
-        outline: none;
-        -webkit-appearance: none;
-      }
-
-      .lightbox-volume-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 24px;
-        height: 24px;
-        background: #9146ff;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 0 15px rgba(145, 70, 255, 0.6);
-      }
-
-      .lightbox-volume-slider::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        background: #9146ff;
-        border-radius: 50%;
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 0 15px rgba(145, 70, 255, 0.6);
+        margin-bottom: 1rem;
       }
 
       .lightbox-chat {
@@ -734,143 +672,75 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         border-radius: 8px;
       }
 
-      .stream-video-container {
-        position: relative;
-        cursor: pointer;
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
       }
 
-      /* Mobile responsive for lightbox */
-      @media (max-width: 768px) {
-        .lightbox-content {
-          margin: 1rem;
-          padding: 1rem;
-        }
-
-        .lightbox-video-container {
-          width: 90vw;
-        }
-
-        .lightbox-chat {
-          height: 200px;
-        }
-
-        .lightbox-controls {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 0.5rem;
-        }
-
-        .lightbox-volume-label {
-          min-width: auto;
-          text-align: center;
-        }
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
       }
 
-      .volume-control {
-        padding: 1rem;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .volume-slider {
-        flex: 1;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 3px;
-        outline: none;
-        -webkit-appearance: none;
-      }
-
-      .volume-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
+      ::-webkit-scrollbar-thumb {
         background: #9146ff;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+        border-radius: 4px;
       }
 
-      .volume-slider::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        background: #9146ff;
-        border-radius: 50%;
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+      ::-webkit-scrollbar-thumb:hover {
+        background: #772ce8;
       }
 
-      .volume-label {
-        font-size: 0.9rem;
-        color: #9146ff;
-        font-weight: bold;
-        min-width: 60px;
-      }
-
-      .chat-container {
-        width: 350px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 15px;
-        border: 2px solid #9146ff;
-        backdrop-filter: blur(10px);
-        display: flex;
-        flex-direction: column;
-        max-height: 80vh;
-      }
-
-      .global-chat-header {
-        padding: 1rem;
-        background: rgba(145, 70, 255, 0.3);
-        border-radius: 13px 13px 0 0;
-        font-weight: bold;
-        text-align: center;
-      }
-
-      .chat-messages {
-        flex: 1;
-        padding: 1rem;
-        overflow-y: auto;
-        max-height: 500px;
-      }
-
-      .chat-message {
-        margin-bottom: 0.8rem;
-        padding: 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        font-size: 0.9rem;
-      }
-
-      .message-author {
-        font-weight: bold;
-        color: #9146ff;
-      }
-
-      .no-streams {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 1.2rem;
-      }
-
-      .loading {
-        text-align: center;
-        padding: 2rem;
-        color: #9146ff;
-        font-size: 1.1rem;
-      }
-
+      /* Mobile responsive */
       @media (max-width: 1200px) {
         .streams-grid {
           grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
           max-width: none;
         }
+
+        .sidebar {
+          width: 200px;
+        }
       }
 
       @media (max-width: 768px) {
+        .app-container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: 200px;
+          position: static;
+          border-right: none;
+          border-bottom: 2px solid rgba(145, 70, 255, 0.3);
+        }
+
+        .followed-channels {
+          display: flex;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 0.5rem;
+        }
+
+        .channel-category {
+          display: flex;
+          gap: 0.5rem;
+          margin: 0;
+          min-width: max-content;
+        }
+
+        .category-header {
+          display: none;
+        }
+
+        .channel-item {
+          min-width: 150px;
+          flex-direction: column;
+          text-align: center;
+          padding: 0.5rem;
+        }
+
         .streams-grid {
           grid-template-columns: 1fr;
           max-width: none;
@@ -893,40 +763,18 @@ localStorage.setItem('multistream_<!DOCTYPE html>
           height: 300px;
         }
 
+        .lightbox-content {
+          margin: 1rem;
+          padding: 1rem;
+        }
+
+        .lightbox-video-container {
+          width: 90vw;
+        }
+
         .lightbox-chat {
           height: 300px;
         }
-      }
-
-      .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 2px solid #9146ff;
-      }
-
-      .username {
-        color: #9146ff;
-        font-weight: bold;
-      }
-
-      /* Scrollbar styling */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: #9146ff;
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: #772ce8;
       }
     </style>
   </head>
@@ -1020,18 +868,16 @@ localStorage.setItem('multistream_<!DOCTYPE html>
 
     <script>
       // Twitch API configuration
-      const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd"; // Your registered Twitch app
+      const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
       const REDIRECT_URI = window.location.origin;
 
       let streams = [];
       let user = null;
-      let chatConnections = new Map();
       let searchTimeout = null;
       let selectedSuggestionIndex = -1;
       let currentSuggestions = [];
-      let streamChats = new Map(); // Store chat messages per stream
       let currentLightboxStream = null;
-      let followedChannels = []; // Store followed channels data
+      let followedChannels = [];
 
       // Initialize the app
       document.addEventListener("DOMContentLoaded", function () {
@@ -1039,17 +885,12 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         loadStreamsFromStorage();
         updateUI();
         setupAutoSuggest();
-
-        // Load demo followed channels initially (always show something)
         loadDemoFollowedChannels();
         updateFollowedChannelsUI();
       });
 
       // Twitch Authentication
       function loginToTwitch() {
-        console.log("Using Client ID:", CLIENT_ID);
-        console.log("Redirect URI:", window.location.origin);
-
         const authUrl =
           `https://id.twitch.tv/oauth2/authorize` +
           `?client_id=${CLIENT_ID}` +
@@ -1058,7 +899,6 @@ localStorage.setItem('multistream_<!DOCTYPE html>
           `&scope=user:read:email` +
           `&force_verify=true`;
 
-        console.log("Full OAuth URL:", authUrl);
         window.location.href = authUrl;
       }
 
@@ -1067,54 +907,26 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         const params = new URLSearchParams(hash);
         const accessToken = params.get("access_token");
         const error = params.get("error");
-        const errorDescription = params.get("error_description");
-
-        console.log("=== AUTH DEBUG ===");
-        console.log("Full URL hash:", hash);
-        console.log("Access token present:", !!accessToken);
-        console.log(
-          "Access token (first 10 chars):",
-          accessToken ? accessToken.substring(0, 10) + "..." : "none"
-        );
-        console.log("OAuth error:", error);
-        console.log("Error description:", errorDescription);
-        console.log("Current domain:", window.location.origin);
-        console.log("Client ID being used:", CLIENT_ID);
 
         if (error) {
-          console.error("OAuth error details:", { error, errorDescription });
-          alert(
-            `Login failed: ${error}\n${
-              errorDescription || "Please check your Twitch app settings."
-            }`
-          );
+          alert(`Login failed: ${error}`);
           return;
         }
 
         if (accessToken) {
-          console.log("✅ Found access token, storing and fetching user data");
           localStorage.setItem("twitch_token", accessToken);
-          window.location.hash = ""; // Clean URL
+          window.location.hash = "";
           fetchUserData(accessToken);
         } else {
           const storedToken = localStorage.getItem("twitch_token");
           if (storedToken) {
-            console.log("📦 Using stored token");
             fetchUserData(storedToken);
-          } else {
-            console.log("❌ No token found, user not logged in");
           }
         }
       }
 
       async function fetchUserData(token) {
-        console.log(
-          "Fetching user data with token length:",
-          token ? token.length : "missing"
-        );
-
         try {
-          console.log("Making API call to Twitch...");
           const response = await fetch("https://api.twitch.tv/helix/users", {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -1122,96 +934,36 @@ localStorage.setItem('multistream_<!DOCTYPE html>
             },
           });
 
-          console.log("API Response status:", response.status);
-          console.log(
-            "API Response headers:",
-            Object.fromEntries(response.headers.entries())
-          );
-
-          if (response.status === 401) {
-            console.error("401 Unauthorized - Token or Client ID issue");
-            const errorData = await response.text();
-            console.error("401 Error details:", errorData);
-
-            localStorage.removeItem("twitch_token");
-            alert(
-              "Authentication failed: Invalid token or client ID. Please check your Twitch app configuration."
-            );
-            user = null;
-            updateUserInfo();
-            return;
-          }
-
           if (response.ok) {
             const data = await response.json();
-            console.log("✅ User data received successfully:", data);
-
             if (data.data && data.data.length > 0) {
               user = data.data[0];
-              console.log("✅ User successfully set to:", user.display_name);
               updateUserInfo();
-              // Load followed channels after successful user authentication
-              if (typeof loadFollowedChannels === "function") {
-                loadFollowedChannels();
-              } else {
-                console.log(
-                  "loadFollowedChannels function not available, showing demo data"
-                );
-              }
-              return;
-            } else {
-              console.error("❌ No user data in response");
+              loadFollowedChannels();
             }
           } else {
-            const errorText = await response.text();
-            console.error("❌ API Error - Status:", response.status);
-            console.error("❌ API Error - Details:", errorText);
-
-            // Try to parse error for more details
-            try {
-              const errorJson = JSON.parse(errorText);
-              console.error("❌ Parsed error:", errorJson);
-            } catch (e) {
-              console.error("❌ Could not parse error as JSON");
-            }
+            localStorage.removeItem("twitch_token");
           }
-
-          throw new Error(`API returned status ${response.status}`);
         } catch (error) {
-          console.error("❌ Network or API error:", error);
+          console.error("Error fetching user data:", error);
           localStorage.removeItem("twitch_token");
-
-          alert(
-            `Failed to get user information. Error: ${error.message}\n\nThis could be:\n- Client ID configuration issue\n- Network connectivity problem\n- Twitch API temporary issue\n\nCheck console for details.`
-          );
-
-          user = null;
-          updateUserInfo();
         }
       }
 
       function updateUserInfo() {
         const userInfo = document.getElementById("userInfo");
         if (user) {
-          console.log("Updating UI for user:", user.display_name);
           userInfo.innerHTML = `
                     <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
                     <span class="username">${user.display_name}</span>
                     <button class="login-btn" onclick="logout()" style="background: #ff4757;">Logout</button>
                 `;
-          // Note: loadFollowedChannels() is now called from fetchUserData()
         } else {
-          console.log("Clearing user info - user logged out");
           userInfo.innerHTML = `
-                    <button class="login-btn" id="loginBtn" onclick="loginToTwitch()">🎮 Login with Twitch</button>
+                    <button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>
                 `;
-          // Clear followed channels when user logs out
           followedChannels = [];
-          if (typeof updateFollowedChannelsUI === "function") {
-            updateFollowedChannelsUI();
-          } else {
-            console.log("updateFollowedChannelsUI function not available");
-          }
+          updateFollowedChannelsUI();
         }
       }
 
@@ -1221,184 +973,175 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         location.reload();
       }
 
-      // Lightbox functionality
-      function openLightbox(streamId) {
-        console.log("Opening lightbox for stream ID:", streamId);
-        const stream = streams.find((s) => s.id === streamId);
-        if (!stream) {
-          console.error("Stream not found:", streamId);
+      function loadDemoFollowedChannels() {
+        followedChannels = [
+          {
+            id: "1",
+            login: "ninja",
+            display_name: "Ninja",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
+            is_live: true,
+            game_name: "Fortnite",
+            viewer_count: 45732,
+          },
+          {
+            id: "2",
+            login: "pokimane",
+            display_name: "Pokimane",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
+            is_live: true,
+            game_name: "Just Chatting",
+            viewer_count: 28456,
+          },
+          {
+            id: "3",
+            login: "shroud",
+            display_name: "shroud",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
+            is_live: false,
+            game_name: "Offline",
+            viewer_count: 0,
+          },
+          {
+            id: "4",
+            login: "xqc",
+            display_name: "xQc",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
+            is_live: true,
+            game_name: "Grand Theft Auto V",
+            viewer_count: 67234,
+          },
+        ];
+      }
+
+      function updateFollowedChannelsUI() {
+        const container = document.getElementById("followedChannels");
+
+        if (followedChannels.length === 0) {
+          container.innerHTML =
+            '<div class="no-channels">No followed channels found</div>';
           return;
         }
 
-        console.log("Found stream:", stream);
-        currentLightboxStream = stream;
-
-        // Update lightbox content
-        document.getElementById(
-          "lightboxTitle"
-        ).textContent = `🎮 ${stream.channel}`;
-
-        // Set up video iframe with unmuted parameter
-        const lightboxVideo = document.getElementById("lightboxVideo");
-        lightboxVideo.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
-
-        // Set up chat iframe
-        const lightboxChatFrame = document.getElementById("lightboxChatFrame");
-        lightboxChatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?parent=${window.location.hostname}`;
-
-        // Mute all other streams by updating their iframes
-        muteBackgroundStreams(streamId);
-
-        // Show lightbox
-        const overlay = document.getElementById("lightboxOverlay");
-        overlay.classList.add("active");
-
-        // Prevent body scroll
-        document.body.style.overflow = "hidden";
-
-        console.log("Lightbox opened successfully");
-      }
-
-      function closeLightbox() {
-        const overlay = document.getElementById("lightboxOverlay");
-        overlay.classList.remove("active");
-
-        // Restore body scroll
-        document.body.style.overflow = "auto";
-
-        // Unmute all streams
-        unmuteAllStreams();
-
-        currentLightboxStream = null;
-      }
-
-      function muteBackgroundStreams(activeStreamId) {
-        streams.forEach((stream) => {
-          if (stream.id !== activeStreamId) {
-            const iframe = document.querySelector(
-              `[data-stream-id="${stream.id}"] iframe`
-            );
-            if (iframe) {
-              // Update iframe src to include muted parameter
-              iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=true&autoplay=true`;
-            }
-          }
+        const sortedChannels = [...followedChannels].sort((a, b) => {
+          if (a.is_live && !b.is_live) return -1;
+          if (!a.is_live && b.is_live) return 1;
+          if (a.is_live && b.is_live) return b.viewer_count - a.viewer_count;
+          return a.display_name.localeCompare(b.display_name);
         });
-      }
 
-      function unmuteAllStreams() {
-        streams.forEach((stream) => {
-          const iframe = document.querySelector(
-            `[data-stream-id="${stream.id}"] iframe`
-          );
-          if (iframe) {
-            // Restore original unmuted state
-            iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
-          }
-        });
-      }
+        const liveChannels = sortedChannels.filter((ch) => ch.is_live);
+        const offlineChannels = sortedChannels.filter((ch) => !ch.is_live);
 
-      function updateLightboxVolume(volume) {
-        const volumeLabel = document.getElementById("lightboxVolumeLabel");
-        volumeLabel.textContent = `🔊 ${volume}%`;
+        let html = "";
 
-        if (currentLightboxStream) {
-          currentLightboxStream.volume = parseInt(volume);
-          saveStreamsToStorage();
-
-          // Also update the main stream's volume display
-          updateUI();
-        }
-      }
-
-      function updateLightboxChat(channel) {
-        const chatMessages = document.getElementById("lightboxChatMessages");
-        const messages = streamChats.get(channel) || [];
-
-        chatMessages.innerHTML = messages
-          .map(
-            (msg) => `
-                <div class="chat-message">
-                    <span class="message-author">${msg.author}:</span>
-                    <span class="message-text">${msg.text}</span>
-                </div>
-            `
-          )
-          .join("");
-
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-
-      function sendLightboxChatMessage() {
-        const input = document.getElementById("lightboxChatInput");
-        const message = input.value.trim();
-
-        if (!message || !currentLightboxStream) return;
-
-        sendChatMessage(currentLightboxStream.channel, message);
-        input.value = "";
-      }
-
-      // Debug function to test your client ID
-      window.testTwitchAPI = async function () {
-        const token = localStorage.getItem("twitch_token");
-        console.log("=== MANUAL API TEST ===");
-        console.log("Client ID:", CLIENT_ID);
-        console.log("Token present:", !!token);
-        console.log("Token length:", token ? token.length : 0);
-
-        if (!token) {
-          console.log("❌ No token found. Please login first.");
-          return;
+        if (liveChannels.length > 0) {
+          html += `
+                    <div class="channel-category">
+                        <div class="category-header">Live (${
+                          liveChannels.length
+                        })</div>
+                        ${liveChannels
+                          .map((channel) => createChannelHTML(channel))
+                          .join("")}
+                    </div>
+                `;
         }
 
-        try {
-          // Test the exact same API call
-          const response = await fetch("https://api.twitch.tv/helix/users", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Client-Id": CLIENT_ID,
-            },
+        if (offlineChannels.length > 0) {
+          html += `
+                    <div class="channel-category">
+                        <div class="category-header">Offline (${
+                          offlineChannels.length
+                        })</div>
+                        ${offlineChannels
+                          .map((channel) => createChannelHTML(channel))
+                          .join("")}
+                    </div>
+                `;
+        }
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".channel-item").forEach((item) => {
+          item.addEventListener("click", function () {
+            const channelLogin = this.dataset.channel;
+            addStreamFromSidebar(channelLogin);
           });
-
-          console.log("Manual test response status:", response.status);
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log("✅ Manual test successful:", data);
-          } else {
-            const errorText = await response.text();
-            console.log("❌ Manual test failed:", errorText);
-          }
-        } catch (error) {
-          console.log("❌ Manual test error:", error);
-        }
-      };
-
-      // Make functions globally available for debugging
-      window.toggleStreamLock = toggleStreamLock;
-      window.removeStream = removeStream;
-      window.openLightbox = openLightbox;
-      window.debugStreams = () => console.log("Current streams:", streams);
-
-      // Close lightbox when clicking outside content
-      document
-        .getElementById("lightboxOverlay")
-        .addEventListener("click", function (e) {
-          if (e.target === this) {
-            closeLightbox();
-          }
         });
+      }
 
-      // Close lightbox with Escape key
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && currentLightboxStream) {
-          closeLightbox();
+      function createChannelHTML(channel) {
+        const viewerText = channel.is_live
+          ? `<div class="channel-viewers">${formatViewerCount(
+              channel.viewer_count
+            )} viewers</div>`
+          : "";
+
+        return `
+                <div class="channel-item ${
+                  channel.is_live ? "live" : ""
+                }" data-channel="${channel.login}">
+                    <img src="${channel.profile_image_url}" alt="${
+          channel.display_name
+        }" class="channel-avatar">
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.display_name}</div>
+                        <div class="channel-game">${channel.game_name}</div>
+                        ${viewerText}
+                    </div>
+                    <div class="${
+                      channel.is_live ? "live-indicator" : "offline-indicator"
+                    }"></div>
+                </div>
+            `;
+      }
+
+      function formatViewerCount(count) {
+        if (count >= 1000000) return (count / 1000000).toFixed(1) + "M";
+        if (count >= 1000) return (count / 1000).toFixed(1) + "K";
+        return count.toString();
+      }
+
+      function addStreamFromSidebar(channelLogin) {
+        if (streams.find((s) => s.channel === channelLogin)) {
+          alert("This stream is already added");
+          return;
         }
-      });
+
+        const stream = {
+          id: Date.now(),
+          channel: channelLogin,
+          locked: false,
+        };
+
+        streams.push(stream);
+        saveStreamsToStorage();
+        updateUI();
+
+        const channelItem = document.querySelector(
+          `[data-channel="${channelLogin}"]`
+        );
+        if (channelItem) {
+          const originalBg = channelItem.style.background;
+          channelItem.style.background = "rgba(76, 175, 80, 0.3)";
+          setTimeout(() => {
+            channelItem.style.background = originalBg;
+          }, 1000);
+        }
+      }
+
+      function refreshFollowedChannels() {
+        loadDemoFollowedChannels();
+        updateFollowedChannelsUI();
+      }
+
       function setupAutoSuggest() {
         const input = document.getElementById("streamInput");
-        const dropdown = document.getElementById("suggestionsDropdown");
 
         input.addEventListener("input", function (e) {
           const query = e.target.value.trim();
@@ -1408,15 +1151,8 @@ localStorage.setItem('multistream_<!DOCTYPE html>
             return;
           }
 
-          // Clear previous timeout
-          if (searchTimeout) {
-            clearTimeout(searchTimeout);
-          }
-
-          // Debounce search requests
-          searchTimeout = setTimeout(() => {
-            searchChannels(query);
-          }, 300);
+          if (searchTimeout) clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => searchChannels(query), 300);
         });
 
         input.addEventListener("keydown", function (e) {
@@ -1458,55 +1194,16 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         });
 
         input.addEventListener("blur", function () {
-          // Delay hiding to allow click on suggestions
           setTimeout(() => hideSuggestions(), 150);
         });
       }
 
       async function searchChannels(query) {
         const dropdown = document.getElementById("suggestionsDropdown");
-
-        // Show loading state
         dropdown.innerHTML =
           '<div class="loading-suggestion">🔍 Searching channels...</div>';
         dropdown.style.display = "block";
 
-        try {
-          const token = localStorage.getItem("twitch_token");
-          if (!token) {
-            // Fallback to popular streamers if not authenticated
-            showPopularChannels(query);
-            return;
-          }
-
-          const response = await fetch(
-            `https://api.twitch.tv/helix/search/channels?query=${encodeURIComponent(
-              query
-            )}&first=10&live_only=true`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Client-Id": CLIENT_ID,
-              },
-            }
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            currentSuggestions = data.data;
-            displaySuggestions(data.data);
-          } else {
-            console.error("Search failed:", response.status);
-            showPopularChannels(query);
-          }
-        } catch (error) {
-          console.error("Search error:", error);
-          showPopularChannels(query);
-        }
-      }
-
-      function showPopularChannels(query) {
-        // Fallback list of popular streamers for demo purposes
         const popularChannels = [
           {
             broadcaster_name: "ninja",
@@ -1536,20 +1233,6 @@ localStorage.setItem('multistream_<!DOCTYPE html>
             thumbnail_url:
               "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
           },
-          {
-            broadcaster_name: "summit1g",
-            display_name: "summit1g",
-            game_name: "Counter-Strike 2",
-            thumbnail_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/summit1g-profile_image-4c3b6e17f40c6e8b-300x300.png",
-          },
-          {
-            broadcaster_name: "lirik",
-            display_name: "LIRIK",
-            game_name: "Variety",
-            thumbnail_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/lirik-profile_image-5b0f84b85dd2edf2-300x300.png",
-          },
         ];
 
         const filtered = popularChannels.filter(
@@ -1576,26 +1259,12 @@ localStorage.setItem('multistream_<!DOCTYPE html>
           .map(
             (channel, index) => `
                 <div class="suggestion-item" onclick="selectSuggestion(currentSuggestions[${index}])" data-index="${index}">
-                    <img src="${
-                      channel.thumbnail_url ||
-                      "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png"
-                    }" 
-                         alt="${
-                           channel.display_name
-                         }" class="suggestion-avatar">
+                    <img src="${channel.thumbnail_url}" alt="${channel.display_name}" class="suggestion-avatar">
                     <div class="suggestion-info">
-                        <div class="suggestion-name">${
-                          channel.display_name
-                        }</div>
-                        <div class="suggestion-game">${
-                          channel.game_name || "No category"
-                        }</div>
+                        <div class="suggestion-name">${channel.display_name}</div>
+                        <div class="suggestion-game">${channel.game_name}</div>
                     </div>
-                    ${
-                      channel.is_live !== false
-                        ? '<span class="suggestion-viewers">🔴 LIVE</span>'
-                        : ""
-                    }
+                    <span class="suggestion-viewers">🔴 LIVE</span>
                 </div>
             `
           )
@@ -1625,7 +1294,7 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         selectedSuggestionIndex = -1;
         currentSuggestions = [];
       }
-      // Stream Management
+
       function addStream() {
         const input = document.getElementById("streamInput");
         const channelName = input.value.trim().toLowerCase();
@@ -1658,7 +1327,6 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         const stream = streams.find((s) => s.id === streamId);
         if (!stream) return;
 
-        // Confirm removal if stream is locked
         if (stream.locked) {
           const confirmRemove = confirm(
             `"${stream.channel}" is locked. Are you sure you want to remove it?`
@@ -1679,7 +1347,6 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         saveStreamsToStorage();
         updateUI();
 
-        // Show feedback
         const lockBtn = document.querySelector(`[data-lock-btn="${streamId}"]`);
         if (lockBtn) {
           const originalText = lockBtn.innerHTML;
@@ -1692,116 +1359,61 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         }
       }
 
-      // Chat functionality
-      function connectToChat(channel) {
-        // Initialize chat storage for this stream
-        if (!streamChats.has(channel)) {
-          streamChats.set(channel, []);
-        }
+      function openLightbox(streamId) {
+        const stream = streams.find((s) => s.id === streamId);
+        if (!stream) return;
 
-        // In a real implementation, you'd connect to Twitch IRC
-        // For demo purposes, we'll simulate chat messages
-        simulateChat(channel);
+        currentLightboxStream = stream;
+
+        document.getElementById(
+          "lightboxTitle"
+        ).textContent = `🎮 ${stream.channel}`;
+
+        const lightboxVideo = document.getElementById("lightboxVideo");
+        lightboxVideo.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
+
+        const lightboxChatFrame = document.getElementById("lightboxChatFrame");
+        lightboxChatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?parent=${window.location.hostname}`;
+
+        muteBackgroundStreams(streamId);
+
+        const overlay = document.getElementById("lightboxOverlay");
+        overlay.classList.add("active");
+        document.body.style.overflow = "hidden";
       }
 
-      function simulateChat(channel) {
-        const messages = [
-          { author: "Viewer1", text: `Hello from ${channel}'s chat!` },
-          { author: "Viewer2", text: "Great stream!" },
-          { author: "Viewer3", text: "PogChamp" },
-          { author: "Viewer4", text: "Amazing gameplay" },
-          { author: "ModeratorBot", text: "Welcome to the stream!" },
-          { author: "StreamFan", text: "LUL" },
-          { author: "ChatBot", text: "Don't forget to follow!" },
-          { author: "Viewer5", text: "KEKW" },
-          { author: "Viewer6", text: "EZ Clap" },
-          { author: "Viewer7", text: "This is so good!" },
-        ];
+      function closeLightbox() {
+        const overlay = document.getElementById("lightboxOverlay");
+        overlay.classList.remove("active");
+        document.body.style.overflow = "auto";
+        unmuteAllStreams();
+        currentLightboxStream = null;
+      }
 
-        let messageIndex = 0;
-        const chatInterval = setInterval(() => {
-          if (messageIndex >= messages.length) {
-            messageIndex = 0;
+      function muteBackgroundStreams(activeStreamId) {
+        streams.forEach((stream) => {
+          if (stream.id !== activeStreamId) {
+            const iframe = document.querySelector(
+              `[data-stream-id="${stream.id}"] iframe`
+            );
+            if (iframe) {
+              iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=true&autoplay=true`;
+            }
           }
+        });
+      }
 
-          const message = messages[messageIndex];
-          addChatMessageToStream(channel, message.author, message.text);
-          messageIndex++;
-
-          // Stop simulation if stream is removed
-          if (!streams.find((s) => s.channel === channel)) {
-            clearInterval(chatInterval);
+      function unmuteAllStreams() {
+        streams.forEach((stream) => {
+          const iframe = document.querySelector(
+            `[data-stream-id="${stream.id}"] iframe`
+          );
+          if (iframe) {
+            iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
           }
-        }, 2000 + Math.random() * 4000);
+        });
       }
 
-      function addChatMessageToStream(channel, author, text) {
-        // Add to stored messages
-        if (!streamChats.has(channel)) {
-          streamChats.set(channel, []);
-        }
-
-        const messages = streamChats.get(channel);
-        messages.push({ author, text, timestamp: Date.now() });
-
-        // Keep only the last 50 messages per stream
-        if (messages.length > 50) {
-          messages.splice(0, messages.length - 50);
-        }
-
-        // Update the chat UI for this stream
-        updateStreamChatUI(channel);
-
-        // Update lightbox chat if this stream is currently focused
-        if (
-          currentLightboxStream &&
-          currentLightboxStream.channel === channel
-        ) {
-          updateLightboxChat(channel);
-        }
-      }
-
-      function updateStreamChatUI(channel) {
-        const chatElement = document.querySelector(
-          `[data-chat-channel="${channel}"]`
-        );
-        if (!chatElement) return;
-
-        const messages = streamChats.get(channel) || [];
-        chatElement.innerHTML = messages
-          .map(
-            (msg) => `
-                <div class="chat-message">
-                    <span class="message-author">${msg.author}:</span>
-                    <span class="message-text">${msg.text}</span>
-                </div>
-            `
-          )
-          .join("");
-
-        chatElement.scrollTop = chatElement.scrollHeight;
-      }
-
-      function sendChatMessage(channel, message) {
-        if (!user) {
-          alert("Please log in to chat");
-          return;
-        }
-
-        if (!message.trim()) return;
-
-        // In a real implementation, you'd send this to Twitch IRC
-        // For demo, we'll just add it locally
-        addChatMessageToStream(channel, user.display_name, message);
-
-        // Clear the input
-        const input = document.querySelector(`[data-chat-input="${channel}"]`);
-        if (input) {
-          input.value = "";
-        }
-      }
-
-      // UI Updates
       function updateUI() {
         const streamsGrid = document.getElementById("streamsGrid");
 
@@ -1811,17 +1423,60 @@ localStorage.setItem('multistream_<!DOCTYPE html>
           return;
         }
 
-        streamsGrid.innerHTML = "";
+        const lockedCount = streams.filter((s) => s.locked).length;
+        let lockedNotice = "";
+        if (lockedCount > 0) {
+          lockedNotice = `
+                    <div class="locked-streams-notice">
+                        🔒 ${lockedCount} stream${
+            lockedCount > 1 ? "s" : ""
+          } locked - will persist after page refresh
+                    </div>
+                `;
+        }
+
+        streamsGrid.innerHTML = lockedNotice;
 
         streams.forEach((stream) => {
           const streamDiv = document.createElement("div");
           streamDiv.className = "stream-item";
           streamDiv.innerHTML = `
                     <div class="stream-header">
-                        <span class="stream-title">${stream.channel}</span>
-                        <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${
-                          stream.id
-                        })">Remove</button>
+                        <span class="stream-title">
+                            ${
+                              stream.locked
+                                ? '<span class="lock-icon">🔒</span>'
+                                : ""
+                            }
+                            ${stream.channel}
+                        </span>
+                        <div class="stream-controls">
+                            <button class="lock-btn ${
+                              stream.locked ? "locked" : ""
+                            }" 
+                                    data-lock-btn="${stream.id}"
+                                    onclick="event.stopPropagation(); toggleStreamLock(${
+                                      stream.id
+                                    })"
+                                    title="${
+                                      stream.locked
+                                        ? "Unlock stream"
+                                        : "Lock stream (persists after refresh)"
+                                    }">
+                                ${stream.locked ? "🔒 Locked" : "🔓 Lock"}
+                            </button>
+                            <button class="remove-btn" 
+                                    onclick="event.stopPropagation(); removeStream(${
+                                      stream.id
+                                    })"
+                                    ${
+                                      stream.locked
+                                        ? 'title="Stream is locked - confirm to remove"'
+                                        : ""
+                                    }>
+                                Remove
+                            </button>
+                        </div>
                     </div>
                     <div class="stream-video-container" data-stream-id="${
                       stream.id
@@ -1838,85 +1493,29 @@ localStorage.setItem('multistream_<!DOCTYPE html>
                             scrolling="no">
                         </iframe>
                     </div>
-                    <div class="volume-control">
-                        <span class="volume-label">🔊 ${stream.volume}%</span>
-                        <input 
-                            type="range" 
-                            min="0" 
-                            max="100" 
-                            value="${stream.volume}"
-                            class="volume-slider"
-                            onchange="updateVolume(${stream.id}, this.value)"
-                            oninput="this.parentElement.querySelector('.volume-label').textContent = '🔊 ' + this.value + '%'"
-                        >
-                    </div>
                     <div class="stream-chat">
-                        <div class="chat-header">💬 ${stream.channel} Chat</div>
-                        <div class="chat-messages" data-chat-channel="${
-                          stream.channel
-                        }">
-                            <div class="chat-message system-message">
-                                <span class="message-timestamp">${new Date().toLocaleTimeString(
-                                  "en-US",
-                                  {
-                                    hour12: false,
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}</span>
-                                <span class="message-text">Welcome to ${
-                                  stream.channel
-                                }'s chat!</span>
-                            </div>
-                        </div>
-                        ${
-                          user
-                            ? `
-                            <div class="chat-input-container">
-                                <input 
-                                    type="text" 
-                                    class="chat-input" 
-                                    data-chat-input="${stream.channel}"
-                                    placeholder="Type a message..."
-                                    onkeypress="if(event.key==='Enter') sendChatMessage('${stream.channel}', this.value)"
-                                    maxlength="500"
-                                >
-                            </div>
-                        `
-                            : `
-                            <div class="login-prompt">
-                                Login with Twitch to chat
-                            </div>
-                        `
-                        }
+                        <iframe 
+                            src="https://www.twitch.tv/embed/${
+                              stream.channel
+                            }/chat?parent=${window.location.hostname}"
+                            frameborder="0"
+                            scrolling="no">
+                        </iframe>
                     </div>
                 `;
+          streamsGrid.appendChild(streamDiv);
 
-          // Add click event to the video container
           const videoContainer = streamDiv.querySelector(
             ".stream-video-container"
           );
-          console.log(
-            "Adding click handler to video container for stream:",
-            stream.id
-          );
           videoContainer.addEventListener("click", function (e) {
-            console.log(
-              "Video container clicked, opening lightbox for:",
-              stream.id
-            );
             e.preventDefault();
             e.stopPropagation();
             openLightbox(stream.id);
           });
-          streamsGrid.appendChild(streamDiv);
-
-          // Initialize chat for this stream
-          updateStreamChatUI(stream.channel);
         });
       }
 
-      // Storage functions
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
       }
@@ -1925,15 +1524,12 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         const stored = localStorage.getItem("multistream_data");
         if (stored) {
           const parsedStreams = JSON.parse(stored);
-
-          // Migrate old streams without locked property and remove volume
           streams = parsedStreams.map((stream) => ({
             id: stream.id,
             channel: stream.channel,
             locked: stream.locked || false,
           }));
 
-          // Show notification if locked streams were restored
           const lockedCount = streams.filter((s) => s.locked).length;
           if (lockedCount > 0) {
             setTimeout(() => {
@@ -1960,12 +1556,20 @@ localStorage.setItem('multistream_<!DOCTYPE html>
         }
       }
 
-      // Handle clicks outside to close suggestions
+      // Event listeners
+      document
+        .getElementById("lightboxOverlay")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeLightbox();
+        });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && currentLightboxStream) closeLightbox();
+      });
+
       document.addEventListener("click", function (e) {
         const inputContainer = document.querySelector(".input-container");
-        if (!inputContainer.contains(e.target)) {
-          hideSuggestions();
-        }
+        if (!inputContainer.contains(e.target)) hideSuggestions();
       });
     </script>
   </body>
