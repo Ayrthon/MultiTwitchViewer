@@ -5,7 +5,777 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multi-Stream Viewer</title>
     <style>
-      /* --- your CSS unchanged --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        min-height: 100vh;
+        color: white;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-container {
+        display: flex;
+        flex: 1;
+        min-height: calc(100vh - 80px);
+      }
+
+      .header {
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        border-bottom: 2px solid #9146ff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #9146ff;
+        text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .login-btn,
+      .add-stream-btn {
+        background: linear-gradient(45deg, #9146ff, #772ce8);
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 25px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .login-btn:hover,
+      .add-stream-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #9146ff;
+      }
+
+      .username {
+        color: #9146ff;
+        font-weight: bold;
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        width: 240px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        border-right: 2px solid rgba(145, 70, 255, 0.3);
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 80px;
+        height: calc(100vh - 80px);
+        overflow: hidden;
+      }
+
+      .sidebar-header {
+        padding: 1rem;
+        background: rgba(145, 70, 255, 0.2);
+        border-bottom: 1px solid rgba(145, 70, 255, 0.3);
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #9146ff;
+      }
+
+      .followed-channels {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.5rem 0;
+      }
+
+      .channel-category {
+        margin-bottom: 1rem;
+      }
+
+      .category-header {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #adadb8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 0.5rem;
+      }
+
+      .channel-item {
+        padding: 0.7rem 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        border-left: 3px solid transparent;
+      }
+
+      .channel-item:hover {
+        background: rgba(145, 70, 255, 0.2);
+        border-left-color: #9146ff;
+      }
+
+      .channel-item.live {
+        background: rgba(255, 107, 107, 0.1);
+      }
+
+      .channel-item.live:hover {
+        background: rgba(255, 107, 107, 0.2);
+        border-left-color: #ff6b6b;
+      }
+
+      .channel-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid transparent;
+      }
+
+      .channel-item.live .channel-avatar {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+      }
+
+      .channel-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .channel-name {
+        font-weight: bold;
+        font-size: 0.85rem;
+        color: #efeff1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .channel-item.live .channel-name {
+        color: #ff6b6b;
+      }
+
+      .channel-game {
+        font-size: 0.75rem;
+        color: #adadb8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
+      }
+
+      .channel-viewers {
+        font-size: 0.7rem;
+        color: #ff6b6b;
+        font-weight: bold;
+        margin-top: 2px;
+      }
+
+      .live-indicator {
+        width: 8px;
+        height: 8px;
+        background: #ff6b6b;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+        flex-shrink: 0;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      .offline-indicator {
+        width: 8px;
+        height: 8px;
+        background: #adadb8;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .refresh-button {
+        margin: 1rem;
+        padding: 0.6rem 1rem;
+        background: linear-gradient(45deg, #9146ff, #772ce8);
+        border: none;
+        border-radius: 20px;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .refresh-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
+      }
+
+      .refresh-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .no-channels {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #adadb8;
+        font-size: 0.8rem;
+        font-style: italic;
+      }
+
+      .main-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .controls {
+        padding: 1rem 2rem;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .input-container {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+      }
+
+      .stream-input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 2px solid #9146ff;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .stream-input:focus {
+        outline: none;
+        border-color: #772ce8;
+        box-shadow: 0 0 15px rgba(145, 70, 255, 0.3);
+      }
+
+      .stream-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .suggestions-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        border: 2px solid #9146ff;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+      }
+
+      .suggestion-item {
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(145, 70, 255, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        transition: all 0.2s ease;
+      }
+
+      .suggestion-item:hover,
+      .suggestion-item.selected {
+        background: rgba(145, 70, 255, 0.3);
+        transform: translateX(5px);
+      }
+
+      .suggestion-item:last-child {
+        border-bottom: none;
+      }
+
+      .suggestion-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .suggestion-info {
+        flex: 1;
+      }
+
+      .suggestion-name {
+        font-weight: bold;
+        color: #9146ff;
+        font-size: 0.9rem;
+      }
+
+      .suggestion-game {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 2px;
+      }
+
+      .suggestion-viewers {
+        font-size: 0.8rem;
+        color: #ff6b6b;
+        font-weight: bold;
+      }
+
+      .loading-suggestion {
+        padding: 1rem;
+        text-align: center;
+        color: #9146ff;
+        font-style: italic;
+      }
+
+      .main-content {
+        padding: 2rem;
+      }
+
+      .streams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+        gap: 1.5rem;
+        max-width: calc(4 * 500px);
+        margin: 0 auto;
+      }
+
+      .stream-item {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 15px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: fit-content;
+      }
+
+      .stream-item:hover {
+        border-color: #9146ff;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(145, 70, 255, 0.2);
+      }
+
+      .stream-header {
+        padding: 1rem;
+        background: rgba(145, 70, 255, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stream-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .lock-icon {
+        color: #ffd700;
+        font-size: 0.9rem;
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+      }
+
+      .stream-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .lock-btn {
+        background: rgba(255, 215, 0, 0.2);
+        border: 2px solid #ffd700;
+        color: #ffd700;
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+      }
+
+      .lock-btn:hover {
+        background: rgba(255, 215, 0, 0.3);
+        transform: scale(1.05);
+      }
+
+      .lock-btn.locked {
+        background: #ffd700;
+        color: #000;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      }
+
+      .lock-btn.locked:hover {
+        background: #ffed4e;
+      }
+
+      .remove-btn {
+        background: #ff4757;
+        border: none;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .remove-btn:hover {
+        background: #ff3838;
+        transform: scale(1.05);
+      }
+
+      .remove-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .stream-video-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        cursor: pointer;
+      }
+
+      .stream-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .stream-chat {
+        background: rgba(0, 0, 0, 0.6);
+        height: 350px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0 0 15px 15px;
+      }
+
+      .stream-chat iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 0 0 15px 15px;
+      }
+
+      .locked-streams-notice {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #ffd700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .locked-streams-notice.hidden {
+        display: none;
+      }
+
+      .no-streams {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.2rem;
+      }
+
+      /* Lightbox Overlay Styles */
+      .lightbox-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .lightbox-overlay.active {
+        display: flex;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .lightbox-content {
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 20px;
+        border: 3px solid #9146ff;
+        box-shadow: 0 20px 60px rgba(145, 70, 255, 0.4);
+        padding: 1.5rem;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        animation: slideUp 0.4s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px) scale(0.9);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+      }
+
+      .lightbox-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(145, 70, 255, 0.3);
+      }
+
+      .lightbox-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #9146ff;
+        text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+      }
+
+      .lightbox-close {
+        background: #ff4757;
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .lightbox-close:hover {
+        background: #ff3838;
+        transform: scale(1.1) rotate(90deg);
+      }
+
+      .lightbox-video-container {
+        width: 80vw;
+        max-width: 1200px;
+        aspect-ratio: 16 / 9;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #000;
+      }
+
+      .lightbox-video {
+        width: 100%;
+        height: 100%;
+      }
+
+      .lightbox-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+      }
+
+      .lightbox-chat {
+        height: 400px;
+        background: #0e0e10;
+        border-radius: 10px;
+        border: 2px solid rgba(145, 70, 255, 0.3);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .lightbox-chat iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 8px;
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #9146ff;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #772ce8;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 1200px) {
+        .streams-grid {
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          max-width: none;
+        }
+
+        .sidebar {
+          width: 200px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .app-container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: 200px;
+          position: static;
+          border-right: none;
+          border-bottom: 2px solid rgba(145, 70, 255, 0.3);
+        }
+
+        .followed-channels {
+          display: flex;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 0.5rem;
+        }
+
+        .channel-category {
+          display: flex;
+          gap: 0.5rem;
+          margin: 0;
+          min-width: max-content;
+        }
+
+        .category-header {
+          display: none;
+        }
+
+        .channel-item {
+          min-width: 150px;
+          flex-direction: column;
+          text-align: center;
+          padding: 0.5rem;
+        }
+
+        .streams-grid {
+          grid-template-columns: 1fr;
+          max-width: none;
+        }
+
+        .controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .input-container {
+          min-width: auto;
+        }
+
+        .stream-video-container {
+          aspect-ratio: 16 / 9;
+        }
+
+        .stream-chat {
+          height: 300px;
+        }
+
+        .lightbox-content {
+          margin: 1rem;
+          padding: 1rem;
+        }
+
+        .lightbox-video-container {
+          width: 90vw;
+        }
+
+        .lightbox-chat {
+          height: 300px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -33,14 +803,6 @@
           onclick="refreshFollowedChannels()"
         >
           🔄 Refresh
-        </button>
-        <button
-          class="refresh-button"
-          id="loadMoreButton"
-          style="display: none"
-          onclick="loadMoreFollowedChannels()"
-        >
-          📥 Load More
         </button>
       </div>
 
@@ -72,6 +834,38 @@
       </div>
     </div>
 
+    <!-- Lightbox Overlay -->
+    <!-- <div class="lightbox-overlay" id="lightboxOverlay">
+      <div class="lightbox-content">
+        <div class="lightbox-header">
+          <div class="lightbox-title" id="lightboxTitle">Stream Focus</div>
+          <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+        </div>
+
+        <div class="lightbox-video-container">
+          <iframe
+            id="lightboxVideo"
+            class="lightbox-video"
+            frameborder="0"
+            allowfullscreen="true"
+            scrolling="no"
+          >
+          </iframe>
+        </div>
+
+        <div class="lightbox-controls">
+          <span style="color: #9146ff; font-weight: bold"
+            >💡 Use Twitch player controls for volume and settings</span
+          >
+        </div>
+
+        <div class="lightbox-chat">
+          <iframe id="lightboxChatFrame" src="" frameborder="0" scrolling="no">
+          </iframe>
+        </div>
+      </div>
+    </div> -->
+
     <script>
       // Twitch API configuration
       const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
@@ -79,18 +873,13 @@
 
       let streams = [];
       let user = null;
+      let searchTimeout = null;
+      let selectedSuggestionIndex = -1;
+      let currentSuggestions = [];
+      let currentLightboxStream = null;
       let followedChannels = [];
-      let paginationCursor = null; // for /channels/followed pagination
 
-      // Helper: split array into chunks of N
-      function chunkArray(arr, size) {
-        const chunks = [];
-        for (let i = 0; i < arr.length; i += size) {
-          chunks.push(arr.slice(i, i + size));
-        }
-        return chunks;
-      }
-
+      // Initialize the app
       document.addEventListener("DOMContentLoaded", function () {
         checkAuthFromURL();
         loadStreamsFromStorage();
@@ -149,8 +938,10 @@
             const data = await response.json();
             if (data.data && data.data.length > 0) {
               user = data.data[0];
+              console.log("✅ User authenticated:", user.display_name);
               updateUserInfo();
-              fetchRealFollowedChannels(true); // load first page
+              // Load real followed channels after login
+              fetchRealFollowedChannels();
             }
           } else {
             localStorage.removeItem("twitch_token");
@@ -161,40 +952,47 @@
         }
       }
 
-      async function fetchRealFollowedChannels(reset = false) {
-        if (!user) return;
+      // Helper: split into chunks of N
+      function chunkArray(arr, size) {
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += size) {
+          chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+      }
+
+      async function fetchRealFollowedChannels() {
+        if (!user) {
+          loadDemoFollowedChannels();
+          updateFollowedChannelsUI();
+          return;
+        }
 
         const refreshButton = document.getElementById("refreshButton");
         refreshButton.disabled = true;
-        refreshButton.textContent = "🔄 Loading...";
+        refreshButton.textContent = "🔄 Loading real data...";
 
         const token = localStorage.getItem("twitch_token");
-        if (reset) {
-          paginationCursor = null;
-          followedChannels = [];
-        }
 
         try {
-          let url = `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=100`;
-          if (paginationCursor) url += `&after=${paginationCursor}`;
-
-          const followsResponse = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Client-Id": CLIENT_ID,
-            },
-          });
+          const followsResponse = await fetch(
+            `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=100`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Client-Id": CLIENT_ID,
+              },
+            }
+          );
 
           if (!followsResponse.ok) {
             throw new Error(`Follows API returned ${followsResponse.status}`);
           }
 
           const followsData = await followsResponse.json();
-          paginationCursor = followsData.pagination?.cursor || null;
-
           const channelIds = followsData.data.map((f) => f.broadcaster_id);
 
-          // Fetch user info
+          // --- Fetch user info (no >100 limit here since we usually want profile info for all) ---
           const usersResponse = await fetch(
             `https://api.twitch.tv/helix/users?${channelIds
               .map((id) => `id=${id}`)
@@ -208,9 +1006,10 @@
           );
           const usersData = await usersResponse.json();
 
-          // Fetch streams in chunks of 100
+          // --- Fetch live streams in chunks of 100 ---
           let streamsData = { data: [] };
           const idChunks = chunkArray(channelIds, 100);
+
           for (const chunk of idChunks) {
             const res = await fetch(
               `https://api.twitch.tv/helix/streams?${chunk
@@ -229,8 +1028,8 @@
             }
           }
 
-          // Merge
-          const newChannels = usersData.data.map((channel) => {
+          // --- Merge data ---
+          followedChannels = usersData.data.map((channel) => {
             const liveStream = streamsData.data.find(
               (stream) => stream.user_id === channel.id
             );
@@ -246,34 +1045,29 @@
             };
           });
 
-          followedChannels.push(...newChannels);
-          updateFollowedChannelsUI();
-
-          // Show/hide load more button
-          document.getElementById("loadMoreButton").style.display =
-            paginationCursor ? "block" : "none";
+          console.log("✅ Loaded followed channels:", followedChannels.length);
         } catch (err) {
-          console.error("❌ Error fetching follows:", err);
+          console.error("❌ Error fetching real follows:", err);
+          loadDemoFollowedChannels();
         }
 
+        updateFollowedChannelsUI();
         refreshButton.disabled = false;
         refreshButton.textContent = "🔄 Refresh";
-      }
-
-      function loadMoreFollowedChannels() {
-        fetchRealFollowedChannels(false);
       }
 
       function updateUserInfo() {
         const userInfo = document.getElementById("userInfo");
         if (user) {
           userInfo.innerHTML = `
-            <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
-            <span class="username">${user.display_name}</span>
-            <button class="login-btn" onclick="logout()" style="background: #ff4757;">Logout</button>
-          `;
+                    <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
+                    <span class="username">${user.display_name}</span>
+                    <button class="login-btn" onclick="logout()" style="background: #ff4757;">Logout</button>
+                `;
         } else {
-          userInfo.innerHTML = `<button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>`;
+          userInfo.innerHTML = `
+                    <button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>
+                `;
           followedChannels = [];
           updateFollowedChannelsUI();
         }
@@ -285,8 +1079,621 @@
         location.reload();
       }
 
-      // --- existing functions for UI, streams, sidebar etc remain unchanged ---
-      // (updateFollowedChannelsUI, createChannelHTML, addStream, updateUI, etc.)
+      function loadDemoFollowedChannels() {
+        followedChannels = [
+          {
+            id: "1",
+            login: "ninja",
+            display_name: "Ninja",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
+            is_live: true,
+            game_name: "Fortnite",
+            viewer_count: 45732,
+          },
+          {
+            id: "2",
+            login: "pokimane",
+            display_name: "Pokimane",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
+            is_live: true,
+            game_name: "Just Chatting",
+            viewer_count: 28456,
+          },
+          {
+            id: "3",
+            login: "shroud",
+            display_name: "shroud",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
+            is_live: false,
+            game_name: "Offline",
+            viewer_count: 0,
+          },
+          {
+            id: "4",
+            login: "xqc",
+            display_name: "xQc",
+            profile_image_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
+            is_live: true,
+            game_name: "Grand Theft Auto V",
+            viewer_count: 67234,
+          },
+        ];
+      }
+
+      function updateFollowedChannelsUI() {
+        const container = document.getElementById("followedChannels");
+
+        if (!user) {
+          container.innerHTML =
+            '<div class="no-channels">Login to see followed channels</div>';
+          return;
+        }
+
+        if (followedChannels.length === 0) {
+          container.innerHTML =
+            '<div class="no-channels">No followed channels found</div>';
+          return;
+        }
+
+        const sortedChannels = [...followedChannels].sort((a, b) => {
+          if (a.is_live && !b.is_live) return -1;
+          if (!a.is_live && b.is_live) return 1;
+          if (a.is_live && b.is_live) return b.viewer_count - a.viewer_count;
+          return a.display_name.localeCompare(b.display_name);
+        });
+
+        const liveChannels = sortedChannels.filter((ch) => ch.is_live);
+        const offlineChannels = sortedChannels.filter((ch) => !ch.is_live);
+
+        let html = "";
+
+        if (liveChannels.length > 0) {
+          html += `
+                    <div class="channel-category">
+                        <div class="category-header">Live (${
+                          liveChannels.length
+                        })</div>
+                        ${liveChannels
+                          .map((channel) => createChannelHTML(channel))
+                          .join("")}
+                    </div>
+                `;
+        }
+
+        if (offlineChannels.length > 0) {
+          html += `
+                    <div class="channel-category">
+                        <div class="category-header">Offline (${
+                          offlineChannels.length
+                        })</div>
+                        ${offlineChannels
+                          .map((channel) => createChannelHTML(channel))
+                          .join("")}
+                    </div>
+                `;
+        }
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".channel-item").forEach((item) => {
+          const channelLogin = item.dataset.channel;
+          // Skip special info items (they have non-standard login names)
+          if (
+            channelLogin &&
+            !channelLogin.includes("_info") &&
+            !channelLogin.includes("_note")
+          ) {
+            item.addEventListener("click", function () {
+              addStreamFromSidebar(channelLogin);
+            });
+          } else {
+            // Make info items non-clickable
+            item.style.cursor = "default";
+            item.style.opacity = "0.7";
+          }
+        });
+      }
+
+      function createChannelHTML(channel) {
+        const viewerText = channel.is_live
+          ? `<div class="channel-viewers">${formatViewerCount(
+              channel.viewer_count
+            )} viewers</div>`
+          : "";
+
+        return `
+                <div class="channel-item ${
+                  channel.is_live ? "live" : ""
+                }" data-channel="${channel.login}">
+                    <img src="${channel.profile_image_url}" alt="${
+          channel.display_name
+        }" class="channel-avatar">
+                    <div class="channel-info">
+                        <div class="channel-name">${channel.display_name}</div>
+                        <div class="channel-game">${channel.game_name}</div>
+                        ${viewerText}
+                    </div>
+                    <div class="${
+                      channel.is_live ? "live-indicator" : "offline-indicator"
+                    }"></div>
+                </div>
+            `;
+      }
+
+      function formatViewerCount(count) {
+        if (count >= 1000000) return (count / 1000000).toFixed(1) + "M";
+        if (count >= 1000) return (count / 1000).toFixed(1) + "K";
+        return count.toString();
+      }
+
+      function addStreamFromSidebar(channelLogin) {
+        if (streams.find((s) => s.channel === channelLogin)) {
+          alert("This stream is already added");
+          return;
+        }
+
+        const stream = {
+          id: Date.now(),
+          channel: channelLogin,
+          locked: false,
+        };
+
+        streams.push(stream);
+        saveStreamsToStorage();
+        updateUI();
+
+        const channelItem = document.querySelector(
+          `[data-channel="${channelLogin}"]`
+        );
+        if (channelItem) {
+          const originalBg = channelItem.style.background;
+          channelItem.style.background = "rgba(76, 175, 80, 0.3)";
+          setTimeout(() => {
+            channelItem.style.background = originalBg;
+          }, 1000);
+        }
+      }
+
+      function refreshFollowedChannels() {
+        if (user) {
+          console.log("🔄 Refreshing real followed channels");
+          fetchRealFollowedChannels();
+        } else {
+          console.log("👤 No user logged in, showing demo data");
+          loadDemoFollowedChannels();
+          updateFollowedChannelsUI();
+        }
+      }
+
+      function setupAutoSuggest() {
+        const input = document.getElementById("streamInput");
+
+        input.addEventListener("input", function (e) {
+          const query = e.target.value.trim();
+
+          if (query.length < 2) {
+            hideSuggestions();
+            return;
+          }
+
+          if (searchTimeout) clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => searchChannels(query), 300);
+        });
+
+        input.addEventListener("keydown", function (e) {
+          const dropdown = document.getElementById("suggestionsDropdown");
+          if (dropdown.style.display === "none") return;
+
+          switch (e.key) {
+            case "ArrowDown":
+              e.preventDefault();
+              selectedSuggestionIndex = Math.min(
+                selectedSuggestionIndex + 1,
+                currentSuggestions.length - 1
+              );
+              updateSuggestionSelection();
+              break;
+            case "ArrowUp":
+              e.preventDefault();
+              selectedSuggestionIndex = Math.max(
+                selectedSuggestionIndex - 1,
+                -1
+              );
+              updateSuggestionSelection();
+              break;
+            case "Enter":
+              e.preventDefault();
+              if (
+                selectedSuggestionIndex >= 0 &&
+                currentSuggestions[selectedSuggestionIndex]
+              ) {
+                selectSuggestion(currentSuggestions[selectedSuggestionIndex]);
+              } else {
+                addStream();
+              }
+              break;
+            case "Escape":
+              hideSuggestions();
+              break;
+          }
+        });
+
+        input.addEventListener("blur", function () {
+          setTimeout(() => hideSuggestions(), 150);
+        });
+      }
+
+      async function searchChannels(query) {
+        const dropdown = document.getElementById("suggestionsDropdown");
+        dropdown.innerHTML =
+          '<div class="loading-suggestion">🔍 Searching channels...</div>';
+        dropdown.style.display = "block";
+
+        const popularChannels = [
+          {
+            broadcaster_name: "ninja",
+            display_name: "Ninja",
+            game_name: "Fortnite",
+            thumbnail_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
+          },
+          {
+            broadcaster_name: "pokimane",
+            display_name: "Pokimane",
+            game_name: "Just Chatting",
+            thumbnail_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
+          },
+          {
+            broadcaster_name: "shroud",
+            display_name: "shroud",
+            game_name: "VALORANT",
+            thumbnail_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
+          },
+          {
+            broadcaster_name: "xqc",
+            display_name: "xQc",
+            game_name: "Grand Theft Auto V",
+            thumbnail_url:
+              "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
+          },
+        ];
+
+        const filtered = popularChannels.filter(
+          (channel) =>
+            channel.display_name.toLowerCase().includes(query.toLowerCase()) ||
+            channel.broadcaster_name.toLowerCase().includes(query.toLowerCase())
+        );
+
+        currentSuggestions = filtered;
+        displaySuggestions(filtered);
+      }
+
+      function displaySuggestions(channels) {
+        const dropdown = document.getElementById("suggestionsDropdown");
+        selectedSuggestionIndex = -1;
+
+        if (channels.length === 0) {
+          dropdown.innerHTML =
+            '<div class="loading-suggestion">No channels found</div>';
+          return;
+        }
+
+        dropdown.innerHTML = channels
+          .map(
+            (channel, index) => `
+                <div class="suggestion-item" onclick="selectSuggestion(currentSuggestions[${index}])" data-index="${index}">
+                    <img src="${channel.thumbnail_url}" alt="${channel.display_name}" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">${channel.display_name}</div>
+                        <div class="suggestion-game">${channel.game_name}</div>
+                    </div>
+                    <span class="suggestion-viewers">🔴 LIVE</span>
+                </div>
+            `
+          )
+          .join("");
+
+        dropdown.style.display = "block";
+      }
+
+      function updateSuggestionSelection() {
+        const items = document.querySelectorAll(".suggestion-item");
+        items.forEach((item, index) => {
+          item.classList.toggle("selected", index === selectedSuggestionIndex);
+        });
+      }
+
+      function selectSuggestion(channel) {
+        const input = document.getElementById("streamInput");
+        input.value =
+          channel.broadcaster_name || channel.display_name.toLowerCase();
+        hideSuggestions();
+        addStream();
+      }
+
+      function hideSuggestions() {
+        const dropdown = document.getElementById("suggestionsDropdown");
+        dropdown.style.display = "none";
+        selectedSuggestionIndex = -1;
+        currentSuggestions = [];
+      }
+
+      function addStream() {
+        const input = document.getElementById("streamInput");
+        const channelName = input.value.trim().toLowerCase();
+
+        if (!channelName) {
+          alert("Please enter a channel name");
+          return;
+        }
+
+        if (streams.find((s) => s.channel === channelName)) {
+          alert("This stream is already added");
+          return;
+        }
+
+        const stream = {
+          id: Date.now(),
+          channel: channelName,
+          locked: false,
+        };
+
+        streams.push(stream);
+        input.value = "";
+        hideSuggestions();
+
+        saveStreamsToStorage();
+        updateUI();
+      }
+
+      function removeStream(streamId) {
+        const stream = streams.find((s) => s.id === streamId);
+        if (!stream) return;
+
+        if (stream.locked) {
+          const confirmRemove = confirm(
+            `"${stream.channel}" is locked. Are you sure you want to remove it?`
+          );
+          if (!confirmRemove) return;
+        }
+
+        streams = streams.filter((s) => s.id !== streamId);
+        saveStreamsToStorage();
+        updateUI();
+      }
+
+      function toggleStreamLock(streamId) {
+        const stream = streams.find((s) => s.id === streamId);
+        if (!stream) return;
+
+        stream.locked = !stream.locked;
+        saveStreamsToStorage();
+        updateUI();
+
+        const lockBtn = document.querySelector(`[data-lock-btn="${streamId}"]`);
+        if (lockBtn) {
+          const originalText = lockBtn.innerHTML;
+          lockBtn.innerHTML = stream.locked
+            ? "🔓➜🔒 Locked!"
+            : "🔒➜🔓 Unlocked!";
+          setTimeout(() => {
+            lockBtn.innerHTML = originalText;
+          }, 1500);
+        }
+      }
+
+      //   function openLightbox(streamId) {
+      //     const stream = streams.find((s) => s.id === streamId);
+      //     if (!stream) return;
+
+      //     currentLightboxStream = stream;
+
+      //     document.getElementById(
+      //       "lightboxTitle"
+      //     ).textContent = `🎮 ${stream.channel}`;
+
+      //     const lightboxVideo = document.getElementById("lightboxVideo");
+      //     lightboxVideo.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true&darkpopout`;
+
+      //     const lightboxChatFrame = document.getElementById("lightboxChatFrame");
+      //     lightboxChatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}`;
+
+      //     muteBackgroundStreams(streamId);
+
+      //     const overlay = document.getElementById("lightboxOverlay");
+      //     overlay.classList.add("active");
+      //     document.body.style.overflow = "hidden";
+      //   }
+
+      function muteBackgroundStreams(activeStreamId) {
+        streams.forEach((stream) => {
+          if (stream.id !== activeStreamId) {
+            const iframe = document.querySelector(
+              `[data-stream-id="${stream.id}"] iframe`
+            );
+            if (iframe) {
+              iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=true&autoplay=true`;
+            }
+          }
+        });
+      }
+
+      function unmuteAllStreams() {
+        streams.forEach((stream) => {
+          const iframe = document.querySelector(
+            `[data-stream-id="${stream.id}"] iframe`
+          );
+          if (iframe) {
+            iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
+          }
+        });
+      }
+
+      function updateUI() {
+        const streamsGrid = document.getElementById("streamsGrid");
+
+        if (streams.length === 0) {
+          streamsGrid.innerHTML =
+            '<div class="no-streams">No streams added yet. Add a Twitch channel to get started!</div>';
+          return;
+        }
+
+        const lockedCount = streams.filter((s) => s.locked).length;
+        let lockedNotice = "";
+        if (lockedCount > 0) {
+          lockedNotice = `
+                    <div class="locked-streams-notice">
+                        🔒 ${lockedCount} stream${
+            lockedCount > 1 ? "s" : ""
+          } locked - will persist after page refresh
+                    </div>
+                `;
+        }
+
+        streamsGrid.innerHTML = lockedNotice;
+
+        streams.forEach((stream) => {
+          const streamDiv = document.createElement("div");
+          streamDiv.className = "stream-item";
+          streamDiv.innerHTML = `
+                    <div class="stream-header">
+                        <span class="stream-title">
+                            ${
+                              stream.locked
+                                ? '<span class="lock-icon">🔒</span>'
+                                : ""
+                            }
+                            ${stream.channel}
+                        </span>
+                        <div class="stream-controls">
+                            <button class="lock-btn ${
+                              stream.locked ? "locked" : ""
+                            }" 
+                                    data-lock-btn="${stream.id}"
+                                    onclick="event.stopPropagation(); toggleStreamLock(${
+                                      stream.id
+                                    })"
+                                    title="${
+                                      stream.locked
+                                        ? "Unlock stream"
+                                        : "Lock stream (persists after refresh)"
+                                    }">
+                                ${stream.locked ? "🔒 Locked" : "🔓 Lock"}
+                            </button>
+                            <button class="remove-btn" 
+                                    onclick="event.stopPropagation(); removeStream(${
+                                      stream.id
+                                    })"
+                                    ${
+                                      stream.locked
+                                        ? 'title="Stream is locked - confirm to remove"'
+                                        : ""
+                                    }>
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stream-video-container" data-stream-id="${
+                      stream.id
+                    }">
+                        <iframe 
+                            src="https://player.twitch.tv/?channel=${
+                              stream.channel
+                            }&parent=${
+            window.location.hostname
+          }&muted=false&autoplay=true"
+                            class="stream-video"
+                            frameborder="0"
+                            allowfullscreen="true"
+                            scrolling="no">
+                        </iframe>
+                    </div>
+                    <div class="stream-chat">
+                        <iframe 
+                            src="https://www.twitch.tv/embed/${
+                              stream.channel
+                            }/chat?darkpopout&parent=${
+            window.location.hostname
+          }"
+                            frameborder="0"
+                            scrolling="no">
+                        </iframe>
+                    </div>
+                `;
+          streamsGrid.appendChild(streamDiv);
+
+          const videoContainer = streamDiv.querySelector(
+            ".stream-video-container"
+          );
+          //   videoContainer.addEventListener("click", function (e) {
+          //     e.preventDefault();
+          //     e.stopPropagation();
+          //     openLightbox(stream.id);
+          //   });
+        });
+      }
+
+      function saveStreamsToStorage() {
+        localStorage.setItem("multistream_data", JSON.stringify(streams));
+      }
+
+      function loadStreamsFromStorage() {
+        const stored = localStorage.getItem("multistream_data");
+        if (stored) {
+          const parsedStreams = JSON.parse(stored);
+          streams = parsedStreams.map((stream) => ({
+            id: stream.id,
+            channel: stream.channel,
+            locked: stream.locked || false,
+          }));
+
+          const lockedCount = streams.filter((s) => s.locked).length;
+          if (lockedCount > 0) {
+            setTimeout(() => {
+              const notice = document.querySelector(".locked-streams-notice");
+              if (notice) {
+                notice.style.background = "rgba(76, 175, 80, 0.2)";
+                notice.style.borderColor = "rgba(76, 175, 80, 0.5)";
+                notice.style.color = "#4caf50";
+                notice.innerHTML = `🔒✅ ${lockedCount} locked stream${
+                  lockedCount > 1 ? "s" : ""
+                } restored from previous session`;
+
+                setTimeout(() => {
+                  notice.style.background = "rgba(255, 215, 0, 0.1)";
+                  notice.style.borderColor = "rgba(255, 215, 0, 0.3)";
+                  notice.style.color = "#ffd700";
+                  notice.innerHTML = `🔒 ${lockedCount} stream${
+                    lockedCount > 1 ? "s" : ""
+                  } locked - will persist after page refresh`;
+                }, 3000);
+              }
+            }, 1000);
+          }
+        }
+      }
+
+      // Event listeners
+      //   document
+      //     .getElementById("lightboxOverlay")
+      //     .addEventListener("click", function (e) {
+      //       if (e.target === this) closeLightbox();
+      //     });
+
+      //   document.addEventListener("keydown", function (e) {
+      //     if (e.key === "Escape" && currentLightboxStream) closeLightbox();
+      //   });
+
+      //   document.addEventListener("click", function (e) {
+      //     const inputContainer = document.querySelector(".input-container");
+      //     if (!inputContainer.contains(e.target)) hideSuggestions();
+      //   });
     </script>
   </body>
 </html>
