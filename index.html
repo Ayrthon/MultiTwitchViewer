@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+// Storage functions function saveStreamsToStorage() {
+localStorage.setItem('multistream_<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -557,157 +558,14 @@
         height: 350px;
         display: flex;
         flex-direction: column;
+        border-radius: 0 0 15px 15px;
       }
 
-      .chat-header {
-        padding: 0.8rem 1rem;
-        background: rgba(145, 70, 255, 0.3);
-        font-weight: bold;
-        font-size: 0.9rem;
-        border-bottom: 1px solid rgba(145, 70, 255, 0.3);
-      }
-
-      .chat-messages {
-        flex: 1;
-        padding: 0.5rem;
-        overflow-y: auto;
-        font-size: 0.8rem;
-        line-height: 1.3;
-        background: #0e0e10;
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, sans-serif;
-      }
-
-      .chat-message {
-        margin-bottom: 0.3rem;
-        padding: 0.2rem 0.5rem;
-        word-wrap: break-word;
-        border-radius: 4px;
-        transition: background-color 0.1s ease;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.3rem;
-      }
-
-      .chat-message:hover {
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      .chat-badges {
-        display: inline-flex;
-        gap: 0.2rem;
-        align-items: center;
-        flex-shrink: 0;
-        margin-right: 0.3rem;
-      }
-
-      .chat-badge {
-        width: 14px;
-        height: 14px;
-        border-radius: 2px;
-        font-size: 8px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-      }
-
-      .badge-broadcaster {
-        background: linear-gradient(45deg, #e91916, #ff6905);
-      }
-
-      .badge-moderator {
-        background: linear-gradient(45deg, #00ad03, #00d3ff);
-      }
-
-      .badge-vip {
-        background: linear-gradient(45deg, #e005b9, #ff1493);
-      }
-
-      .badge-subscriber {
-        background: linear-gradient(45deg, #9147ff, #772ce8);
-      }
-
-      .badge-prime {
-        background: linear-gradient(45deg, #0099ff, #00d4ff);
-      }
-
-      .badge-turbo {
-        background: linear-gradient(45deg, #f2647a, #ff6905);
-      }
-
-      .message-author {
-        font-weight: bold;
-        flex-shrink: 0;
-        cursor: pointer;
-      }
-
-      .message-text {
-        flex: 1;
-        color: #efeff1;
-      }
-
-      .message-timestamp {
-        font-size: 0.7rem;
-        color: #adadb8;
-        margin-right: 0.3rem;
-        flex-shrink: 0;
-      }
-
-      .chat-emote {
-        display: inline-block;
-        vertical-align: middle;
-        margin: 0 1px;
-      }
-
-      .system-message {
-        color: #adadb8;
-        font-style: italic;
-      }
-
-      .chat-input-container {
-        padding: 0.8rem;
-        border-top: 1px solid rgba(145, 70, 255, 0.3);
-        background: rgba(0, 0, 0, 0.4);
-      }
-
-      .chat-input {
+      .stream-chat iframe {
         width: 100%;
-        padding: 0.6rem 0.8rem;
-        border: 1px solid rgba(145, 70, 255, 0.5);
-        border-radius: 4px;
-        background: #18181b;
-        color: #efeff1;
-        font-size: 0.8rem;
-        resize: none;
-        outline: none;
-        transition: all 0.3s ease;
-        font-family: inherit;
-      }
-
-      .chat-input:focus {
-        border-color: #9146ff;
-        box-shadow: 0 0 0 1px #9146ff;
-      }
-
-      .chat-input::placeholder {
-        color: #adadb8;
-      }
-
-      .chat-input:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .login-prompt {
-        text-align: center;
-        padding: 1rem;
-        color: #adadb8;
-        font-size: 0.8rem;
-        font-style: italic;
-        background: #18181b;
+        height: 100%;
+        border: none;
+        border-radius: 0 0 15px 15px;
       }
 
       /* Lightbox Overlay Styles */
@@ -869,51 +727,11 @@
         flex-direction: column;
       }
 
-      .lightbox-chat-header {
-        padding: 1rem;
-        background: rgba(145, 70, 255, 0.3);
-        border-radius: 8px 8px 0 0;
-        font-weight: bold;
-        text-align: center;
-      }
-
-      .lightbox-chat-messages {
-        flex: 1;
-        padding: 0.5rem;
-        overflow-y: auto;
-        font-size: 0.85rem;
-        line-height: 1.3;
-        background: #0e0e10;
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, sans-serif;
-      }
-
-      .lightbox-chat-input-container {
-        padding: 1rem;
-        border-top: 1px solid rgba(145, 70, 255, 0.3);
-        background: #18181b;
-      }
-
-      .lightbox-chat-input {
+      .lightbox-chat iframe {
         width: 100%;
-        padding: 0.8rem 1rem;
-        border: 2px solid rgba(145, 70, 255, 0.5);
-        border-radius: 4px;
-        background: #18181b;
-        color: #efeff1;
-        font-size: 0.9rem;
-        outline: none;
-        transition: all 0.3s ease;
-        font-family: inherit;
-      }
-
-      .lightbox-chat-input:focus {
-        border-color: #9146ff;
-        box-shadow: 0 0 0 1px #9146ff;
-      }
-
-      .lightbox-chat-input::placeholder {
-        color: #adadb8;
+        height: 100%;
+        border: none;
+        border-radius: 8px;
       }
 
       .stream-video-container {
@@ -1188,31 +1006,14 @@
         </div>
 
         <div class="lightbox-controls">
-          <span class="lightbox-volume-label" id="lightboxVolumeLabel"
-            >🔊 50%</span
+          <span style="color: #9146ff; font-weight: bold"
+            >💡 Use Twitch player controls for volume and settings</span
           >
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value="50"
-            class="lightbox-volume-slider"
-            id="lightboxVolumeSlider"
-            oninput="updateLightboxVolume(this.value)"
-          />
         </div>
 
         <div class="lightbox-chat">
-          <div class="lightbox-chat-header" id="lightboxChatHeader">
-            💬 Chat
-          </div>
-          <div class="lightbox-chat-messages" id="lightboxChatMessages"></div>
-          <div
-            class="lightbox-chat-input-container"
-            id="lightboxChatInputContainer"
-          >
-            <!-- Chat input will be dynamically added based on login status -->
-          </div>
+          <iframe id="lightboxChatFrame" src="" frameborder="0" scrolling="no">
+          </iframe>
         </div>
       </div>
     </div>
@@ -1436,43 +1237,14 @@
         document.getElementById(
           "lightboxTitle"
         ).textContent = `🎮 ${stream.channel}`;
-        document.getElementById(
-          "lightboxChatHeader"
-        ).textContent = `💬 ${stream.channel} Chat`;
 
         // Set up video iframe with unmuted parameter
         const lightboxVideo = document.getElementById("lightboxVideo");
         lightboxVideo.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
 
-        // Set volume slider
-        const volumeSlider = document.getElementById("lightboxVolumeSlider");
-        const volumeLabel = document.getElementById("lightboxVolumeLabel");
-        volumeSlider.value = stream.volume;
-        volumeLabel.textContent = `🔊 ${stream.volume}%`;
-
-        // Update chat
-        updateLightboxChat(stream.channel);
-
-        // Set up chat input
-        const chatInputContainer = document.getElementById(
-          "lightboxChatInputContainer"
-        );
-        if (user) {
-          chatInputContainer.innerHTML = `
-                    <input 
-                        type="text" 
-                        class="lightbox-chat-input" 
-                        id="lightboxChatInput"
-                        placeholder="Type a message..."
-                        onkeypress="if(event.key==='Enter') sendLightboxChatMessage()"
-                        maxlength="500"
-                    >
-                `;
-        } else {
-          chatInputContainer.innerHTML = `
-                    <div class="login-prompt">Login with Twitch to chat</div>
-                `;
-        }
+        // Set up chat iframe
+        const lightboxChatFrame = document.getElementById("lightboxChatFrame");
+        lightboxChatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?parent=${window.location.hostname}`;
 
         // Mute all other streams by updating their iframes
         muteBackgroundStreams(streamId);
@@ -1871,7 +1643,6 @@
         const stream = {
           id: Date.now(),
           channel: channelName,
-          volume: 50,
           locked: false,
         };
 
@@ -1881,7 +1652,6 @@
 
         saveStreamsToStorage();
         updateUI();
-        connectToChat(channelName);
       }
 
       function removeStream(streamId) {
@@ -1895,13 +1665,6 @@
           );
           if (!confirmRemove) return;
         }
-
-        // Clean up chat connections and data
-        if (chatConnections.has(stream.channel)) {
-          chatConnections.get(stream.channel).close();
-          chatConnections.delete(stream.channel);
-        }
-        streamChats.delete(stream.channel);
 
         streams = streams.filter((s) => s.id !== streamId);
         saveStreamsToStorage();
@@ -1926,22 +1689,6 @@
           setTimeout(() => {
             lockBtn.innerHTML = originalText;
           }, 1500);
-        }
-      }
-
-      function updateVolume(streamId, volume) {
-        const stream = streams.find((s) => s.id === streamId);
-        if (stream) {
-          stream.volume = volume;
-          const iframe = document.querySelector(
-            `[data-stream-id="${streamId}"] iframe`
-          );
-          if (iframe && iframe.contentWindow) {
-            // Note: Twitch embeds don't allow direct volume control from parent
-            // This would need to be implemented with Twitch's Player API
-            console.log(`Volume for ${stream.channel} set to ${volume}%`);
-          }
-          saveStreamsToStorage();
         }
       }
 
@@ -2179,14 +1926,12 @@
         if (stored) {
           const parsedStreams = JSON.parse(stored);
 
-          // Migrate old streams without locked property
+          // Migrate old streams without locked property and remove volume
           streams = parsedStreams.map((stream) => ({
-            ...stream,
+            id: stream.id,
+            channel: stream.channel,
             locked: stream.locked || false,
           }));
-
-          // Reconnect to chats
-          streams.forEach((stream) => connectToChat(stream.channel));
 
           // Show notification if locked streams were restored
           const lockedCount = streams.filter((s) => s.locked).length;
