@@ -952,6 +952,15 @@
         }
       }
 
+      // Helper: split into chunks of N
+      function chunkArray(arr, size) {
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += size) {
+          chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+      }
+
       async function fetchRealFollowedChannels() {
         if (!user) {
           loadDemoFollowedChannels();
@@ -966,12 +975,6 @@
         const token = localStorage.getItem("twitch_token");
 
         try {
-          console.log(
-            "🔍 Fetching real followed channels for:",
-            user.display_name
-          );
-
-          // Use the current working API endpoint
           const followsResponse = await fetch(
             `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=100`,
             {
@@ -982,65 +985,34 @@
             }
           );
 
-          console.log(
-            "📡 Follows API response status:",
-            followsResponse.status
-          );
-
-          if (followsResponse.status === 410) {
-            throw new Error(
-              "Follows API deprecated - requires special permissions"
-            );
-          }
-
-          if (followsResponse.status === 401) {
-            throw new Error("Token lacks required permissions");
-          }
-
           if (!followsResponse.ok) {
             throw new Error(`Follows API returned ${followsResponse.status}`);
           }
 
           const followsData = await followsResponse.json();
-          console.log("📋 Follows data:", followsData);
+          const channelIds = followsData.data.map((f) => f.broadcaster_id);
 
-          if (!followsData.data || followsData.data.length === 0) {
-            followedChannels = [
-              {
-                id: "no_follows",
-                login: "no_follows",
-                display_name: "📝 No Follows Found",
-                profile_image_url:
-                  "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-                is_live: false,
-                game_name: "You are not following any channels",
-                viewer_count: 0,
+          // --- Fetch user info (no >100 limit here since we usually want profile info for all) ---
+          const usersResponse = await fetch(
+            `https://api.twitch.tv/helix/users?${channelIds
+              .map((id) => `id=${id}`)
+              .join("&")}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Client-Id": CLIENT_ID,
               },
-            ];
-            updateFollowedChannelsUI();
-            refreshButton.disabled = false;
-            refreshButton.textContent = "🔄 Refresh";
-            return;
-          }
-
-          // Get channel info using broadcaster_id from the new API response
-          const channelIds = followsData.data.map(
-            (follow) => follow.broadcaster_id
+            }
           );
-          const [usersResponse, streamsResponse] = await Promise.all([
-            fetch(
-              `https://api.twitch.tv/helix/users?${channelIds
-                .map((id) => `id=${id}`)
-                .join("&")}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Client-Id": CLIENT_ID,
-                },
-              }
-            ),
-            fetch(
-              `https://api.twitch.tv/helix/streams?${channelIds
+          const usersData = await usersResponse.json();
+
+          // --- Fetch live streams in chunks of 100 ---
+          let streamsData = { data: [] };
+          const idChunks = chunkArray(channelIds, 100);
+
+          for (const chunk of idChunks) {
+            const res = await fetch(
+              `https://api.twitch.tv/helix/streams?${chunk
                 .map((id) => `user_id=${id}`)
                 .join("&")}`,
               {
@@ -1049,14 +1021,14 @@
                   "Client-Id": CLIENT_ID,
                 },
               }
-            ),
-          ]);
+            );
+            if (res.ok) {
+              const json = await res.json();
+              streamsData.data.push(...json.data);
+            }
+          }
 
-          const usersData = await usersResponse.json();
-          const streamsData = streamsResponse.ok
-            ? await streamsResponse.json()
-            : { data: [] };
-
+          // --- Merge data ---
           followedChannels = usersData.data.map((channel) => {
             const liveStream = streamsData.data.find(
               (stream) => stream.user_id === channel.id
@@ -1073,67 +1045,10 @@
             };
           });
 
-          // Add success indicator
-          //   followedChannels.unshift({
-          //     id: "real_data",
-          //     login: "real_data",
-          //     display_name: "✅ Your Real Follows",
-          //     profile_image_url: user.profile_image_url,
-          //     is_live: false,
-          //     game_name: `${followedChannels.length} channels loaded`,
-          //     viewer_count: 0,
-          //   });
-
-          console.log(
-            "✅ Real followed channels loaded:",
-            followedChannels.length - 1
-          );
-        } catch (error) {
-          console.error("❌ Error fetching real follows:", error);
-
-          // Specific handling for the 410 deprecation error
-          if (
-            error.message.includes("deprecated") ||
-            error.message.includes("410")
-          ) {
-            loadDemoFollowedChannels();
-            followedChannels.unshift({
-              id: "api_deprecated",
-              login: "api_deprecated",
-              display_name: "🔒 API Restricted",
-              profile_image_url:
-                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-              is_live: false,
-              game_name: "Follows API needs Twitch approval",
-              viewer_count: 0,
-            });
-          } else if (error.message.includes("permissions")) {
-            loadDemoFollowedChannels();
-            followedChannels.unshift({
-              id: "permissions_error",
-              login: "permissions_error",
-              display_name: "🔑 Login Required",
-              profile_image_url:
-                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-              is_live: false,
-              game_name: "Token lacks follow permissions",
-              viewer_count: 0,
-            });
-          } else {
-            // General error fallback
-            loadDemoFollowedChannels();
-            followedChannels.unshift({
-              id: "api_error",
-              login: "api_error",
-              display_name: "⚠️ API Error",
-              profile_image_url:
-                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-              is_live: false,
-              game_name:
-                "Showing demo data - " + error.message.substring(0, 30),
-              viewer_count: 0,
-            });
-          }
+          console.log("✅ Loaded followed channels:", followedChannels.length);
+        } catch (err) {
+          console.error("❌ Error fetching real follows:", err);
+          loadDemoFollowedChannels();
         }
 
         updateFollowedChannelsUI();
