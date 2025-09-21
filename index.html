@@ -1375,15 +1375,6 @@
         }
       }
 
-      function removeStream(streamId) {
-        const stream = streams.find((s) => s.id === streamId);
-        if (!stream) return;
-
-        streams = streams.filter((s) => s.id !== streamId);
-        saveStreamsToStorage();
-        updateUI();
-      }
-
       function updateUI() {
         const grid = document.getElementById("streamsGrid");
 
