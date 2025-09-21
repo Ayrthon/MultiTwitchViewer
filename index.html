@@ -651,6 +651,29 @@
         .stream-chat {
           height: 300px;
         }
+
+        .offline-pager {
+          display: inline-flex;
+          gap: 8px;
+          margin-left: 8px;
+          font-weight: normal;
+          align-items: center;
+        }
+        .offline-pager button {
+          padding: 4px 8px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.06);
+          color: inherit;
+          cursor: pointer;
+        }
+        .offline-pager button[disabled] {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .offline-page-indicator {
+          opacity: 0.8;
+        }
       }
     </style>
   </head>
@@ -721,6 +744,8 @@
       let selectedSuggestionIndex = -1;
       let currentSuggestions = [];
       let followedChannels = [];
+      let offlinePage = 0;
+      const OFFLINE_PAGE_SIZE = 100;
 
       // Initialize the app
       document.addEventListener("DOMContentLoaded", function () {
@@ -814,21 +839,22 @@
         const refreshButton = document.getElementById("refreshButton");
         if (refreshButton) {
           refreshButton.disabled = true;
-          refreshButton.textContent = "🔄 Loading live follows...";
+          refreshButton.textContent = "🔄 Loading follows...";
         }
 
         const token = localStorage.getItem("twitch_token");
 
         try {
-          // 1) Get ONLY live followed streams (paginated)
-          let after = null;
-          let liveStreams = [];
-
+          // 1) Get ALL followed channels (paginated)
+          let afterFollows = null;
+          const allFollows = [];
           do {
-            const url = new URL("https://api.twitch.tv/helix/streams/followed");
+            const url = new URL(
+              "https://api.twitch.tv/helix/channels/followed"
+            );
             url.searchParams.set("user_id", user.id);
             url.searchParams.set("first", "100");
-            if (after) url.searchParams.set("after", after);
+            if (afterFollows) url.searchParams.set("after", afterFollows);
 
             const res = await fetch(url.toString(), {
               headers: {
@@ -837,26 +863,51 @@
               },
             });
 
-            // If token expired/invalid, clear and bail
             if (res.status === 401 || res.status === 403) {
               localStorage.removeItem("twitch_token");
               throw new Error(
                 `Auth error ${res.status} — please log in again.`
               );
             }
+            if (!res.ok) throw new Error(`Follows API returned ${res.status}`);
 
+            const json = await res.json();
+            allFollows.push(...json.data); // elements have broadcaster_id/login/name/followed_at
+            afterFollows = json.pagination?.cursor || null;
+          } while (afterFollows);
+
+          const allFollowIds = allFollows.map((f) => f.broadcaster_id);
+
+          // 2) Get ONLY live followed streams (paginated)
+          let afterLive = null;
+          const liveStreams = [];
+          do {
+            const url = new URL("https://api.twitch.tv/helix/streams/followed");
+            url.searchParams.set("user_id", user.id);
+            url.searchParams.set("first", "100");
+            if (afterLive) url.searchParams.set("after", afterLive);
+
+            const res = await fetch(url.toString(), {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Client-Id": CLIENT_ID,
+              },
+            });
             if (!res.ok) throw new Error(`Streams API returned ${res.status}`);
 
             const json = await res.json();
-            liveStreams.push(...json.data);
-            after = json.pagination?.cursor || null;
-          } while (after);
+            liveStreams.push(...json.data); // user_id, user_login, user_name, game_name, viewer_count, title
+            afterLive = json.pagination?.cursor || null;
+          } while (afterLive);
 
-          // 2) Enrich with profile images (via /helix/users in chunks of 100)
-          const ids = liveStreams.map((s) => s.user_id);
-          const idChunks = chunkArray(ids, 100);
+          const liveIds = new Set(liveStreams.map((s) => s.user_id));
+          const offlineIds = allFollowIds.filter((id) => !liveIds.has(id));
 
+          // 3) Enrich USERS for live + offline in chunks of 100
+          const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
+          const idChunks = chunkArray(idsToFetch, 100);
           const usersById = new Map();
+
           for (const chunk of idChunks) {
             if (chunk.length === 0) continue;
             const usersUrl =
@@ -869,7 +920,6 @@
                 "Client-Id": CLIENT_ID,
               },
             });
-
             if (!usersRes.ok)
               throw new Error(`Users API returned ${usersRes.status}`);
 
@@ -877,8 +927,8 @@
             usersJson.data.forEach((u) => usersById.set(u.id, u));
           }
 
-          // 3) Build your UI model (only live = is_live true)
-          followedChannels = liveStreams.map((s) => {
+          // 4) Build arrays
+          const liveList = liveStreams.map((s) => {
             const u = usersById.get(s.user_id);
             return {
               id: s.user_id,
@@ -892,10 +942,29 @@
             };
           });
 
-          console.log("✅ Live followed streams:", followedChannels.length);
+          const offlineList = offlineIds.map((id) => {
+            const u = usersById.get(id);
+            return {
+              id: id,
+              login: u?.login || "",
+              display_name: u?.display_name || (u?.login ?? ""),
+              profile_image_url: u?.profile_image_url || "",
+              is_live: false,
+              game_name: "Offline",
+              viewer_count: 0,
+              title: "",
+            };
+          });
+
+          // 5) Combine for your existing UI; reset to page 0 on refresh
+          followedChannels = [...liveList, ...offlineList];
+          offlinePage = 0;
+
+          console.log(
+            `✅ Follows: ${allFollows.length} | Live: ${liveList.length} | Offline: ${offlineList.length}`
+          );
         } catch (err) {
-          console.error("❌ Error fetching live followed streams:", err);
-          // Fallback to demo if something goes wrong
+          console.error("❌ Error fetching follows/live:", err);
           loadDemoFollowedChannels();
         } finally {
           updateFollowedChannelsUI();
@@ -989,49 +1058,72 @@
           return;
         }
 
-        const sortedChannels = [...followedChannels].sort((a, b) => {
+        // Sort: live first by viewers desc, then offline alphabetical
+        const sorted = [...followedChannels].sort((a, b) => {
           if (a.is_live && !b.is_live) return -1;
           if (!a.is_live && b.is_live) return 1;
-          if (a.is_live && b.is_live) return b.viewer_count - a.viewer_count;
+          if (a.is_live && b.is_live)
+            return (b.viewer_count || 0) - (a.viewer_count || 0);
           return a.display_name.localeCompare(b.display_name);
         });
 
-        const liveChannels = sortedChannels.filter((ch) => ch.is_live);
-        const offlineChannels = sortedChannels.filter((ch) => !ch.is_live);
+        const liveChannels = sorted.filter((ch) => ch.is_live);
+        const offlineAll = sorted.filter((ch) => !ch.is_live);
+
+        // Pagination calc for offline
+        const totalOffline = offlineAll.length;
+        const totalPages = Math.max(
+          1,
+          Math.ceil(totalOffline / OFFLINE_PAGE_SIZE)
+        );
+        offlinePage = Math.min(Math.max(0, offlinePage), totalPages - 1);
+
+        const start = offlinePage * OFFLINE_PAGE_SIZE;
+        const end = Math.min(start + OFFLINE_PAGE_SIZE, totalOffline);
+        const offlinePageItems = offlineAll.slice(start, end);
 
         let html = "";
 
+        // LIVE section (no pagination)
         if (liveChannels.length > 0) {
           html += `
-                    <div class="channel-category">
-                        <div class="category-header">Live (${
-                          liveChannels.length
-                        })</div>
-                        ${liveChannels
-                          .map((channel) => createChannelHTML(channel))
-                          .join("")}
-                    </div>
-                `;
+      <div class="channel-category">
+        <div class="category-header">Live (${liveChannels.length})</div>
+        ${liveChannels.map((c) => createChannelHTML(c)).join("")}
+      </div>
+    `;
         }
 
-        if (offlineChannels.length > 0) {
-          html += `
-                    <div class="channel-category">
-                        <div class="category-header">Offline (${
-                          offlineChannels.length
-                        })</div>
-                        ${offlineChannels
-                          .map((channel) => createChannelHTML(channel))
-                          .join("")}
-                    </div>
-                `;
-        }
+        // OFFLINE section (with pagination)
+        html += `
+    <div class="channel-category">
+      <div class="category-header">
+        Offline (${totalOffline})
+        <span class="offline-pager">
+          <button id="offlinePrev" ${
+            offlinePage === 0 ? "disabled" : ""
+          }>Prev</button>
+          <span class="offline-page-indicator">Page ${
+            offlinePage + 1
+          } / ${totalPages}</span>
+          <button id="offlineNext" ${
+            offlinePage >= totalPages - 1 ? "disabled" : ""
+          }>Next</button>
+        </span>
+      </div>
+      ${
+        totalOffline === 0
+          ? '<div class="no-channels">No offline channels 🎉</div>'
+          : offlinePageItems.map((c) => createChannelHTML(c)).join("")
+      }
+    </div>
+  `;
 
         container.innerHTML = html;
 
+        // Attach clicks for items (skip info-note styles)
         container.querySelectorAll(".channel-item").forEach((item) => {
           const channelLogin = item.dataset.channel;
-          // Skip special info items (they have non-standard login names)
           if (
             channelLogin &&
             !channelLogin.includes("_info") &&
@@ -1041,11 +1133,18 @@
               addStreamFromSidebar(channelLogin);
             });
           } else {
-            // Make info items non-clickable
             item.style.cursor = "default";
             item.style.opacity = "0.7";
           }
         });
+
+        // Wire up pagination buttons
+        const prevBtn = document.getElementById("offlinePrev");
+        const nextBtn = document.getElementById("offlineNext");
+        if (prevBtn)
+          prevBtn.addEventListener("click", () => changeOfflinePage(-1));
+        if (nextBtn)
+          nextBtn.addEventListener("click", () => changeOfflinePage(1));
       }
 
       function createChannelHTML(channel) {
@@ -1175,6 +1274,11 @@
         input.addEventListener("blur", function () {
           setTimeout(() => hideSuggestions(), 150);
         });
+      }
+
+      function changeOfflinePage(delta) {
+        offlinePage = Math.max(0, offlinePage + delta);
+        updateFollowedChannelsUI();
       }
 
       async function searchChannels(query) {
