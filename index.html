@@ -418,48 +418,11 @@
         gap: 0.5rem;
       }
 
-      .lock-icon {
-        color: #ffd700;
-        font-size: 0.9rem;
-        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-      }
-
       .stream-controls {
         display: flex;
         gap: 0.5rem;
         align-items: center;
         flex-wrap: wrap;
-      }
-
-      .lock-btn {
-        background: rgba(255, 215, 0, 0.2);
-        border: 2px solid #ffd700;
-        color: #ffd700;
-        padding: 0.4rem 0.8rem;
-        border-radius: 15px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        white-space: nowrap;
-      }
-
-      .lock-btn:hover {
-        background: rgba(255, 215, 0, 0.3);
-        transform: scale(1.05);
-      }
-
-      .lock-btn.locked {
-        background: #ffd700;
-        color: #000;
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-      }
-
-      .lock-btn.locked:hover {
-        background: #ffed4e;
       }
 
       .remove-btn {
@@ -514,23 +477,6 @@
         height: 100%;
         border: none;
         border-radius: 0 0 15px 15px;
-      }
-
-      .locked-streams-notice {
-        background: rgba(255, 215, 0, 0.1);
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 10px;
-        padding: 0.8rem 1rem;
-        margin-bottom: 1rem;
-        font-size: 0.85rem;
-        color: #ffd700;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .locked-streams-notice.hidden {
-        display: none;
       }
 
       .no-streams {
@@ -1517,36 +1463,9 @@
         const stream = streams.find((s) => s.id === streamId);
         if (!stream) return;
 
-        if (stream.locked) {
-          const confirmRemove = confirm(
-            `"${stream.channel}" is locked. Are you sure you want to remove it?`
-          );
-          if (!confirmRemove) return;
-        }
-
         streams = streams.filter((s) => s.id !== streamId);
         saveStreamsToStorage();
         updateUI();
-      }
-
-      function toggleStreamLock(streamId) {
-        const stream = streams.find((s) => s.id === streamId);
-        if (!stream) return;
-
-        stream.locked = !stream.locked;
-        saveStreamsToStorage();
-        updateUI();
-
-        const lockBtn = document.querySelector(`[data-lock-btn="${streamId}"]`);
-        if (lockBtn) {
-          const originalText = lockBtn.innerHTML;
-          lockBtn.innerHTML = stream.locked
-            ? "🔓➜🔒 Locked!"
-            : "🔒➜🔓 Unlocked!";
-          setTimeout(() => {
-            lockBtn.innerHTML = originalText;
-          }, 1500);
-        }
       }
 
       function muteBackgroundStreams(activeStreamId) {
@@ -1582,93 +1501,39 @@
           return;
         }
 
-        const lockedCount = streams.filter((s) => s.locked).length;
-        let lockedNotice = "";
-        if (lockedCount > 0) {
-          lockedNotice = `
-                    <div class="locked-streams-notice">
-                        🔒 ${lockedCount} stream${
-            lockedCount > 1 ? "s" : ""
-          } locked - will persist after page refresh
-                    </div>
-                `;
-        }
-
-        streamsGrid.innerHTML = lockedNotice;
-
         streams.forEach((stream) => {
           const streamDiv = document.createElement("div");
           streamDiv.className = "stream-item";
           streamDiv.innerHTML = `
-                    <div class="stream-header">
-                        <span class="stream-title">
-                            ${
-                              stream.locked
-                                ? '<span class="lock-icon">🔒</span>'
-                                : ""
-                            }
-                            ${stream.channel}
-                        </span>
-                        <div class="stream-controls">
-                            <button class="lock-btn ${
-                              stream.locked ? "locked" : ""
-                            }" 
-                                    data-lock-btn="${stream.id}"
-                                    onclick="event.stopPropagation(); toggleStreamLock(${
-                                      stream.id
-                                    })"
-                                    title="${
-                                      stream.locked
-                                        ? "Unlock stream"
-                                        : "Lock stream (persists after refresh)"
-                                    }">
-                                ${stream.locked ? "🔒 Locked" : "🔓 Lock"}
-                            </button>
-                            <button class="remove-btn" 
-                                    onclick="event.stopPropagation(); removeStream(${
-                                      stream.id
-                                    })"
-                                    ${
-                                      stream.locked
-                                        ? 'title="Stream is locked - confirm to remove"'
-                                        : ""
-                                    }>
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-                    <div class="stream-video-container" data-stream-id="${
-                      stream.id
-                    }">
-                        <iframe 
-                            src="https://player.twitch.tv/?channel=${
-                              stream.channel
-                            }&parent=${
-            window.location.hostname
-          }&muted=false&autoplay=true"
-                            class="stream-video"
-                            frameborder="0"
-                            allowfullscreen="true"
-                            scrolling="no">
-                        </iframe>
-                    </div>
-                    <div class="stream-chat">
-                        <iframe 
-                            src="https://www.twitch.tv/embed/${
-                              stream.channel
-                            }/chat?darkpopout&parent=${
-            window.location.hostname
-          }"
-                            frameborder="0"
-                            scrolling="no">
-                        </iframe>
-                    </div>
-                `;
+    <div class="stream-header">
+      <span class="stream-title">
+        ${stream.channel}
+      </span>
+      <div class="stream-controls">
+        <button class="remove-btn" 
+                onclick="event.stopPropagation(); removeStream(${stream.id})">
+          Remove
+        </button>
+      </div>
+    </div>
+    <div class="stream-video-container" data-stream-id="${stream.id}">
+      <iframe 
+        src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
+        class="stream-video"
+        frameborder="0"
+        allowfullscreen="true"
+        scrolling="no">
+      </iframe>
+    </div>
+    <div class="stream-chat">
+      <iframe 
+        src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+        frameborder="0"
+        scrolling="no">
+      </iframe>
+    </div>
+  `;
           streamsGrid.appendChild(streamDiv);
-
-          const videoContainer = streamDiv.querySelector(
-            ".stream-video-container"
-          );
         });
       }
 
