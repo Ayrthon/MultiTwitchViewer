@@ -1239,11 +1239,9 @@
         updateUI();
         setupAutoSuggest();
 
-        // Load demo followed channels initially
-        if (!user) {
-          loadDemoFollowedChannels();
-          updateFollowedChannelsUI();
-        }
+        // Load demo followed channels initially (always show something)
+        loadDemoFollowedChannels();
+        updateFollowedChannelsUI();
       });
 
       // Twitch Authentication
@@ -1351,7 +1349,14 @@
               user = data.data[0];
               console.log("✅ User successfully set to:", user.display_name);
               updateUserInfo();
-              loadFollowedChannels();
+              // Load followed channels after successful user authentication
+              if (typeof loadFollowedChannels === "function") {
+                loadFollowedChannels();
+              } else {
+                console.log(
+                  "loadFollowedChannels function not available, showing demo data"
+                );
+              }
               return;
             } else {
               console.error("❌ No user data in response");
@@ -1393,7 +1398,6 @@
                     <span class="username">${user.display_name}</span>
                     <button class="login-btn" onclick="logout()" style="background: #ff4757;">Logout</button>
                 `;
-          // Load followed channels when user logs in
           // Note: loadFollowedChannels() is now called from fetchUserData()
         } else {
           console.log("Clearing user info - user logged out");
@@ -1402,7 +1406,11 @@
                 `;
           // Clear followed channels when user logs out
           followedChannels = [];
-          updateFollowedChannelsUI();
+          if (typeof updateFollowedChannelsUI === "function") {
+            updateFollowedChannelsUI();
+          } else {
+            console.log("updateFollowedChannelsUI function not available");
+          }
         }
       }
 
