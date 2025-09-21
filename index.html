@@ -631,6 +631,14 @@
         .show-more-btn:hover {
           background: rgba(126, 0, 105, 0.37);
         }
+        .stream-item.dragging {
+          opacity: 0.6;
+          transform: scale(0.98);
+        }
+        .stream-item.drop-target {
+          outline: 2px dashed rgba(145, 70, 255, 0.8);
+          outline-offset: 3px;
+        }
       }
     </style>
   </head>
@@ -702,6 +710,7 @@
       let offlinePage = 0;
       const OFFLINE_PAGE_SIZE = 100;
       let offlineVisibleCount = OFFLINE_PAGE_SIZE;
+      let dragIndex = null;
 
       // Initialize the app
       document.addEventListener("DOMContentLoaded", function () {
@@ -1485,15 +1494,19 @@
         No streams added yet. Add a Twitch channel to get started!
       </div>
     `;
-          return; // ✅ stop here if empty
+          return;
         }
 
-        // ✅ clear grid if there are streams
+        // Clear grid first
         streamsGrid.innerHTML = "";
 
-        streams.forEach((stream) => {
+        // Render items with index + draggable
+        streams.forEach((stream, idx) => {
           const streamDiv = document.createElement("div");
           streamDiv.className = "stream-item";
+          streamDiv.setAttribute("draggable", "true");
+          streamDiv.dataset.index = String(idx);
+
           streamDiv.innerHTML = `
       <div class="stream-header">
         <span class="stream-title">${stream.channel}</span>
@@ -1521,8 +1534,66 @@
         </iframe>
       </div>
     `;
+
           streamsGrid.appendChild(streamDiv);
         });
+
+        // Wire drag & drop after rendering
+        enableDragAndDrop(streamsGrid);
+      }
+
+      function enableDragAndDrop(container) {
+        const items = container.querySelectorAll(".stream-item");
+
+        items.forEach((item) => {
+          item.addEventListener("dragstart", onDragStart);
+          item.addEventListener("dragover", onDragOver);
+          item.addEventListener("dragleave", onDragLeave);
+          item.addEventListener("drop", onDrop);
+          item.addEventListener("dragend", onDragEnd);
+        });
+      }
+
+      function onDragStart(e) {
+        const item = e.currentTarget;
+        dragIndex = Number(item.dataset.index);
+        item.classList.add("dragging");
+        // Required for Firefox
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(dragIndex));
+      }
+
+      function onDragOver(e) {
+        e.preventDefault(); // allow drop
+        const target = e.currentTarget;
+        if (!target.classList.contains("drop-target")) {
+          target.classList.add("drop-target");
+        }
+      }
+
+      function onDragLeave(e) {
+        e.currentTarget.classList.remove("drop-target");
+      }
+
+      function onDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove("drop-target");
+
+        const from = dragIndex;
+        const to = Number(target.dataset.index);
+        if (Number.isInteger(from) && Number.isInteger(to) && from !== to) {
+          // Move the item in the array
+          const [moved] = streams.splice(from, 1);
+          streams.splice(to, 0, moved);
+          saveStreamsToStorage();
+          updateUI(); // re-render with new order
+        }
+      }
+
+      function onDragEnd(e) {
+        e.currentTarget.classList.remove("dragging");
+        dragIndex = null;
       }
 
       function saveStreamsToStorage() {
