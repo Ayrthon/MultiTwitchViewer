@@ -84,7 +84,7 @@
         font-weight: bold;
       }
 
-      /* Sidebar Styles */
+      /* Sidebar */
       .sidebar {
         width: 240px;
         background: rgba(0, 0, 0, 0.8);
@@ -112,7 +112,6 @@
         overflow-y: auto;
         padding: 0.5rem 0;
       }
-
       .channel-category {
         margin-bottom: 1rem;
       }
@@ -137,7 +136,6 @@
         gap: 0.8rem;
         border-left: 3px solid transparent;
       }
-
       .channel-item:hover {
         background: rgba(145, 70, 255, 0.2);
         border-left-color: #9146ff;
@@ -146,7 +144,6 @@
       .channel-item.live {
         background: rgba(255, 107, 107, 0.1);
       }
-
       .channel-item.live:hover {
         background: rgba(255, 107, 107, 0.2);
         border-left-color: #ff6b6b;
@@ -159,7 +156,6 @@
         object-fit: cover;
         border: 2px solid transparent;
       }
-
       .channel-item.live .channel-avatar {
         border-color: #ff6b6b;
         box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
@@ -169,7 +165,6 @@
         flex: 1;
         min-width: 0;
       }
-
       .channel-name {
         font-weight: bold;
         font-size: 0.85rem;
@@ -178,7 +173,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
       .channel-item.live .channel-name {
         color: #ff6b6b;
       }
@@ -191,14 +185,12 @@
         text-overflow: ellipsis;
         margin-top: 2px;
       }
-
       .channel-viewers {
         font-size: 0.7rem;
         color: #ff6b6b;
         font-weight: bold;
         margin-top: 2px;
       }
-
       .live-indicator {
         width: 8px;
         height: 8px;
@@ -207,7 +199,6 @@
         animation: pulse 2s infinite;
         flex-shrink: 0;
       }
-
       @keyframes pulse {
         0%,
         100% {
@@ -217,7 +208,6 @@
           opacity: 0.4;
         }
       }
-
       .offline-indicator {
         width: 8px;
         height: 8px;
@@ -238,12 +228,10 @@
         cursor: pointer;
         transition: all 0.3s ease;
       }
-
       .refresh-button:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
       }
-
       .refresh-button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -263,7 +251,6 @@
         display: flex;
         flex-direction: column;
       }
-
       .controls {
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(5px);
@@ -278,7 +265,6 @@
         min-width: 300px;
         position: relative;
       }
-
       .stream-input {
         width: 100%;
         padding: 0.7rem 1rem;
@@ -289,13 +275,11 @@
         font-size: 1rem;
         transition: all 0.3s ease;
       }
-
       .stream-input:focus {
         outline: none;
         border-color: #772ce8;
         box-shadow: 0 0 15px rgba(145, 70, 255, 0.3);
       }
-
       .stream-input::placeholder {
         color: rgba(255, 255, 255, 0.6);
       }
@@ -325,46 +309,38 @@
         gap: 0.8rem;
         transition: all 0.2s ease;
       }
-
       .suggestion-item:hover,
       .suggestion-item.selected {
         background: rgba(145, 70, 255, 0.3);
         transform: translateX(5px);
       }
-
       .suggestion-item:last-child {
         border-bottom: none;
       }
-
       .suggestion-avatar {
         width: 32px;
         height: 32px;
         border-radius: 50%;
         object-fit: cover;
       }
-
       .suggestion-info {
         flex: 1;
       }
-
       .suggestion-name {
         font-weight: bold;
         color: #9146ff;
         font-size: 0.9rem;
       }
-
       .suggestion-game {
         font-size: 0.8rem;
         color: rgba(255, 255, 255, 0.7);
         margin-top: 2px;
       }
-
       .suggestion-viewers {
         font-size: 0.8rem;
         color: #ff6b6b;
         font-weight: bold;
       }
-
       .loading-suggestion {
         padding: 1rem;
         text-align: center;
@@ -375,7 +351,6 @@
       .main-content {
         padding: 2rem;
       }
-
       .streams-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -395,7 +370,6 @@
         flex-direction: column;
         height: fit-content;
       }
-
       .stream-item:hover {
         border-color: #9146ff;
         transform: translateY(-5px);
@@ -409,7 +383,6 @@
         justify-content: space-between;
         align-items: center;
       }
-
       .stream-title {
         font-weight: bold;
         font-size: 1.1rem;
@@ -424,7 +397,6 @@
         align-items: center;
         flex-wrap: wrap;
       }
-
       .remove-btn {
         background: #ff4757;
         border: none;
@@ -436,12 +408,10 @@
         font-weight: bold;
         transition: all 0.3s ease;
       }
-
       .remove-btn:hover {
         background: #ff3838;
         transform: scale(1.05);
       }
-
       .remove-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -455,7 +425,6 @@
         background: #000;
         cursor: pointer;
       }
-
       .stream-video {
         position: absolute;
         top: 0;
@@ -471,7 +440,6 @@
         flex-direction: column;
         border-radius: 0 0 15px 15px;
       }
-
       .stream-chat iframe {
         width: 100%;
         height: 100%;
@@ -486,52 +454,28 @@
         font-size: 1.2rem;
       }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      @keyframes slideUp {
-        from {
-          transform: translateY(50px) scale(0.9);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0) scale(1);
-          opacity: 1;
-        }
-      }
-
-      /* Scrollbar styling */
+      /* Scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
-
       ::-webkit-scrollbar-track {
         background: rgba(0, 0, 0, 0.2);
         border-radius: 4px;
       }
-
       ::-webkit-scrollbar-thumb {
         background: #9146ff;
         border-radius: 4px;
       }
-
       ::-webkit-scrollbar-thumb:hover {
         background: #772ce8;
       }
 
-      /* Mobile responsive */
+      /* Mobile */
       @media (max-width: 1200px) {
         .streams-grid {
           grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
           max-width: none;
         }
-
         .sidebar {
           width: 200px;
         }
@@ -541,7 +485,6 @@
         .app-container {
           flex-direction: column;
         }
-
         .sidebar {
           width: 100%;
           height: 200px;
@@ -549,75 +492,43 @@
           border-right: none;
           border-bottom: 2px solid rgba(145, 70, 255, 0.3);
         }
-
         .followed-channels {
           display: flex;
           overflow-x: auto;
           overflow-y: hidden;
           padding: 0.5rem;
         }
-
         .channel-category {
           display: flex;
           gap: 0.5rem;
           margin: 0;
           min-width: max-content;
         }
-
         .category-header {
           display: none;
         }
-
         .channel-item {
           min-width: 150px;
           flex-direction: column;
           text-align: center;
           padding: 0.5rem;
         }
-
         .streams-grid {
           grid-template-columns: 1fr;
           max-width: none;
         }
-
         .controls {
           flex-direction: column;
           align-items: stretch;
         }
-
         .input-container {
           min-width: auto;
         }
-
         .stream-video-container {
           aspect-ratio: 16 / 9;
         }
-
         .stream-chat {
           height: 300px;
-        }
-
-        .offline-pager {
-          display: inline-flex;
-          gap: 8px;
-          margin-left: 8px;
-          font-weight: normal;
-          align-items: center;
-        }
-        .offline-pager button {
-          padding: 4px 8px;
-          border-radius: 6px;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          background: rgba(255, 255, 255, 0.06);
-          color: inherit;
-          cursor: pointer;
-        }
-        .offline-pager button[disabled] {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .offline-page-indicator {
-          opacity: 0.8;
         }
         .show-more-wrap {
           display: flex;
@@ -699,12 +610,11 @@
       let selectedSuggestionIndex = -1;
       let currentSuggestions = [];
       let followedChannels = [];
-      let offlinePage = 0;
       const OFFLINE_PAGE_SIZE = 100;
       let offlineVisibleCount = OFFLINE_PAGE_SIZE;
       let dragIndex = null;
 
-      // Initialize the app
+      // Init
       document.addEventListener("DOMContentLoaded", function () {
         checkAuthFromURL();
         loadStreamsFromStorage();
@@ -723,7 +633,6 @@
           `&response_type=token` +
           `&scope=user:read:email user:read:follows` +
           `&force_verify=true`;
-
         window.location.href = authUrl;
       }
 
@@ -744,9 +653,7 @@
           fetchUserData(accessToken);
         } else {
           const storedToken = localStorage.getItem("twitch_token");
-          if (storedToken) {
-            fetchUserData(storedToken);
-          }
+          if (storedToken) fetchUserData(storedToken);
         }
       }
 
@@ -763,9 +670,7 @@
             const data = await response.json();
             if (data.data && data.data.length > 0) {
               user = data.data[0];
-              console.log("✅ User authenticated:", user.display_name);
               updateUserInfo();
-              // Load real followed channels after login
               fetchRealFollowedChannels();
             }
           } else {
@@ -777,12 +682,11 @@
         }
       }
 
-      // Helper: split into chunks of N
+      // Helpers
       function chunkArray(arr, size) {
         const chunks = [];
-        for (let i = 0; i < arr.length; i += size) {
+        for (let i = 0; i < arr.length; i += size)
           chunks.push(arr.slice(i, i + size));
-        }
         return chunks;
       }
 
@@ -802,7 +706,7 @@
         const token = localStorage.getItem("twitch_token");
 
         try {
-          // 1) Get ALL followed channels (paginated)
+          // 1) All follows (paginated)
           let afterFollows = null;
           const allFollows = [];
           do {
@@ -829,13 +733,13 @@
             if (!res.ok) throw new Error(`Follows API returned ${res.status}`);
 
             const json = await res.json();
-            allFollows.push(...json.data); // elements have broadcaster_id/login/name/followed_at
+            allFollows.push(...json.data);
             afterFollows = json.pagination?.cursor || null;
           } while (afterFollows);
 
           const allFollowIds = allFollows.map((f) => f.broadcaster_id);
 
-          // 2) Get ONLY live followed streams (paginated)
+          // 2) Live followed streams
           let afterLive = null;
           const liveStreams = [];
           do {
@@ -853,14 +757,14 @@
             if (!res.ok) throw new Error(`Streams API returned ${res.status}`);
 
             const json = await res.json();
-            liveStreams.push(...json.data); // user_id, user_login, user_name, game_name, viewer_count, title
+            liveStreams.push(...json.data);
             afterLive = json.pagination?.cursor || null;
           } while (afterLive);
 
           const liveIds = new Set(liveStreams.map((s) => s.user_id));
           const offlineIds = allFollowIds.filter((id) => !liveIds.has(id));
 
-          // 3) Enrich USERS for live + offline in chunks of 100
+          // 3) Enrich /users
           const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
           const idChunks = chunkArray(idsToFetch, 100);
           const usersById = new Map();
@@ -870,7 +774,6 @@
             const usersUrl =
               "https://api.twitch.tv/helix/users?" +
               chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
-
             const usersRes = await fetch(usersUrl, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -879,12 +782,11 @@
             });
             if (!usersRes.ok)
               throw new Error(`Users API returned ${usersRes.status}`);
-
             const usersJson = await usersRes.json();
             usersJson.data.forEach((u) => usersById.set(u.id, u));
           }
 
-          // 4) Build arrays
+          // 4) Build lists
           const liveList = liveStreams.map((s) => {
             const u = usersById.get(s.user_id);
             return {
@@ -902,7 +804,7 @@
           const offlineList = offlineIds.map((id) => {
             const u = usersById.get(id);
             return {
-              id: id,
+              id,
               login: u?.login || "",
               display_name: u?.display_name || (u?.login ?? ""),
               profile_image_url: u?.profile_image_url || "",
@@ -913,14 +815,8 @@
             };
           });
 
-          // 5) Combine for your existing UI; reset to page 0 on refresh
           followedChannels = [...liveList, ...offlineList];
           offlineVisibleCount = OFFLINE_PAGE_SIZE;
-          offlinePage = 0;
-
-          console.log(
-            `✅ Follows: ${allFollows.length} | Live: ${liveList.length} | Offline: ${offlineList.length}`
-          );
         } catch (err) {
           console.error("❌ Error fetching follows/live:", err);
           loadDemoFollowedChannels();
@@ -937,14 +833,12 @@
         const userInfo = document.getElementById("userInfo");
         if (user) {
           userInfo.innerHTML = `
-                    <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
-                    <span class="username">${user.display_name}</span>
-                    <button class="login-btn" onclick="logout()" style="background: #ff4757;">Logout</button>
-                `;
+            <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
+            <span class="username">${user.display_name}</span>
+            <button class="login-btn" onclick="logout()" style="background:#ff4757;">Logout</button>
+          `;
         } else {
-          userInfo.innerHTML = `
-                    <button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>
-                `;
+          userInfo.innerHTML = `<button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>`;
           followedChannels = [];
           updateFollowedChannelsUI();
         }
@@ -1009,14 +903,12 @@
             '<div class="no-channels">Login to see followed channels</div>';
           return;
         }
-
         if (followedChannels.length === 0) {
           container.innerHTML =
             '<div class="no-channels">No followed channels found</div>';
           return;
         }
 
-        // Sort: live (by viewers desc) first, offline alphabetical
         const sorted = [...followedChannels].sort((a, b) => {
           if (a.is_live && !b.is_live) return -1;
           if (!a.is_live && b.is_live) return 1;
@@ -1028,7 +920,6 @@
         const liveChannels = sorted.filter((ch) => ch.is_live);
         const offlineAll = sorted.filter((ch) => !ch.is_live);
 
-        // Figure out how many offline entries to show
         const totalOffline = offlineAll.length;
         const toShow = Math.min(offlineVisibleCount, totalOffline);
         const offlineShown = offlineAll.slice(0, toShow);
@@ -1036,49 +927,43 @@
 
         let html = "";
 
-        // LIVE section
         if (liveChannels.length > 0) {
           html += `
-      <div class="channel-category">
-        <div class="category-header">Live (${liveChannels.length})</div>
-        ${liveChannels.map((c) => createChannelHTML(c)).join("")}
-      </div>
-    `;
+            <div class="channel-category">
+              <div class="category-header">Live (${liveChannels.length})</div>
+              ${liveChannels.map((c) => createChannelHTML(c)).join("")}
+            </div>
+          `;
         }
 
-        // OFFLINE section with "Show more"
         html += `
-    <div class="channel-category">
-      <div class="category-header">
-        Offline (${totalOffline})
-      </div>
-      ${
-        totalOffline === 0
-          ? '<div class="no-channels">No offline channels 🎉</div>'
-          : offlineShown.map((c) => createChannelHTML(c)).join("")
-      }
-      ${
-        hasMore
-          ? `<div class="show-more-wrap">
-               <button id="offlineShowMore" class="show-more-btn">
-                 Show ${Math.min(OFFLINE_PAGE_SIZE, totalOffline - toShow)} more
-               </button>
-             </div>`
-          : ""
-      }
-    </div>
-  `;
+          <div class="channel-category">
+            <div class="category-header">Offline (${totalOffline})</div>
+            ${
+              totalOffline === 0
+                ? '<div class="no-channels">No offline channels 🎉</div>'
+                : offlineShown.map((c) => createChannelHTML(c)).join("")
+            }
+            ${
+              hasMore
+                ? `<div class="show-more-wrap">
+                    <button id="offlineShowMore" class="show-more-btn">
+                      Show ${Math.min(
+                        OFFLINE_PAGE_SIZE,
+                        totalOffline - toShow
+                      )} more
+                    </button>
+                   </div>`
+                : ""
+            }
+          </div>
+        `;
 
         container.innerHTML = html;
 
-        // Click to add stream from list
         container.querySelectorAll(".channel-item").forEach((item) => {
           const channelLogin = item.dataset.channel;
-          if (
-            channelLogin &&
-            !channelLogin.includes("_info") &&
-            !channelLogin.includes("_note")
-          ) {
+          if (channelLogin) {
             item.addEventListener("click", function () {
               addStreamFromSidebar(channelLogin);
             });
@@ -1088,11 +973,9 @@
           }
         });
 
-        // Wire the "Show more" button
         const showMoreBtn = document.getElementById("offlineShowMore");
-        if (showMoreBtn) {
+        if (showMoreBtn)
           showMoreBtn.addEventListener("click", () => showMoreOffline());
-        }
       }
 
       function showMoreOffline() {
@@ -1106,24 +989,23 @@
               channel.viewer_count
             )} viewers</div>`
           : "";
-
         return `
-                <div class="channel-item ${
-                  channel.is_live ? "live" : ""
-                }" data-channel="${channel.login}">
-                    <img src="${channel.profile_image_url}" alt="${
+          <div class="channel-item ${
+            channel.is_live ? "live" : ""
+          }" data-channel="${channel.login}">
+            <img src="${channel.profile_image_url}" alt="${
           channel.display_name
         }" class="channel-avatar">
-                    <div class="channel-info">
-                        <div class="channel-name">${channel.display_name}</div>
-                        <div class="channel-game">${channel.game_name}</div>
-                        ${viewerText}
-                    </div>
-                    <div class="${
-                      channel.is_live ? "live-indicator" : "offline-indicator"
-                    }"></div>
-                </div>
-            `;
+            <div class="channel-info">
+              <div class="channel-name">${channel.display_name}</div>
+              <div class="channel-game">${channel.game_name}</div>
+              ${viewerText}
+            </div>
+            <div class="${
+              channel.is_live ? "live-indicator" : "offline-indicator"
+            }"></div>
+          </div>
+        `;
       }
 
       function formatViewerCount(count) {
@@ -1137,14 +1019,7 @@
           alert("This stream is already added");
           return;
         }
-
-        const stream = {
-          id: Date.now(),
-          channel: channelLogin,
-          locked: false,
-        };
-
-        streams.push(stream);
+        streams.push({ id: Date.now(), channel: channelLogin });
         saveStreamsToStorage();
         updateUI();
 
@@ -1162,26 +1037,22 @@
 
       function refreshFollowedChannels() {
         if (user) {
-          console.log("🔄 Refreshing real followed channels");
           fetchRealFollowedChannels();
         } else {
-          console.log("👤 No user logged in, showing demo data");
           loadDemoFollowedChannels();
           updateFollowedChannelsUI();
         }
       }
 
+      // Search + suggestions
       function setupAutoSuggest() {
         const input = document.getElementById("streamInput");
-
         input.addEventListener("input", function (e) {
           const query = e.target.value.trim();
-
           if (query.length < 2) {
             hideSuggestions();
             return;
           }
-
           if (searchTimeout) clearTimeout(searchTimeout);
           searchTimeout = setTimeout(() => searchChannels(query), 300);
         });
@@ -1224,14 +1095,16 @@
           }
         });
 
+        // Click outside to close suggestions
+        document.addEventListener("click", (e) => {
+          const box = document.getElementById("suggestionsDropdown");
+          const inp = document.getElementById("streamInput");
+          if (!box.contains(e.target) && e.target !== inp) hideSuggestions();
+        });
+
         input.addEventListener("blur", function () {
           setTimeout(() => hideSuggestions(), 150);
         });
-      }
-
-      function changeOfflinePage(delta) {
-        offlinePage = Math.max(0, offlinePage + delta);
-        updateFollowedChannelsUI();
       }
 
       async function searchChannels(query) {
@@ -1240,7 +1113,6 @@
           '<div class="loading-suggestion">🔍 Searching channels...</div>';
         dropdown.style.display = "block";
 
-        // If not logged in, gracefully fall back to a small local list
         const token = localStorage.getItem("twitch_token");
         if (!token) {
           const fallback = [
@@ -1285,19 +1157,16 @@
               c.display_name.toLowerCase().includes(query.toLowerCase()) ||
               c.broadcaster_login.toLowerCase().includes(query.toLowerCase())
           );
-
           currentSuggestions = fallback;
           displaySuggestions(fallback);
           return;
         }
 
         try {
-          // Helix search/channels supports: query, first (max 100), live_only (optional)
           const url = new URL("https://api.twitch.tv/helix/search/channels");
           url.searchParams.set("query", query);
           url.searchParams.set("first", "10");
-          // If you want only live, uncomment:
-          // url.searchParams.set("live_only", "true");
+          // url.searchParams.set("live_only", "true"); // optional
 
           const res = await fetch(url.toString(), {
             headers: {
@@ -1307,26 +1176,23 @@
           });
 
           if (res.status === 401 || res.status === 403) {
-            // Token not valid anymore; clear it so user can re-auth
             localStorage.removeItem("twitch_token");
             throw new Error(`Auth error ${res.status}`);
           }
           if (res.status === 429) {
-            throw new Error("Rate limited (429) — try again in a moment.");
+            throw new Error("Rate limited (429) — try again later.");
           }
           if (!res.ok) {
             throw new Error(`search/channels failed: ${res.status}`);
           }
 
           const json = await res.json();
-          // Map to a shape your UI expects
           const results = (json.data || []).map((ch) => ({
             id: ch.id,
             broadcaster_login: ch.broadcaster_login,
             display_name: ch.display_name || ch.broadcaster_login,
             game_name: ch.game_name || "",
             is_live: !!ch.is_live,
-            // Twitch returns a 50x50/70x70-ish avatar URL in thumbnail_url for this endpoint
             thumbnail_url: ch.thumbnail_url || "",
             title: ch.title || "",
           }));
@@ -1354,27 +1220,26 @@
         dropdown.innerHTML = channels
           .map(
             (channel, index) => `
-    <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
+          <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
               channel.display_name
             }">
-      <img src="${channel.thumbnail_url || ""}" alt="${
+            <img src="${channel.thumbnail_url || ""}" alt="${
               channel.display_name
             }" class="suggestion-avatar">
-      <div class="suggestion-info">
-        <div class="suggestion-name">${channel.display_name}</div>
-        <div class="suggestion-game">${channel.game_name || ""}</div>
-      </div>
-      <span class="suggestion-viewers">${
-        channel.is_live ? "🔴 LIVE" : ""
-      }</span>
-    </div>
-  `
+            <div class="suggestion-info">
+              <div class="suggestion-name">${channel.display_name}</div>
+              <div class="suggestion-game">${channel.game_name || ""}</div>
+            </div>
+            <span class="suggestion-viewers">${
+              channel.is_live ? "🔴 LIVE" : ""
+            }</span>
+          </div>
+        `
           )
           .join("");
 
         dropdown.style.display = "block";
 
-        // Attach handlers
         const items = dropdown.querySelectorAll(".suggestion-item");
         items.forEach((item) => {
           item.addEventListener("click", () => {
@@ -1399,7 +1264,6 @@
 
       function selectSuggestion(channel) {
         const input = document.getElementById("streamInput");
-        // Prefer broadcaster_login for the actual channel name
         input.value = (
           channel.broadcaster_login ||
           channel.display_name ||
@@ -1416,127 +1280,157 @@
         currentSuggestions = [];
       }
 
+      // Streams (Add/Remove/Reorder) — DOM reconciliation so iframes stay alive
       function addStream() {
         const input = document.getElementById("streamInput");
         const channelName = input.value.trim().toLowerCase();
-
         if (!channelName) {
           alert("Please enter a channel name");
           return;
         }
-
         if (streams.find((s) => s.channel === channelName)) {
           alert("This stream is already added");
           return;
         }
-
-        const stream = {
-          id: Date.now(),
-          channel: channelName,
-          locked: false,
-        };
-
-        streams.push(stream);
+        streams.push({ id: Date.now(), channel: channelName });
         input.value = "";
         hideSuggestions();
-
         saveStreamsToStorage();
         updateUI();
       }
 
       function removeStream(streamId) {
-        const stream = streams.find((s) => s.id === streamId);
-        if (!stream) return;
-
-        streams = streams.filter((s) => s.id !== streamId);
+        const idx = streams.findIndex((s) => s.id === streamId);
+        if (idx === -1) return;
+        streams.splice(idx, 1);
         saveStreamsToStorage();
-        updateUI();
-      }
 
-      function muteBackgroundStreams(activeStreamId) {
-        streams.forEach((stream) => {
-          if (stream.id !== activeStreamId) {
-            const iframe = document.querySelector(
-              `[data-stream-id="${stream.id}"] iframe`
-            );
-            if (iframe) {
-              iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=true&autoplay=true`;
-            }
-          }
-        });
-      }
+        // Remove only that card (no full re-render)
+        const grid = document.getElementById("streamsGrid");
+        const card = grid.querySelector(
+          `.stream-item[data-stream-id="${String(streamId)}"]`
+        );
+        if (card) card.remove();
 
-      function unmuteAllStreams() {
-        streams.forEach((stream) => {
-          const iframe = document.querySelector(
-            `[data-stream-id="${stream.id}"] iframe`
-          );
-          if (iframe) {
-            iframe.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
-          }
-        });
+        // If empty now, show placeholder
+        if (streams.length === 0) {
+          grid.innerHTML = `
+            <div class="no-streams">
+              No streams added yet. Add a Twitch channel to get started!
+            </div>
+          `;
+        }
       }
 
       function updateUI() {
-        const streamsGrid = document.getElementById("streamsGrid");
+        const grid = document.getElementById("streamsGrid");
 
-        if (streams.length === 0) {
-          streamsGrid.innerHTML = `
-      <div class="no-streams">
-        No streams added yet. Add a Twitch channel to get started!
-      </div>
-    `;
+        if (!streams || streams.length === 0) {
+          grid.innerHTML = `
+            <div class="no-streams">
+              No streams added yet. Add a Twitch channel to get started!
+            </div>
+          `;
           return;
         }
 
-        // Clear grid first
-        streamsGrid.innerHTML = "";
+        const desiredIds = new Set(streams.map((s) => String(s.id)));
 
-        // Render items with index + draggable
-        streams.forEach((stream, idx) => {
-          const streamDiv = document.createElement("div");
-          streamDiv.className = "stream-item";
-          streamDiv.setAttribute("draggable", "true");
-          streamDiv.dataset.index = String(idx);
-
-          streamDiv.innerHTML = `
-      <div class="stream-header">
-        <span class="stream-title">${stream.channel}</span>
-        <div class="stream-controls">
-          <button class="remove-btn" 
-                  onclick="event.stopPropagation(); removeStream(${stream.id})">
-            Remove
-          </button>
-        </div>
-      </div>
-      <div class="stream-video-container" data-stream-id="${stream.id}">
-        <iframe 
-          src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-          class="stream-video"
-          frameborder="0"
-          allowfullscreen="true"
-          scrolling="no">
-        </iframe>
-      </div>
-      <div class="stream-chat">
-        <iframe 
-          src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-          frameborder="0"
-          scrolling="no">
-        </iframe>
-      </div>
-    `;
-
-          streamsGrid.appendChild(streamDiv);
+        // Remove cards that no longer exist
+        grid.querySelectorAll(".stream-item").forEach((card) => {
+          const id = card.getAttribute("data-stream-id");
+          if (!desiredIds.has(id)) card.remove();
         });
 
-        // Wire drag & drop after rendering
-        enableDragAndDrop(streamsGrid);
+        // Add/update/reorder
+        streams.forEach((stream) => {
+          const key = String(stream.id);
+          let card = grid.querySelector(
+            `.stream-item[data-stream-id="${key}"]`
+          );
+          if (!card) {
+            card = createStreamCard(stream); // create with iframe once
+            grid.appendChild(card);
+          } else {
+            updateStreamCard(card, stream); // update text only
+            grid.appendChild(card); // move to new order without re-creating
+          }
+        });
+
+        // Enable DnD on current items
+        enableDragAndDrop(grid);
       }
 
+      function createStreamCard(stream) {
+        const card = document.createElement("div");
+        card.className = "stream-item";
+        card.setAttribute("data-stream-id", String(stream.id));
+        card.setAttribute("draggable", "true");
+
+        const header = document.createElement("div");
+        header.className = "stream-header";
+
+        const title = document.createElement("span");
+        title.className = "stream-title";
+        title.textContent = stream.channel;
+
+        const controls = document.createElement("div");
+        controls.className = "stream-controls";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeStream(stream.id);
+        });
+
+        controls.appendChild(removeBtn);
+        header.appendChild(title);
+        header.appendChild(controls);
+
+        const videoWrap = document.createElement("div");
+        videoWrap.className = "stream-video-container";
+        videoWrap.setAttribute("data-stream-id", String(stream.id));
+
+        const video = document.createElement("iframe");
+        video.className = "stream-video";
+        video.setAttribute("frameborder", "0");
+        video.setAttribute("allowfullscreen", "true");
+        video.setAttribute("scrolling", "no");
+        video.src = `https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true`;
+
+        videoWrap.appendChild(video);
+
+        const chat = document.createElement("div");
+        chat.className = "stream-chat";
+
+        const chatFrame = document.createElement("iframe");
+        chatFrame.setAttribute("frameborder", "0");
+        chatFrame.setAttribute("scrolling", "no");
+        chatFrame.src = `https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}`;
+
+        chat.appendChild(chatFrame);
+
+        card.appendChild(header);
+        card.appendChild(videoWrap);
+        card.appendChild(chat);
+
+        return card;
+      }
+
+      function updateStreamCard(card, stream) {
+        const title = card.querySelector(".stream-title");
+        if (title && title.textContent !== stream.channel)
+          title.textContent = stream.channel;
+
+        // If in the future you want to switch channel without reload, you'd need the Twitch Embed SDK.
+        // Avoid touching iframe src here to keep playback.
+      }
+
+      // Drag & Drop (reorders array, then UI reorders existing nodes)
       function enableDragAndDrop(container) {
         const items = container.querySelectorAll(".stream-item");
-
         items.forEach((item) => {
           item.addEventListener("dragstart", onDragStart);
           item.addEventListener("dragover", onDragOver);
@@ -1548,19 +1442,31 @@
 
       function onDragStart(e) {
         const item = e.currentTarget;
-        dragIndex = Number(item.dataset.index);
+        const grid = document.getElementById("streamsGrid");
+        const id = item.getAttribute("data-stream-id");
+        dragIndex = streams.findIndex((s) => String(s.id) === id);
         item.classList.add("dragging");
-        // Required for Firefox
+
         e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", String(dragIndex));
+        e.dataTransfer.setData("text/plain", id);
+
+        // Add a subtle preview image (optional)
+        if (e.dataTransfer.setDragImage) {
+          const crt = item.cloneNode(true);
+          crt.style.position = "absolute";
+          crt.style.top = "-9999px";
+          crt.style.opacity = "0.7";
+          document.body.appendChild(crt);
+          e.dataTransfer.setDragImage(crt, 10, 10);
+          setTimeout(() => document.body.removeChild(crt), 0);
+        }
       }
 
       function onDragOver(e) {
-        e.preventDefault(); // allow drop
+        e.preventDefault();
         const target = e.currentTarget;
-        if (!target.classList.contains("drop-target")) {
+        if (!target.classList.contains("drop-target"))
           target.classList.add("drop-target");
-        }
       }
 
       function onDragLeave(e) {
@@ -1572,14 +1478,15 @@
         const target = e.currentTarget;
         target.classList.remove("drop-target");
 
+        const targetId = target.getAttribute("data-stream-id");
+        const to = streams.findIndex((s) => String(s.id) === targetId);
         const from = dragIndex;
-        const to = Number(target.dataset.index);
+
         if (Number.isInteger(from) && Number.isInteger(to) && from !== to) {
-          // Move the item in the array
           const [moved] = streams.splice(from, 1);
           streams.splice(to, 0, moved);
           saveStreamsToStorage();
-          updateUI(); // re-render with new order
+          updateUI(); // reorders nodes without recreating iframes
         }
       }
 
@@ -1596,35 +1503,11 @@
         const stored = localStorage.getItem("multistream_data");
         if (stored) {
           const parsedStreams = JSON.parse(stored);
-          streams = parsedStreams.map((stream) => ({
-            id: stream.id,
-            channel: stream.channel,
-            locked: stream.locked || false,
+          // No more "locked" state.
+          streams = parsedStreams.map((s) => ({
+            id: s.id,
+            channel: s.channel,
           }));
-
-          const lockedCount = streams.filter((s) => s.locked).length;
-          if (lockedCount > 0) {
-            setTimeout(() => {
-              const notice = document.querySelector(".locked-streams-notice");
-              if (notice) {
-                notice.style.background = "rgba(76, 175, 80, 0.2)";
-                notice.style.borderColor = "rgba(76, 175, 80, 0.5)";
-                notice.style.color = "#4caf50";
-                notice.innerHTML = `🔒✅ ${lockedCount} locked stream${
-                  lockedCount > 1 ? "s" : ""
-                } restored from previous session`;
-
-                setTimeout(() => {
-                  notice.style.background = "rgba(255, 215, 0, 0.1)";
-                  notice.style.borderColor = "rgba(255, 215, 0, 0.3)";
-                  notice.style.color = "#ffd700";
-                  notice.innerHTML = `🔒 ${lockedCount} stream${
-                    lockedCount > 1 ? "s" : ""
-                  } locked - will persist after page refresh`;
-                }, 3000);
-              }
-            }, 1000);
-          }
         }
       }
     </script>
