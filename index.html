@@ -678,22 +678,6 @@
 
       <!-- Main Content -->
       <div class="main-wrapper">
-        <!-- <div class="controls">
-          <div class="input-container">
-            <input
-              type="text"
-              class="stream-input"
-              id="streamInput"
-              placeholder="Search for Twitch channels..."
-              autocomplete="on"
-            />
-            <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
-          </div>
-          <button class="add-stream-btn" onclick="addStream()">
-            Add Stream
-          </button>
-        </div> -->
-
         <div class="main-content">
           <div class="streams-grid" id="streamsGrid">
             <div class="no-streams" id="noStreams">
@@ -1496,43 +1480,47 @@
         const streamsGrid = document.getElementById("streamsGrid");
 
         if (streams.length === 0) {
-          streamsGrid.innerHTML =
-            '<div class="no-streams">No streams added yet. Add a Twitch channel to get started!</div>';
-          return;
+          streamsGrid.innerHTML = `
+      <div class="no-streams">
+        No streams added yet. Add a Twitch channel to get started!
+      </div>
+    `;
+          return; // ✅ stop here if empty
         }
+
+        // ✅ clear grid if there are streams
+        streamsGrid.innerHTML = "";
 
         streams.forEach((stream) => {
           const streamDiv = document.createElement("div");
           streamDiv.className = "stream-item";
           streamDiv.innerHTML = `
-    <div class="stream-header">
-      <span class="stream-title">
-        ${stream.channel}
-      </span>
-      <div class="stream-controls">
-        <button class="remove-btn" 
-                onclick="event.stopPropagation(); removeStream(${stream.id})">
-          Remove
-        </button>
+      <div class="stream-header">
+        <span class="stream-title">${stream.channel}</span>
+        <div class="stream-controls">
+          <button class="remove-btn" 
+                  onclick="event.stopPropagation(); removeStream(${stream.id})">
+            Remove
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="stream-video-container" data-stream-id="${stream.id}">
-      <iframe 
-        src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-        class="stream-video"
-        frameborder="0"
-        allowfullscreen="true"
-        scrolling="no">
-      </iframe>
-    </div>
-    <div class="stream-chat">
-      <iframe 
-        src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-        frameborder="0"
-        scrolling="no">
-      </iframe>
-    </div>
-  `;
+      <div class="stream-video-container" data-stream-id="${stream.id}">
+        <iframe 
+          src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
+          class="stream-video"
+          frameborder="0"
+          allowfullscreen="true"
+          scrolling="no">
+        </iframe>
+      </div>
+      <div class="stream-chat">
+        <iframe 
+          src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+          frameborder="0"
+          scrolling="no">
+        </iframe>
+      </div>
+    `;
           streamsGrid.appendChild(streamDiv);
         });
       }
