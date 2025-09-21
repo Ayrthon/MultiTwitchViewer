@@ -971,9 +971,9 @@
             user.display_name
           );
 
-          // Try the follows API
+          // Use the current working API endpoint
           const followsResponse = await fetch(
-            `https://api.twitch.tv/helix/users/follows?from_id=${user.id}&first=20`,
+            `https://api.twitch.tv/helix/channels/followed?user_id=${user.id}&first=20`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -981,6 +981,21 @@
               },
             }
           );
+
+          console.log(
+            "📡 Follows API response status:",
+            followsResponse.status
+          );
+
+          if (followsResponse.status === 410) {
+            throw new Error(
+              "Follows API deprecated - requires special permissions"
+            );
+          }
+
+          if (followsResponse.status === 401) {
+            throw new Error("Token lacks required permissions");
+          }
 
           if (!followsResponse.ok) {
             throw new Error(`Follows API returned ${followsResponse.status}`);
@@ -1008,8 +1023,10 @@
             return;
           }
 
-          // Get channel info
-          const channelIds = followsData.data.map((follow) => follow.to_id);
+          // Get channel info using broadcaster_id from the new API response
+          const channelIds = followsData.data.map(
+            (follow) => follow.broadcaster_id
+          );
           const [usersResponse, streamsResponse] = await Promise.all([
             fetch(
               `https://api.twitch.tv/helix/users?${channelIds
@@ -1074,18 +1091,49 @@
         } catch (error) {
           console.error("❌ Error fetching real follows:", error);
 
-          // Fallback to demo with error message
-          loadDemoFollowedChannels();
-          followedChannels.unshift({
-            id: "api_error",
-            login: "api_error",
-            display_name: "⚠️ API Error",
-            profile_image_url:
-              "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
-            is_live: false,
-            game_name: "Showing demo data - " + error.message,
-            viewer_count: 0,
-          });
+          // Specific handling for the 410 deprecation error
+          if (
+            error.message.includes("deprecated") ||
+            error.message.includes("410")
+          ) {
+            loadDemoFollowedChannels();
+            followedChannels.unshift({
+              id: "api_deprecated",
+              login: "api_deprecated",
+              display_name: "🔒 API Restricted",
+              profile_image_url:
+                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
+              is_live: false,
+              game_name: "Follows API needs Twitch approval",
+              viewer_count: 0,
+            });
+          } else if (error.message.includes("permissions")) {
+            loadDemoFollowedChannels();
+            followedChannels.unshift({
+              id: "permissions_error",
+              login: "permissions_error",
+              display_name: "🔑 Login Required",
+              profile_image_url:
+                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
+              is_live: false,
+              game_name: "Token lacks follow permissions",
+              viewer_count: 0,
+            });
+          } else {
+            // General error fallback
+            loadDemoFollowedChannels();
+            followedChannels.unshift({
+              id: "api_error",
+              login: "api_error",
+              display_name: "⚠️ API Error",
+              profile_image_url:
+                "https://static-cdn.jtvnw.net/user-default-pictures-uv/cdd517fe-def4-11e9-948e-784f43822e80-profile_image-300x300.png",
+              is_live: false,
+              game_name:
+                "Showing demo data - " + error.message.substring(0, 30),
+              viewer_count: 0,
+            });
+          }
         }
 
         updateFollowedChannelsUI();
