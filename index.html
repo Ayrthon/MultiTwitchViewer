@@ -343,15 +343,14 @@
       }
 
       .streams-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
         gap: 1.5rem;
         max-width: calc(4 * 500px);
         margin: 0 auto;
       }
 
       .stream-item {
-        flex: 1 1 450px; /* min width 450px, grow to fill */
         background: rgba(0, 0, 0, 0.4);
         border-radius: 15px;
         overflow: hidden;
@@ -1376,6 +1375,15 @@
         }
       }
 
+      function removeStream(streamId) {
+        const stream = streams.find((s) => s.id === streamId);
+        if (!stream) return;
+
+        streams = streams.filter((s) => s.id !== streamId);
+        saveStreamsToStorage();
+        updateUI();
+      }
+
       function updateUI() {
         const grid = document.getElementById("streamsGrid");
 
@@ -1471,13 +1479,23 @@
         if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
           return;
 
-        // 1) Update state order
+        // Update array order
         const [moved] = streams.splice(from, 1);
         streams.splice(to, 0, moved);
         saveStreamsToStorage();
 
-        // 2) Visually reorder via CSS order (no DOM moves, no reload)
+        // Move the DOM node (no iframe reload)
         const grid = document.getElementById("streamsGrid");
+        const nodes = Array.from(grid.querySelectorAll(".stream-item"));
+        const movingEl = nodes[from];
+        const referenceEl = nodes[to];
+
+        if (from < to) {
+          grid.insertBefore(movingEl, referenceEl.nextSibling);
+        } else {
+          grid.insertBefore(movingEl, referenceEl);
+        }
+
         refreshItemIndices(grid);
       }
 
@@ -1569,7 +1587,6 @@
         card.setAttribute("draggable", "true");
         card.dataset.index = String(index);
         card.dataset.id = String(stream.id);
-        card.style.order = String(index);
 
         card.innerHTML = `
     <div class="stream-header">
@@ -1604,7 +1621,6 @@
       function refreshItemIndices(container) {
         container.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
-          el.style.order = String(i);
         });
       }
     </script>
