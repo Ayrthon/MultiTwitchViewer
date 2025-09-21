@@ -343,14 +343,15 @@
       }
 
       .streams-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 1.5rem;
         max-width: calc(4 * 500px);
         margin: 0 auto;
       }
 
       .stream-item {
+        flex: 1 1 450px; /* min width 450px, grow to fill */
         background: rgba(0, 0, 0, 0.4);
         border-radius: 15px;
         overflow: hidden;
@@ -1470,23 +1471,13 @@
         if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
           return;
 
-        // Update array order
+        // 1) Update state order
         const [moved] = streams.splice(from, 1);
         streams.splice(to, 0, moved);
         saveStreamsToStorage();
 
-        // Move the DOM node (no iframe reload)
+        // 2) Visually reorder via CSS order (no DOM moves, no reload)
         const grid = document.getElementById("streamsGrid");
-        const nodes = Array.from(grid.querySelectorAll(".stream-item"));
-        const movingEl = nodes[from];
-        const referenceEl = nodes[to];
-
-        if (from < to) {
-          grid.insertBefore(movingEl, referenceEl.nextSibling);
-        } else {
-          grid.insertBefore(movingEl, referenceEl);
-        }
-
         refreshItemIndices(grid);
       }
 
@@ -1578,6 +1569,7 @@
         card.setAttribute("draggable", "true");
         card.dataset.index = String(index);
         card.dataset.id = String(stream.id);
+        card.style.order = String(index);
 
         card.innerHTML = `
     <div class="stream-header">
@@ -1612,6 +1604,7 @@
       function refreshItemIndices(container) {
         container.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
+          el.style.order = String(i);
         });
       }
     </script>
