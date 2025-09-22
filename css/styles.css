@@ -312,14 +312,14 @@ body {
   font-style: italic;
 }
 .main-content {
-  padding: 2rem;
+  padding: 1rem;
 }
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: calc(4 * 500px);
   margin: 0 auto;
 }
