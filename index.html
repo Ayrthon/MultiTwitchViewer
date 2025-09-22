@@ -498,7 +498,11 @@
         --chat-w: 340px;
       }
       .stream-item.single {
+        display: grid;
+        /* FIX: allow video column to fully expand */
         grid-template-columns: minmax(0, 1fr) var(--chat-w);
+        grid-template-rows: auto 1fr;
+        align-items: stretch;
       }
       .stream-item.single .stream-header {
         grid-column: 1 / -1;
