@@ -344,8 +344,8 @@ body.focus-mode .streams-grid {
 
   /* Cap each card to the viewport height minus header.
      Use dvh for dynamic viewport; vh as fallback. */
-  height: calc(100vh - var(--header-h) - 30px);
-  height: calc(100dvh - var(--header-h) - 30px);
+  height: calc(100vh - var(--header-h) - 35px);
+  height: calc(100dvh - var(--header-h) - 35px);
   min-height: 0; /* allow children to shrink */
 }
 
