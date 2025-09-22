@@ -343,44 +343,15 @@
       }
 
       /* Single-stream layout: header on top, player left (16:9), chat right */
-      .stream-item.single {
-        display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-        grid-template-rows: auto 1fr;
-        grid-template-areas:
-          "header header"
-          "video chat";
-        gap: 12px;
-      }
 
       .stream-item.single .stream-header {
         grid-area: header;
-      }
-      .stream-item.single .stream-video-container {
-        grid-area: video;
-        position: relative;
-        width: 100%;
-        background: #000;
       }
 
       .stream-item.single .stream-video-container::before {
         content: "";
         display: block;
         padding-top: 56.25%; /* 16:9 aspect ratio */
-      }
-
-      .stream-item.single .stream-video {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
-
-      .stream-item.single .stream-chat {
-        grid-area: chat;
-        min-width: 300px;
-        height: auto; /* let JS size it */
       }
 
       .streams-grid {
@@ -1151,7 +1122,7 @@
         // ensure DnD is wired and indices are correct
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
-        applySingleLayoutIfNeeded();
+        applySingleOrGrid();
 
         // little visual tickle on the clicked sidebar item (optional)
         const channelItem = document.querySelector(
@@ -1428,7 +1399,6 @@
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
         showEmptyState(false);
-        applySingleLayoutIfNeeded();
         applySingleOrGrid();
 
         input.value = "";
@@ -1461,7 +1431,6 @@
             "No streams added yet. Add a Twitch channel to get started!";
           grid.appendChild(n);
         }
-        applySingleLayoutIfNeeded();
         applySingleOrGrid();
       }
 
@@ -1514,7 +1483,7 @@
         refreshItemIndices(gridNow);
         enableDragAndDrop(gridNow);
         showEmptyState(streams.length === 0);
-        applySingleLayoutIfNeeded();
+        applySingleOrGrid();
       }
 
       function enableDragAndDrop(container) {
@@ -1579,7 +1548,6 @@
         }
 
         refreshItemIndices(grid);
-        applySingleLayoutIfNeeded();
         applySingleOrGrid();
       }
 
@@ -1588,24 +1556,24 @@
         dragIndex = null;
       }
 
-      function onDragStart(e) {
-        const item = e.currentTarget;
-        dragIndex = Number(item.dataset.index);
-        item.classList.add("dragging");
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", String(dragIndex));
-      }
+      // function onDragStart(e) {
+      //   const item = e.currentTarget;
+      //   dragIndex = Number(item.dataset.index);
+      //   item.classList.add("dragging");
+      //   e.dataTransfer.effectAllowed = "move";
+      //   e.dataTransfer.setData("text/plain", String(dragIndex));
+      // }
 
-      function onDragOver(e) {
-        e.preventDefault();
-        const target = e.currentTarget;
-        if (!target.classList.contains("drop-target"))
-          target.classList.add("drop-target");
-      }
+      // function onDragOver(e) {
+      //   e.preventDefault();
+      //   const target = e.currentTarget;
+      //   if (!target.classList.contains("drop-target"))
+      //     target.classList.add("drop-target");
+      // }
 
-      function onDragLeave(e) {
-        e.currentTarget.classList.remove("drop-target");
-      }
+      // function onDragLeave(e) {
+      //   e.currentTarget.classList.remove("drop-target");
+      // }
 
       // function onDrop(e) {
       //   e.preventDefault();
@@ -1622,10 +1590,10 @@
       //   }
       // }
 
-      function onDragEnd(e) {
-        e.currentTarget.classList.remove("dragging");
-        dragIndex = null;
-      }
+      // function onDragEnd(e) {
+      //   e.currentTarget.classList.remove("dragging");
+      //   dragIndex = null;
+      // }
 
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
@@ -1708,42 +1676,6 @@
         });
       }
 
-      function applySingleLayoutIfNeeded() {
-        const grid = document.getElementById("streamsGrid");
-        const items = grid.querySelectorAll(".stream-item");
-
-        // toggle single layout class
-        if (streams.length === 1 && items[0]) {
-          items.forEach((i) => i.classList.remove("single"));
-          items[0].classList.add("single");
-          sizeSingle(items[0]);
-          window.addEventListener("resize", onResizeSingle);
-        } else {
-          items.forEach((i) => i.classList.remove("single"));
-          window.removeEventListener("resize", onResizeSingle);
-          // reset heights if we leave single mode
-          grid
-            .querySelectorAll(".stream-video-container,.stream-chat")
-            .forEach((el) => {
-              el.style.height = "";
-            });
-        }
-      }
-
-      function sizeSingle(card) {
-        const video = card.querySelector(".stream-video-container");
-        const chat = card.querySelector(".stream-chat");
-
-        if (video && chat) {
-          const videoH = video.offsetHeight;
-          chat.style.height = `${videoH}px`;
-        }
-      }
-
-      function onResizeSingle() {
-        const card = document.querySelector(".stream-item.single");
-        if (card) sizeSingle(card);
-      }
       /* === Single-stream layout controller (refined) ============================ */
       (() => {
         const CHAT_W = 340; // chat width in px
