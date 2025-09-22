@@ -629,7 +629,6 @@
       </div>
     </div>
 
-    <script src="https://player.twitch.tv/js/embed/v1.js"></script>
     <script>
       /* ========================== Config & State ========================== */
       const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
@@ -642,10 +641,6 @@
       const OFFLINE_PAGE_SIZE = 100;
       let offlineVisibleCount = OFFLINE_PAGE_SIZE;
       let dragIndex = null;
-      // --- Audio control state ---
-      const players = new Map(); // id -> Twitch.Player
-      const volumes = new Map(); // id -> last known volume (0..1)
-      let activeAudioId = null; // which stream id is allowed to play sound
 
       /* ========================== Boot ========================== */
       document.addEventListener("DOMContentLoaded", () => {
@@ -1053,9 +1048,6 @@
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
         applySingleOrGrid();
-        // If nothing is active, give audio to this new stream
-        if (activeAudioId == null) setActiveAudio(stream.id);
-        else enforceSingleAudio();
 
         const channelItem = document.querySelector(
           `[data-channel="${channelLogin}"]`
@@ -1314,9 +1306,6 @@
         refreshItemIndices(grid);
         showEmptyState(false);
         applySingleOrGrid();
-        // If nothing is active, give audio to this new stream
-        if (activeAudioId == null) setActiveAudio(stream.id);
-        else enforceSingleAudio();
 
         input.value = "";
         hideSuggestions();
@@ -1333,22 +1322,6 @@
         );
         if (card) card.remove();
 
-        // Player cleanup
-        const removed = players.get(streamId);
-        if (removed) {
-          try {
-            removed.pause();
-          } catch {}
-          players.delete(streamId);
-          volumes.delete(streamId);
-        }
-
-        // If the removed one had audio, give it to the first remaining stream (if any)
-        if (activeAudioId === streamId) {
-          const first = streams[0]?.id ?? null;
-          activeAudioId = first;
-        }
-        enforceSingleAudio();
         const grid = document.getElementById("streamsGrid");
         grid.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
@@ -1362,7 +1335,6 @@
           grid.appendChild(n);
         }
         applySingleOrGrid();
-        enforceSingleAudio();
       }
 
       function updateUI() {
@@ -1411,7 +1383,6 @@
         enableDragAndDrop(gridNow);
         showEmptyState(streams.length === 0);
         applySingleOrGrid();
-        enforceSingleAudio();
       }
 
       /* ========================== Drag & Drop ========================== */
@@ -1469,7 +1440,6 @@
 
         refreshItemIndices(grid);
         applySingleOrGrid();
-        enforceSingleAudio();
       }
 
       function onDragEnd(e) {
@@ -1478,26 +1448,6 @@
       }
 
       /* ========================== Storage & Helpers ========================== */
-      function setActiveAudio(streamId) {
-        activeAudioId = streamId;
-        enforceSingleAudio();
-      }
-
-      function enforceSingleAudio() {
-        // Only the active one is unmuted; all others muted
-        players.forEach((player, id) => {
-          try {
-            if (id === activeAudioId) {
-              const v = volumes.get(id) ?? 0.5;
-              player.setMuted(false);
-              player.setVolume(v);
-            } else {
-              player.setMuted(true);
-            }
-          } catch {}
-        });
-      }
-
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
       }
@@ -1541,77 +1491,26 @@
         card.dataset.index = String(index);
         card.dataset.id = String(stream.id);
 
-        const playerId = `player-${stream.id}`;
-        const chatId = `chat-${stream.id}`;
-
         card.innerHTML = `
-    <div class="stream-header">
-      <span class="stream-title">${stream.channel}</span>
-      <div class="stream-controls">
-        <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${stream.id})">Remove</button>
-      </div>
-    </div>
-
-    <div class="stream-video-container" data-stream-id="${stream.id}">
-      <div id="${playerId}" class="stream-video"></div>
-    </div>
-
-    <div class="stream-chat">
-      <iframe
-        id="${chatId}"
-        src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-        frameborder="0"
-        scrolling="no">
-      </iframe>
-    </div>
-  `;
-
-        // Build the Twitch player
-        // Ensure the Twitch embed script is present
-        if (window.Twitch && Twitch.Player) {
-          const player = new Twitch.Player(playerId, {
-            channel: stream.channel,
-            parent: [window.location.hostname],
-            autoplay: true,
-            // We'll manage mute/volume ourselves:
-            muted: true,
-            // Set a reasonable starting volume (persisted per id)
-            volume: volumes.get(stream.id) ?? 0.5,
-          });
-
-          players.set(stream.id, player);
-
-          // Unmute logic once ready
-          player.addEventListener(Twitch.Player.READY, () => {
-            // keep stored volume
-            const v = volumes.get(stream.id);
-            if (typeof v === "number") player.setVolume(v);
-
-            // If nothing has audio yet, give it to this one
-            if (activeAudioId == null) setActiveAudio(stream.id);
-            else enforceSingleAudio(); // ensure this new one stays muted if another is active
-          });
-
-          // Track volume changes to persist user intent
-          player.addEventListener(Twitch.Player.VOLUME, () => {
-            try {
-              const vol = player.getVolume();
-              volumes.set(stream.id, vol);
-              // If volume > 0, consider this a user intent to hear this one
-              if (vol > 0 && activeAudioId !== stream.id) {
-                setActiveAudio(stream.id);
-              }
-            } catch {}
-          });
-
-          // Clicking the video gives it audio focus
-          card
-            .querySelector(".stream-video-container")
-            ?.addEventListener("click", () => {
-              setActiveAudio(stream.id);
-            });
-        }
-
+          <div class="stream-header">
+            <span class="stream-title">${stream.channel}</span>
+            <div class="stream-controls">
+              <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${stream.id})">Remove</button>
+            </div>
+          </div>
+          <div class="stream-video-container" data-stream-id="${stream.id}">
+            <iframe
+              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
+              class="stream-video" frameborder="0" allowfullscreen="true" scrolling="no">
+            </iframe>
+          </div>
+          <div class="stream-chat">
+            <iframe
+              src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+              frameborder="0" scrolling="no">
+            </iframe>
+          </div>
+        `;
         return card;
       }
 
@@ -1713,7 +1612,6 @@
           const obs = new MutationObserver(applySingleOrGrid);
           obs.observe(grid, { childList: true, subtree: false });
           applySingleOrGrid();
-          enforceSingleAudio();
         });
 
         // Expose for manual calls
