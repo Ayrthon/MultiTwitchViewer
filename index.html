@@ -608,6 +608,27 @@
       .stream-item:not(.single) .stream-chat {
         height: 700px; /* your original default */
       }
+      /* --- Fix single-card header ordering & kill legacy ::before --- */
+      .stream-item.single .stream-header {
+        grid-area: unset; /* neutralize old rule */
+        grid-column: 1 / -1; /* span both columns */
+        grid-row: 1; /* force to the top row */
+      }
+
+      .stream-item.single .stream-video-container {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      .stream-item.single .stream-chat {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      /* If any legacy aspect shim exists, disable it in single mode */
+      .stream-item.single .stream-video-container::before {
+        content: none;
+      }
     </style>
   </head>
   <body>
@@ -1555,45 +1576,6 @@
         e.currentTarget.classList.remove("dragging");
         dragIndex = null;
       }
-
-      // function onDragStart(e) {
-      //   const item = e.currentTarget;
-      //   dragIndex = Number(item.dataset.index);
-      //   item.classList.add("dragging");
-      //   e.dataTransfer.effectAllowed = "move";
-      //   e.dataTransfer.setData("text/plain", String(dragIndex));
-      // }
-
-      // function onDragOver(e) {
-      //   e.preventDefault();
-      //   const target = e.currentTarget;
-      //   if (!target.classList.contains("drop-target"))
-      //     target.classList.add("drop-target");
-      // }
-
-      // function onDragLeave(e) {
-      //   e.currentTarget.classList.remove("drop-target");
-      // }
-
-      // function onDrop(e) {
-      //   e.preventDefault();
-      //   const target = e.currentTarget;
-      //   target.classList.remove("drop-target");
-
-      //   const from = dragIndex;
-      //   const to = Number(target.dataset.index);
-      //   if (Number.isInteger(from) && Number.isInteger(to) && from !== to) {
-      //     const [moved] = streams.splice(from, 1);
-      //     streams.splice(to, 0, moved);
-      //     saveStreamsToStorage();
-      //     updateUI();
-      //   }
-      // }
-
-      // function onDragEnd(e) {
-      //   e.currentTarget.classList.remove("dragging");
-      //   dragIndex = null;
-      // }
 
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
