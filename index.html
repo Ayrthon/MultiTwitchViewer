@@ -342,7 +342,7 @@
         padding: 2rem;
       }
 
-      /* Single-stream layout: header on top, player left, chat right */
+      /* Single-stream layout: header on top, player left (16:9), chat right */
       .stream-item.single {
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
@@ -353,22 +353,34 @@
         gap: 12px;
       }
 
-      /* Place existing children into the grid areas */
       .stream-item.single .stream-header {
         grid-area: header;
       }
       .stream-item.single .stream-video-container {
         grid-area: video;
-      }
-      .stream-item.single .stream-chat {
-        grid-area: chat;
+        position: relative;
+        width: 100%;
+        background: #000;
       }
 
-      /* Ensure iframes expand to their containers */
-      .stream-item.single .stream-video,
-      .stream-item.single .stream-chat iframe {
+      .stream-item.single .stream-video-container::before {
+        content: "";
+        display: block;
+        padding-top: 56.25%; /* 16:9 aspect ratio */
+      }
+
+      .stream-item.single .stream-video {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
+      }
+
+      .stream-item.single .stream-chat {
+        grid-area: chat;
+        min-width: 300px;
+        height: auto; /* let JS size it */
       }
 
       .streams-grid {
@@ -1672,33 +1684,12 @@
       }
 
       function sizeSingle(card) {
-        // available height = viewport - sticky header - main-content vertical padding
-        const header = document.querySelector(".header");
-        const headerH = header ? header.offsetHeight : 0;
-
-        // match your .main-content { padding: 2rem } => 32px top + 32px bottom
-        const MAIN_CONTENT_VERTICAL_PADDING = 32 * 2;
-
-        // also subtract the stream card header height + the grid gap between header and row
-        const streamHeader = card.querySelector(".stream-header");
-        const streamHeaderH = streamHeader ? streamHeader.offsetHeight : 0;
-
-        // little extra breathing room for borders, rounding, etc.
-        const EXTRA = 12;
-
-        const available =
-          window.innerHeight -
-          headerH -
-          MAIN_CONTENT_VERTICAL_PADDING -
-          streamHeaderH -
-          EXTRA;
-
         const video = card.querySelector(".stream-video-container");
         const chat = card.querySelector(".stream-chat");
-        if (available > 200) {
-          // guard against tiny viewports
-          video.style.height = `${available}px`;
-          chat.style.height = `${available}px`;
+
+        if (video && chat) {
+          const videoH = video.offsetHeight;
+          chat.style.height = `${videoH}px`;
         }
       }
 
