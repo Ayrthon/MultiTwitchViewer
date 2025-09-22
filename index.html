@@ -333,8 +333,12 @@
 
       /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
       body.focus-mode .streams-grid {
-        max-width: none;
-        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        align-items: flex-start;
+        max-width: 1200px; /* similar to your 4*500 cap */
+        margin: 0 auto;
       }
 
       .stream-item {
@@ -499,8 +503,7 @@
       }
       .stream-item.single {
         display: grid;
-        /* FIX: allow video column to fully expand */
-        grid-template-columns: minmax(0, 1fr) var(--chat-w);
+        grid-template-columns: 1fr var(--chat-w);
         grid-template-rows: auto 1fr;
         align-items: stretch;
       }
