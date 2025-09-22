@@ -71,7 +71,7 @@ body {
 
 /* ========== Sidebar ========== */
 .sidebar {
-  min-width: 240px;
+  width: 240px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-right: 2px solid rgba(145, 70, 255, 0.3);
@@ -317,11 +317,11 @@ body {
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 1rem;
-  /* width: 90svw; */
-  /* margin: 0 auto; */
+  /* max-width: calc(4 * 500px); */
+  margin: 0 auto;
 }
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
 body.focus-mode .streams-grid {
@@ -342,7 +342,6 @@ body.focus-mode .streams-grid {
   display: flex;
   flex-direction: column;
   height: fit-content;
-  width: 500px;
 }
 .stream-item:hover {
   border-color: #9146ff;
@@ -447,7 +446,6 @@ body.focus-mode .stream-item:not(.focused) {
   grid-template-columns: 1fr var(--chat-w);
   grid-template-rows: auto 1fr;
   align-items: stretch;
-  width: 85svw;
 }
 .stream-item.single .stream-header {
   grid-column: 1 / -1;
@@ -483,11 +481,11 @@ body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
 }
 
 /* optional: slightly shorter on mobile */
-/* @media (max-width: 768px) {
+@media (max-width: 768px) {
   body.focus-mode .stream-item:not(.focused) .stream-chat {
     height: 260px;
   }
-} */
+}
 
 .focus-btn {
   background: #2dd4bf;
