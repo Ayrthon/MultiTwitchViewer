@@ -71,7 +71,7 @@ body {
 
 /* ========== Sidebar ========== */
 .sidebar {
-  min-width: 240px;
+  width: 240px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-right: 2px solid rgba(145, 70, 255, 0.3);
@@ -312,14 +312,14 @@ body {
   font-style: italic;
 }
 .main-content {
-  padding: 1rem;
+  padding: 2rem;
 }
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
   max-width: calc(4 * 500px);
   margin: 0 auto;
 }
@@ -413,11 +413,8 @@ body.focus-mode .stream-item:not(.focused) {
 }
 
 .stream-chat {
-  /* height: calc(
-    100svh - var(--header-h) - 420px
-  ); 16px = padding/margin tweak */
-  height: 55dvh;
   background: rgba(0, 0, 0, 0.6);
+  height: 700px;
   display: flex;
   flex-direction: column;
   border-radius: 0 0 15px 15px;
@@ -436,10 +433,63 @@ body.focus-mode .stream-item:not(.focused) {
   font-size: 1.2rem;
 }
 
+/* ========== Responsive tweaks ========== */
+@media (max-width: 1200px) {
+  .streams-grid {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    max-width: none;
+  }
+  .sidebar {
+    width: 200px;
+  }
+}
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: 200px;
+    position: static;
+    border-right: none;
+    border-bottom: 2px solid rgba(145, 70, 255, 0.3);
+  }
+  .followed-channels {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5rem;
+  }
+  .channel-category {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    min-width: max-content;
+  }
+  .category-header {
+    display: none;
+  }
+  .channel-item {
+    min-width: 150px;
+    flex-direction: column;
+    text-align: center;
+    padding: 0.5rem;
+  }
+  .streams-grid {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+  body.focus-mode .streams-grid {
+    display: block;
+  } /* on mobile just stack */
+  .stream-chat {
+    height: 300px;
+  }
+}
+
 /* ========== Single-card layout (video left + chat right) ========== */
 :root {
   --chat-w: 340px;
-  --header-h: 76px; /* adjust if your header is taller/shorter */
 }
 .stream-item.single {
   display: grid;
@@ -481,11 +531,11 @@ body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
 }
 
 /* optional: slightly shorter on mobile */
-/* @media (max-width: 768px) {
+@media (max-width: 768px) {
   body.focus-mode .stream-item:not(.focused) .stream-chat {
     height: 260px;
   }
-} */
+}
 
 .focus-btn {
   background: #2dd4bf;
