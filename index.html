@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multi-Stream Viewer</title>
     <style>
+      /* ========== Base ========== */
       * {
         margin: 0;
         padding: 0;
@@ -61,7 +62,7 @@
         color: white;
         font-weight: bold;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: 0.3s;
         text-decoration: none;
         display: inline-block;
       }
@@ -82,7 +83,7 @@
         font-weight: bold;
       }
 
-      /* Sidebar */
+      /* ========== Sidebar ========== */
       .sidebar {
         width: 240px;
         background: rgba(0, 0, 0, 0.8);
@@ -119,7 +120,7 @@
       .channel-item {
         padding: 0.7rem 1rem;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: 0.2s;
         display: flex;
         align-items: center;
         gap: 0.8rem;
@@ -214,7 +215,7 @@
         font-size: 0.8rem;
         font-weight: bold;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: 0.3s;
       }
       .refresh-button:hover {
         transform: translateY(-2px);
@@ -234,6 +235,7 @@
         font-style: italic;
       }
 
+      /* ========== Main ========== */
       .main-wrapper {
         flex: 1;
         display: flex;
@@ -263,7 +265,7 @@
         background: rgba(255, 255, 255, 0.1);
         color: white;
         font-size: 1rem;
-        transition: all 0.3s ease;
+        transition: 0.3s;
       }
       .stream-input:focus {
         outline: none;
@@ -289,7 +291,6 @@
         z-index: 9999999;
         display: none;
       }
-
       .suggestion-item {
         padding: 0.8rem 1rem;
         cursor: pointer;
@@ -297,7 +298,7 @@
         display: flex;
         align-items: center;
         gap: 0.8rem;
-        transition: all 0.2s ease;
+        transition: 0.2s;
       }
       .suggestion-item:hover,
       .suggestion-item.selected {
@@ -342,18 +343,7 @@
         padding: 2rem;
       }
 
-      /* Single-stream layout: header on top, player left (16:9), chat right */
-
-      .stream-item.single .stream-header {
-        grid-area: header;
-      }
-
-      .stream-item.single .stream-video-container::before {
-        content: "";
-        display: block;
-        padding-top: 56.25%; /* 16:9 aspect ratio */
-      }
-
+      /* ========== Streams grid ========== */
       .streams-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -367,7 +357,7 @@
         border-radius: 15px;
         overflow: hidden;
         border: 2px solid transparent;
-        transition: all 0.3s ease;
+        transition: 0.3s;
         position: relative;
         display: flex;
         flex-direction: column;
@@ -409,7 +399,7 @@
         cursor: pointer;
         font-size: 0.75rem;
         font-weight: bold;
-        transition: all 0.3s ease;
+        transition: 0.3s;
       }
       .remove-btn:hover {
         background: #ff3838;
@@ -430,8 +420,7 @@
       }
       .stream-video {
         position: absolute;
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
         height: 100%;
       }
@@ -457,26 +446,7 @@
         font-size: 1.2rem;
       }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-      @keyframes slideUp {
-        from {
-          transform: translateY(50px) scale(0.9);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0) scale(1);
-          opacity: 1;
-        }
-      }
-
-      /* Scrollbar */
+      /* ========== Scrollbar ========== */
       ::-webkit-scrollbar {
         width: 8px;
       }
@@ -492,7 +462,7 @@
         background: #772ce8;
       }
 
-      /* Mobile */
+      /* ========== Responsive ========== */
       @media (max-width: 1200px) {
         .streams-grid {
           grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -564,70 +534,44 @@
           background: rgba(126, 0, 105, 0.37);
         }
       }
-      /* === Single stream: video left (16:9) + chat right, no spacing === */
+
+      /* ========== Single-card layout (video left 16:9 + chat right) ========== */
       .stream-item.single {
         display: grid;
-        grid-template-columns: 1fr var(--chat-w, 340px); /* video | chat */
-        grid-template-rows: auto 1fr; /* header on top, then content */
+        grid-template-columns: 1fr var(--chat-w, 340px);
+        grid-template-rows: auto 1fr; /* header on row 1, content on row 2 */
         column-gap: 0;
         row-gap: 0;
         align-items: stretch;
       }
-
-      /* Header spans both columns */
       .stream-item.single .stream-header {
         grid-column: 1 / -1;
+        grid-row: 1;
       }
-
-      /* Side-by-side content row */
       .stream-item.single .stream-video-container {
         grid-column: 1;
         grid-row: 2;
-        /* we’ll set explicit width/height via JS to keep 16:9 and fit viewport */
       }
-
       .stream-item.single .stream-chat {
         grid-column: 2;
         grid-row: 2;
-        height: auto; /* JS will size to match the video height */
-        border-radius: 0; /* keep edges flush with video */
+        height: auto;
+        border-radius: 0; /* flush edge */
       }
-
       .stream-item.single .stream-chat iframe {
         width: 100%;
         height: 100%;
         display: block;
       }
 
-      /* Ensure non-single cards always render as responsive 16:9 */
+      /* Ensure non-single cards keep responsive 16:9 + default chat height */
       .stream-item:not(.single) .stream-video-container {
         width: 100%;
         height: auto;
         aspect-ratio: 16 / 9;
       }
       .stream-item:not(.single) .stream-chat {
-        height: 700px; /* your original default */
-      }
-      /* --- Fix single-card header ordering & kill legacy ::before --- */
-      .stream-item.single .stream-header {
-        grid-area: unset; /* neutralize old rule */
-        grid-column: 1 / -1; /* span both columns */
-        grid-row: 1; /* force to the top row */
-      }
-
-      .stream-item.single .stream-video-container {
-        grid-column: 1;
-        grid-row: 2;
-      }
-
-      .stream-item.single .stream-chat {
-        grid-column: 2;
-        grid-row: 2;
-      }
-
-      /* If any legacy aspect shim exists, disable it in single mode */
-      .stream-item.single .stream-video-container::before {
-        content: none;
+        height: 700px;
       }
     </style>
   </head>
@@ -686,9 +630,8 @@
     </div>
 
     <script>
-      // Twitch API configuration
+      /* ========================== Config & State ========================== */
       const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
-
       let streams = [];
       let user = null;
       let searchTimeout = null;
@@ -699,8 +642,8 @@
       let offlineVisibleCount = OFFLINE_PAGE_SIZE;
       let dragIndex = null;
 
-      // Initialize the app
-      document.addEventListener("DOMContentLoaded", function () {
+      /* ========================== Boot ========================== */
+      document.addEventListener("DOMContentLoaded", () => {
         checkAuthFromURL();
         loadStreamsFromStorage();
         updateUI();
@@ -709,7 +652,7 @@
         updateFollowedChannelsUI();
       });
 
-      // Twitch Authentication
+      /* ========================== Auth ========================== */
       function loginToTwitch() {
         const authUrl =
           `https://id.twitch.tv/oauth2/authorize` +
@@ -722,7 +665,7 @@
       }
 
       function checkAuthFromURL() {
-        const hash = window.location.hash.substr(1);
+        const hash = window.location.hash.slice(1);
         const params = new URLSearchParams(hash);
         const accessToken = params.get("access_token");
         const error = params.get("error");
@@ -731,7 +674,6 @@
           alert(`Login failed: ${error}`);
           return;
         }
-
         if (accessToken) {
           localStorage.setItem("twitch_token", accessToken);
           window.location.hash = "";
@@ -750,25 +692,44 @@
               "Client-Id": CLIENT_ID,
             },
           });
-
           if (response.ok) {
             const data = await response.json();
             if (data.data && data.data.length > 0) {
               user = data.data[0];
-              console.log("✅ User authenticated:", user.display_name);
               updateUserInfo();
               fetchRealFollowedChannels();
             }
           } else {
             localStorage.removeItem("twitch_token");
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+        } catch (e) {
+          console.error("Error fetching user data:", e);
           localStorage.removeItem("twitch_token");
         }
       }
 
-      // Helper: split into chunks of N
+      function updateUserInfo() {
+        const userInfo = document.getElementById("userInfo");
+        if (user) {
+          userInfo.innerHTML = `
+            <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
+            <span class="username">${user.display_name}</span>
+            <button class="login-btn" onclick="logout()" style="background:#ff4757;">Logout</button>
+          `;
+        } else {
+          userInfo.innerHTML = `<button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>`;
+          followedChannels = [];
+          updateFollowedChannelsUI();
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("twitch_token");
+        user = null;
+        location.reload();
+      }
+
+      /* ========================== Follows ========================== */
       function chunkArray(arr, size) {
         const chunks = [];
         for (let i = 0; i < arr.length; i += size)
@@ -790,9 +751,8 @@
         }
 
         const token = localStorage.getItem("twitch_token");
-
         try {
-          // 1) Get ALL followed channels (paginated)
+          // All follows (paginated)
           let afterFollows = null;
           const allFollows = [];
           do {
@@ -803,21 +763,19 @@
             url.searchParams.set("first", "100");
             if (afterFollows) url.searchParams.set("after", afterFollows);
 
-            const res = await fetch(url.toString(), {
+            const res = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 "Client-Id": CLIENT_ID,
               },
             });
-
             if (res.status === 401 || res.status === 403) {
               localStorage.removeItem("twitch_token");
               throw new Error(
                 `Auth error ${res.status} — please log in again.`
               );
             }
-            if (!res.ok) throw new Error(`Follows API returned ${res.status}`);
-
+            if (!res.ok) throw new Error(`Follows API ${res.status}`);
             const json = await res.json();
             allFollows.push(...json.data);
             afterFollows = json.pagination?.cursor || null;
@@ -825,7 +783,7 @@
 
           const allFollowIds = allFollows.map((f) => f.broadcaster_id);
 
-          // 2) Get ONLY live followed streams (paginated)
+          // Live followed streams (paginated)
           let afterLive = null;
           const liveStreams = [];
           do {
@@ -834,14 +792,13 @@
             url.searchParams.set("first", "100");
             if (afterLive) url.searchParams.set("after", afterLive);
 
-            const res = await fetch(url.toString(), {
+            const res = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 "Client-Id": CLIENT_ID,
               },
             });
-            if (!res.ok) throw new Error(`Streams API returned ${res.status}`);
-
+            if (!res.ok) throw new Error(`Streams API ${res.status}`);
             const json = await res.json();
             liveStreams.push(...json.data);
             afterLive = json.pagination?.cursor || null;
@@ -850,31 +807,25 @@
           const liveIds = new Set(liveStreams.map((s) => s.user_id));
           const offlineIds = allFollowIds.filter((id) => !liveIds.has(id));
 
-          // 3) Enrich USERS for live + offline in chunks of 100
+          // Users enrichment in chunks of 100
           const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
-          const idChunks = chunkArray(idsToFetch, 100);
           const usersById = new Map();
-
-          for (const chunk of idChunks) {
+          for (const chunk of chunkArray(idsToFetch, 100)) {
             if (chunk.length === 0) continue;
             const usersUrl =
               "https://api.twitch.tv/helix/users?" +
               chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
-
             const usersRes = await fetch(usersUrl, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 "Client-Id": CLIENT_ID,
               },
             });
-            if (!usersRes.ok)
-              throw new Error(`Users API returned ${usersRes.status}`);
-
+            if (!usersRes.ok) throw new Error(`Users API ${usersRes.status}`);
             const usersJson = await usersRes.json();
             usersJson.data.forEach((u) => usersById.set(u.id, u));
           }
 
-          // 4) Build arrays
           const liveList = liveStreams.map((s) => {
             const u = usersById.get(s.user_id);
             return {
@@ -905,12 +856,8 @@
 
           followedChannels = [...liveList, ...offlineList];
           offlineVisibleCount = OFFLINE_PAGE_SIZE;
-
-          console.log(
-            `✅ Follows: ${allFollows.length} | Live: ${liveList.length} | Offline: ${offlineList.length}`
-          );
         } catch (err) {
-          console.error("❌ Error fetching follows/live:", err);
+          console.error("Follows/live error:", err);
           loadDemoFollowedChannels();
         } finally {
           updateFollowedChannelsUI();
@@ -919,29 +866,6 @@
             refreshButton.textContent = "🔄 Refresh";
           }
         }
-      }
-
-      function updateUserInfo() {
-        const userInfo = document.getElementById("userInfo");
-        if (user) {
-          userInfo.innerHTML = `
-            <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
-            <span class="username">${user.display_name}</span>
-            <button class="login-btn" onclick="logout()" style="background: #ff4757;">Logout</button>
-          `;
-        } else {
-          userInfo.innerHTML = `
-            <button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>
-          `;
-          followedChannels = [];
-          updateFollowedChannelsUI();
-        }
-      }
-
-      function logout() {
-        localStorage.removeItem("twitch_token");
-        user = null;
-        location.reload();
       }
 
       function loadDemoFollowedChannels() {
@@ -997,7 +921,6 @@
             '<div class="no-channels">Login to see followed channels</div>';
           return;
         }
-
         if (followedChannels.length === 0) {
           container.innerHTML =
             '<div class="no-channels">No followed channels found</div>';
@@ -1021,14 +944,12 @@
         const hasMore = toShow < totalOffline;
 
         let html = "";
-
         if (liveChannels.length > 0) {
           html += `
             <div class="channel-category">
               <div class="category-header">Live (${liveChannels.length})</div>
-              ${liveChannels.map((c) => createChannelHTML(c)).join("")}
-            </div>
-          `;
+              ${liveChannels.map(createChannelHTML).join("")}
+            </div>`;
         }
 
         html += `
@@ -1037,22 +958,17 @@
             ${
               totalOffline === 0
                 ? '<div class="no-channels">No offline channels 🎉</div>'
-                : offlineShown.map((c) => createChannelHTML(c)).join("")
+                : offlineShown.map(createChannelHTML).join("")
             }
             ${
               hasMore
-                ? `<div class="show-more-wrap">
-                     <button id="offlineShowMore" class="show-more-btn">
-                       Show ${Math.min(
-                         OFFLINE_PAGE_SIZE,
-                         totalOffline - toShow
-                       )} more
-                     </button>
-                   </div>`
+                ? `<div class="show-more-wrap"><button id="offlineShowMore" class="show-more-btn">Show ${Math.min(
+                    OFFLINE_PAGE_SIZE,
+                    totalOffline - toShow
+                  )} more</button></div>`
                 : ""
             }
-          </div>
-        `;
+          </div>`;
 
         container.innerHTML = html;
 
@@ -1063,9 +979,9 @@
             !channelLogin.includes("_info") &&
             !channelLogin.includes("_note")
           ) {
-            item.addEventListener("click", function () {
-              addStreamFromSidebar(channelLogin);
-            });
+            item.addEventListener("click", () =>
+              addStreamFromSidebar(channelLogin)
+            );
           } else {
             item.style.cursor = "default";
             item.style.opacity = "0.7";
@@ -1088,7 +1004,6 @@
               channel.viewer_count
             )} viewers</div>`
           : "";
-
         return `
           <div class="channel-item ${
             channel.is_live ? "live" : ""
@@ -1104,48 +1019,36 @@
             <div class="${
               channel.is_live ? "live-indicator" : "offline-indicator"
             }"></div>
-          </div>
-        `;
+          </div>`;
       }
 
       function formatViewerCount(count) {
-        if (count >= 1000000) return (count / 1000000).toFixed(1) + "M";
-        if (count >= 1000) return (count / 1000).toFixed(1) + "K";
-        return count.toString();
+        if (count >= 1_000_000) return (count / 1_000_000).toFixed(1) + "M";
+        if (count >= 1_000) return (count / 1_000).toFixed(1) + "K";
+        return String(count);
       }
 
+      /* ========================== Streams: add/remove/UI ========================== */
       function addStreamFromSidebar(channelLogin) {
         if (streams.find((s) => s.channel === channelLogin)) {
           alert("This stream is already added");
           return;
         }
-
-        const stream = {
-          id: Date.now(),
-          channel: channelLogin,
-          locked: false,
-        };
-
+        const stream = { id: Date.now(), channel: channelLogin, locked: false };
         streams.push(stream);
         saveStreamsToStorage();
 
-        // ⬇️ Incremental DOM add (no full rebuild, players keep playing)
         const grid = document.getElementById("streamsGrid");
-
-        // remove placeholder once, if present
         const empty = grid.querySelector(".no-streams");
         if (empty) empty.remove();
 
-        // create just the new card and append
         const card = createStreamElement(stream, streams.length - 1);
         grid.appendChild(card);
 
-        // ensure DnD is wired and indices are correct
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
         applySingleOrGrid();
 
-        // little visual tickle on the clicked sidebar item (optional)
         const channelItem = document.querySelector(
           `[data-channel="${channelLogin}"]`
         );
@@ -1159,11 +1062,8 @@
       }
 
       function refreshFollowedChannels() {
-        if (user) {
-          console.log("🔄 Refreshing real followed channels");
-          fetchRealFollowedChannels();
-        } else {
-          console.log("👤 No user logged in, showing demo data");
+        if (user) fetchRealFollowedChannels();
+        else {
           loadDemoFollowedChannels();
           updateFollowedChannelsUI();
         }
@@ -1171,8 +1071,7 @@
 
       function setupAutoSuggest() {
         const input = document.getElementById("streamInput");
-
-        input.addEventListener("input", function (e) {
+        input.addEventListener("input", (e) => {
           const query = e.target.value.trim();
           if (query.length < 2) {
             hideSuggestions();
@@ -1182,47 +1081,39 @@
           searchTimeout = setTimeout(() => searchChannels(query), 300);
         });
 
-        input.addEventListener("keydown", function (e) {
+        input.addEventListener("keydown", (e) => {
           const dropdown = document.getElementById("suggestionsDropdown");
           if (dropdown.style.display === "none") return;
 
-          switch (e.key) {
-            case "ArrowDown":
-              e.preventDefault();
-              selectedSuggestionIndex = Math.min(
-                selectedSuggestionIndex + 1,
-                currentSuggestions.length - 1
-              );
-              updateSuggestionSelection();
-              break;
-            case "ArrowUp":
-              e.preventDefault();
-              selectedSuggestionIndex = Math.max(
-                selectedSuggestionIndex - 1,
-                -1
-              );
-              updateSuggestionSelection();
-              break;
-            case "Enter":
-              e.preventDefault();
-              if (
-                selectedSuggestionIndex >= 0 &&
-                currentSuggestions[selectedSuggestionIndex]
-              ) {
-                selectSuggestion(currentSuggestions[selectedSuggestionIndex]);
-              } else {
-                addStream();
-              }
-              break;
-            case "Escape":
-              hideSuggestions();
-              break;
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            selectedSuggestionIndex = Math.min(
+              selectedSuggestionIndex + 1,
+              currentSuggestions.length - 1
+            );
+            updateSuggestionSelection();
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+            updateSuggestionSelection();
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (
+              selectedSuggestionIndex >= 0 &&
+              currentSuggestions[selectedSuggestionIndex]
+            ) {
+              selectSuggestion(currentSuggestions[selectedSuggestionIndex]);
+            } else {
+              addStream();
+            }
+          } else if (e.key === "Escape") {
+            hideSuggestions();
           }
         });
 
-        input.addEventListener("blur", function () {
-          setTimeout(() => hideSuggestions(), 150);
-        });
+        input.addEventListener("blur", () =>
+          setTimeout(() => hideSuggestions(), 150)
+        );
       }
 
       async function searchChannels(query) {
@@ -1275,7 +1166,6 @@
               c.display_name.toLowerCase().includes(query.toLowerCase()) ||
               c.broadcaster_login.toLowerCase().includes(query.toLowerCase())
           );
-
           currentSuggestions = fallback;
           displaySuggestions(fallback);
           return;
@@ -1285,22 +1175,18 @@
           const url = new URL("https://api.twitch.tv/helix/search/channels");
           url.searchParams.set("query", query);
           url.searchParams.set("first", "10");
-          // url.searchParams.set("live_only", "true"); // optional
-
-          const res = await fetch(url.toString(), {
+          const res = await fetch(url, {
             headers: {
               Authorization: `Bearer ${token}`,
               "Client-Id": CLIENT_ID,
             },
           });
-
           if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("twitch_token");
             throw new Error(`Auth error ${res.status}`);
           }
-          if (res.status === 429)
-            throw new Error("Rate limited (429) — try again in a moment.");
-          if (!res.ok) throw new Error(`search/channels failed: ${res.status}`);
+          if (res.status === 429) throw new Error("Rate limited (429)");
+          if (!res.ok) throw new Error(`search/channels ${res.status}`);
 
           const json = await res.json();
           const results = (json.data || []).map((ch) => ({
@@ -1336,28 +1222,27 @@
         dropdown.innerHTML = channels
           .map(
             (channel, index) => `
-              <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
+            <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
               channel.display_name
             }">
-                <img src="${channel.thumbnail_url || ""}" alt="${
+              <img src="${channel.thumbnail_url || ""}" alt="${
               channel.display_name
             }" class="suggestion-avatar">
-                <div class="suggestion-info">
-                  <div class="suggestion-name">${channel.display_name}</div>
-                  <div class="suggestion-game">${channel.game_name || ""}</div>
-                </div>
-                <span class="suggestion-viewers">${
-                  channel.is_live ? "🔴 LIVE" : ""
-                }</span>
+              <div class="suggestion-info">
+                <div class="suggestion-name">${channel.display_name}</div>
+                <div class="suggestion-game">${channel.game_name || ""}</div>
               </div>
-            `
+              <span class="suggestion-viewers">${
+                channel.is_live ? "🔴 LIVE" : ""
+              }</span>
+            </div>
+          `
           )
           .join("");
 
         dropdown.style.display = "block";
 
-        const items = dropdown.querySelectorAll(".suggestion-item");
-        items.forEach((item) => {
+        dropdown.querySelectorAll(".suggestion-item").forEach((item) => {
           item.addEventListener("click", () => {
             const idx = Number(item.getAttribute("data-index"));
             selectSuggestion(channels[idx]);
@@ -1372,8 +1257,7 @@
       }
 
       function updateSuggestionSelection() {
-        const items = document.querySelectorAll(".suggestion-item");
-        items.forEach((item, index) => {
+        document.querySelectorAll(".suggestion-item").forEach((item, index) => {
           item.classList.toggle("selected", index === selectedSuggestionIndex);
         });
       }
@@ -1414,9 +1298,10 @@
         saveStreamsToStorage();
 
         const grid = document.getElementById("streamsGrid");
-        if (grid.querySelector(".no-streams")) grid.innerHTML = ""; // remove placeholder once
+        if (grid.querySelector(".no-streams")) grid.innerHTML = "";
         const card = createStreamElement(stream, streams.length - 1);
         grid.appendChild(card);
+
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
         showEmptyState(false);
@@ -1427,19 +1312,16 @@
       }
 
       function removeStream(streamId) {
-        // 1) update state
         const idx = streams.findIndex((s) => s.id === streamId);
         if (idx === -1) return;
         streams.splice(idx, 1);
         saveStreamsToStorage();
 
-        // 2) remove only that DOM node (don’t rebuild the grid)
         const card = document.querySelector(
           `.stream-item[data-id="${streamId}"]`
         );
         if (card) card.remove();
 
-        // 3) tidy up indices + empty state
         const grid = document.getElementById("streamsGrid");
         grid.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
@@ -1457,42 +1339,38 @@
 
       function updateUI() {
         const grid = document.getElementById("streamsGrid");
-
-        // First render: if there are no cards yet
         const existingCards = grid.querySelectorAll(".stream-item");
+
         if (existingCards.length === 0) {
           if (streams.length === 0) {
             grid.innerHTML = "";
             showEmptyState(true);
             return;
           }
-          grid.innerHTML = ""; // only once on initial render
-          streams.forEach((stream, idx) => {
-            const card = createStreamElement(stream, idx);
-            grid.appendChild(card);
-          });
+          grid.innerHTML = "";
+          streams.forEach((stream, idx) =>
+            grid.appendChild(createStreamElement(stream, idx))
+          );
           enableDragAndDrop(grid);
           showEmptyState(false);
           return;
         }
 
-        // Remove cards no longer in streams[]
+        // Remove cards not in state
         Array.from(existingCards).forEach((card) => {
           const id = Number(card.dataset.id);
-          if (!streams.some((s) => s.id === id)) {
-            card.remove();
-          }
+          if (!streams.some((s) => s.id === id)) card.remove();
         });
 
-        // Add new cards that don't exist yet
+        // Add new cards
         streams.forEach((s, idx) => {
-          if (!findCardById(s.id)) {
-            const card = createStreamElement(s, idx);
-            document.getElementById("streamsGrid").appendChild(card);
-          }
+          if (!findCardById(s.id))
+            document
+              .getElementById("streamsGrid")
+              .appendChild(createStreamElement(s, idx));
         });
 
-        // Reorder DOM to match streams[] (no iframe reloads)
+        // Reorder DOM to match state (no reloads)
         const gridNow = document.getElementById("streamsGrid");
         const orderMap = new Map(streams.map((s, i) => [String(s.id), i]));
         Array.from(gridNow.querySelectorAll(".stream-item"))
@@ -1507,16 +1385,16 @@
         applySingleOrGrid();
       }
 
+      /* ========================== Drag & Drop ========================== */
       function enableDragAndDrop(container) {
-        const items = container.querySelectorAll(".stream-item");
-        items.forEach((item) => {
+        container.querySelectorAll(".stream-item").forEach((item) => {
           if (!item._dndBound) {
             item.addEventListener("dragstart", onDragStart);
             item.addEventListener("dragover", onDragOver);
             item.addEventListener("dragleave", onDragLeave);
             item.addEventListener("drop", onDrop);
             item.addEventListener("dragend", onDragEnd);
-            item._dndBound = true; // avoid double-binding
+            item._dndBound = true;
           }
         });
       }
@@ -1528,15 +1406,12 @@
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", String(dragIndex));
       }
-
       function onDragOver(e) {
         e.preventDefault();
-        const target = e.currentTarget;
-        if (!target.classList.contains("drop-target")) {
-          target.classList.add("drop-target");
-        }
+        const t = e.currentTarget;
+        if (!t.classList.contains("drop-target"))
+          t.classList.add("drop-target");
       }
-
       function onDragLeave(e) {
         e.currentTarget.classList.remove("drop-target");
       }
@@ -1551,22 +1426,17 @@
         if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
           return;
 
-        // Update array order
         const [moved] = streams.splice(from, 1);
         streams.splice(to, 0, moved);
         saveStreamsToStorage();
 
-        // Move the DOM node (no iframe reload)
+        // Reposition DOM node directly to avoid iframe reloads
         const grid = document.getElementById("streamsGrid");
         const nodes = Array.from(grid.querySelectorAll(".stream-item"));
         const movingEl = nodes[from];
         const referenceEl = nodes[to];
-
-        if (from < to) {
-          grid.insertBefore(movingEl, referenceEl.nextSibling);
-        } else {
-          grid.insertBefore(movingEl, referenceEl);
-        }
+        if (from < to) grid.insertBefore(movingEl, referenceEl.nextSibling);
+        else grid.insertBefore(movingEl, referenceEl);
 
         refreshItemIndices(grid);
         applySingleOrGrid();
@@ -1577,6 +1447,7 @@
         dragIndex = null;
       }
 
+      /* ========================== Storage & Helpers ========================== */
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
       }
@@ -1584,16 +1455,14 @@
       function loadStreamsFromStorage() {
         const stored = localStorage.getItem("multistream_data");
         if (stored) {
-          const parsedStreams = JSON.parse(stored);
-          streams = parsedStreams.map((stream) => ({
-            id: stream.id,
-            channel: stream.channel,
-            locked: stream.locked || false,
+          const parsed = JSON.parse(stored);
+          streams = parsed.map((s) => ({
+            id: s.id,
+            channel: s.channel,
+            locked: s.locked || false,
           }));
         }
       }
-
-      // --- helpers ---------------------------------------------------------------
 
       function findCardById(id) {
         return document.querySelector(`.stream-item[data-id="${id}"]`);
@@ -1623,32 +1492,25 @@
         card.dataset.id = String(stream.id);
 
         card.innerHTML = `
-    <div class="stream-header">
-      <span class="stream-title">${stream.channel}</span>
-      <div class="stream-controls">
-        <button class="remove-btn"
-                onclick="event.stopPropagation(); removeStream(${stream.id})">
-          Remove
-        </button>
-      </div>
-    </div>
-    <div class="stream-video-container" data-stream-id="${stream.id}">
-      <iframe
-        src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-        class="stream-video"
-        frameborder="0"
-        allowfullscreen="true"
-        scrolling="no">
-      </iframe>
-    </div>
-    <div class="stream-chat">
-      <iframe
-        src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-        frameborder="0"
-        scrolling="no">
-      </iframe>
-    </div>
-  `;
+          <div class="stream-header">
+            <span class="stream-title">${stream.channel}</span>
+            <div class="stream-controls">
+              <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${stream.id})">Remove</button>
+            </div>
+          </div>
+          <div class="stream-video-container" data-stream-id="${stream.id}">
+            <iframe
+              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
+              class="stream-video" frameborder="0" allowfullscreen="true" scrolling="no">
+            </iframe>
+          </div>
+          <div class="stream-chat">
+            <iframe
+              src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+              frameborder="0" scrolling="no">
+            </iframe>
+          </div>
+        `;
         return card;
       }
 
@@ -1658,25 +1520,23 @@
         });
       }
 
-      /* === Single-stream layout controller (refined) ============================ */
+      /* ========================== Single-card layout controller ========================== */
       (() => {
-        const CHAT_W = 340; // chat width in px
+        const CHAT_W = 340; // px
 
         function sizeSingle(card) {
           const grid = document.getElementById("streamsGrid");
           const header = document.querySelector(".header");
           if (!card || !grid) return;
 
-          // Available space
           const headerH = header ? header.offsetHeight : 0;
           const gridRect = grid.getBoundingClientRect();
-          const availW = gridRect.width; // content width
-          const availH = window.innerHeight - headerH; // from below header to bottom
+          const availW = gridRect.width;
+          const availH = window.innerHeight - headerH;
 
-          const verticalMargin = 16; // small safety
+          const verticalMargin = 16;
           const usableH = Math.max(0, availH - verticalMargin);
 
-          // Compute 16:9 player next to fixed-width chat
           const chatW = CHAT_W;
           const maxVidW = Math.max(0, availW - chatW);
           const maxVidH_fromW = maxVidW / (16 / 9);
@@ -1688,14 +1548,12 @@
           const chat = card.querySelector(".stream-chat");
           if (!video || !chat) return;
 
-          // If too small to fit side-by-side, bail out to default stacked
           if (videoH <= 0 || videoW <= 0) {
             resetSingleSizing(card);
             card.classList.remove("single");
             return;
           }
 
-          // Apply sizes
           card.style.setProperty("--chat-w", chatW + "px");
           video.style.width = videoW + "px";
           video.style.height = videoH + "px";
@@ -1724,7 +1582,6 @@
           const cards = grid.querySelectorAll(".stream-item");
           if (cards.length === 1) {
             const card = cards[0];
-            // ensure only this card is single
             grid.querySelectorAll(".stream-item.single").forEach((c) => {
               if (c !== card) {
                 resetSingleSizing(c);
@@ -1735,7 +1592,6 @@
             sizeSingle(card);
             window.addEventListener("resize", onSingleResize);
           } else {
-            // leaving single mode: clear inline sizes so 16:9 returns
             grid.querySelectorAll(".stream-item.single").forEach((card) => {
               resetSingleSizing(card);
               card.classList.remove("single");
@@ -1749,18 +1605,16 @@
           if (card) sizeSingle(card);
         }
 
-        // Observe grid changes (add/remove/reorder) and re-apply layout
+        // React to DOM changes in the grid
         document.addEventListener("DOMContentLoaded", () => {
           const grid = document.getElementById("streamsGrid");
           if (!grid) return;
-
           const obs = new MutationObserver(applySingleOrGrid);
           obs.observe(grid, { childList: true, subtree: false });
-
           applySingleOrGrid();
         });
 
-        // Expose for manual calls if needed
+        // Expose for manual calls
         window.applySingleOrGrid = applySingleOrGrid;
       })();
     </script>
