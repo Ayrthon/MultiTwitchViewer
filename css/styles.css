@@ -520,7 +520,7 @@ body.focus-mode .stream-item:not(.focused) {
 /* When focusing, hide chat on non-focused to keep things tidy */
 body.focus-mode .stream-item:not(.focused) .stream-chat {
   display: flex;
-  height: 320px; /* tweak to taste */
+  height: 420px;
 }
 
 /* make sure the iframe fills whatever height you set */
