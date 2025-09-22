@@ -71,7 +71,7 @@ body {
 
 /* ========== Sidebar ========== */
 .sidebar {
-  width: 240px;
+  min-width: 240px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-right: 2px solid rgba(145, 70, 255, 0.3);
