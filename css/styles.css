@@ -536,3 +536,22 @@ body.focus-mode .stream-item:not(.focused) .stream-chat {
 .focus-btn:hover {
   filter: brightness(0.95);
 }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9146ff;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #772ce8;
+}
