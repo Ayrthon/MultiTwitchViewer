@@ -563,3 +563,80 @@ body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
 ::-webkit-scrollbar-thumb:hover {
   background: #772ce8;
 }
+
+/* Drawer variables */
+.app-container {
+  --drawer-w: 240px; /* open width */
+  --drawer-gap: 0px; /* gap after drawer (if you want one) */
+  --header-h: 80px; /* matches your sticky header */
+  position: relative;
+}
+
+/* Toggle button style (tweak to taste) */
+.drawer-toggle {
+  background: linear-gradient(45deg, #9146ff, #772ce8);
+  border: 0;
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.drawer-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
+}
+
+/* Make the layout a grid so we can "collapse" the first column to 0 cleanly */
+.app-container {
+  display: grid;
+  grid-template-columns: var(--drawer-w) var(--drawer-gap) 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* When closed, the drawer column becomes 0 */
+.app-container[data-drawer-closed] {
+  grid-template-columns: 0 var(--drawer-gap) 1fr;
+}
+
+/* Place elements into the grid */
+.sidebar {
+  grid-column: 1;
+  grid-row: 1;
+  /* Let it be sticky inside the grid cell */
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100dvh - var(--header-h));
+  overflow: hidden;
+  border-right: 2px solid rgba(145, 70, 255, 0.3);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+
+  /* Smooth column-width transitions: wrap content so we can slide it */
+  /* The outer sidebar's width is controlled by the grid column. */
+}
+.main-wrapper {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+/* For a nice slide-out animation, add an inner wrapper to sidebar in HTML:
+   <aside class="sidebar"><div class="sidebar__inner"> ... </div></aside>
+   If you can't change HTML, you can apply these to .sidebar directly, but the
+   slide will look like a clip instead of a slide. */
+.sidebar__inner {
+  width: 240px; /* the full drawer width when open */
+  transform: translateX(0);
+  transition: transform 250ms ease, opacity 250ms ease;
+}
+
+/* When closed, slide the inner content left while the column collapses to 0 */
+.app-container[data-drawer-closed] .sidebar__inner {
+  transform: translateX(-100%);
+  opacity: 0.98;
+}
+
+/* Optional: disable pointer events when closed (prevents accidental clicks) */
+.app-container[data-drawer-closed] .sidebar {
+  pointer-events: none;
+}
