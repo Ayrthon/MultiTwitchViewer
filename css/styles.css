@@ -317,10 +317,11 @@ body {
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  display: flex;
+  flex-flow: column;
+  /* display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); */
   gap: 1rem;
-  /* max-width: calc(4 * 500px); */
   margin: 0 auto;
 }
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
@@ -481,11 +482,11 @@ body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
 }
 
 /* optional: slightly shorter on mobile */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   body.focus-mode .stream-item:not(.focused) .stream-chat {
     height: 260px;
   }
-}
+} */
 
 .focus-btn {
   background: #2dd4bf;
