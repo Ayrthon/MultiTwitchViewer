@@ -4,6 +4,11 @@
   padding: 0;
   box-sizing: border-box;
 }
+:root {
+  --chat-w: 340px;
+  --header-h: 76px; /* adjust if your header is taller/shorter */
+}
+
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
@@ -71,7 +76,7 @@ body {
 
 /* ========== Sidebar ========== */
 .sidebar {
-  min-width: 240px;
+  width: 240px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-right: 2px solid rgba(145, 70, 255, 0.3);
@@ -323,6 +328,7 @@ body {
   max-width: calc(4 * 500px);
   margin: 0 auto;
 }
+
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
 body.focus-mode .streams-grid {
   display: flex;
@@ -341,22 +347,28 @@ body.focus-mode .streams-grid {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: fit-content;
+  height: fit-content; /* default: cards size to content in grid mode */
 }
 .stream-item:hover {
   border-color: #9146ff;
   transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(145, 70, 255, 0.2);
 }
+
 /* Focus-mode sizing using flex without DOM moves */
 body.focus-mode .stream-item.focused {
   order: -1;
   width: 100%;
+  /* Make the focused card consume available viewport height */
+  height: calc(100dvh - var(--header-h) - 16px);
 }
 body.focus-mode .stream-item:not(.focused) {
   width: 420px;
+  /* keep non-focused cards shorter but responsive */
+  height: auto;
 }
 
+/* Header / controls */
 .stream-header {
   padding: 1rem;
   background: rgba(145, 70, 255, 0.2);
@@ -399,11 +411,13 @@ body.focus-mode .stream-item:not(.focused) {
   transform: none;
 }
 
+/* Video */
 .stream-video-container {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
+  flex: 0 0 auto;
 }
 .stream-video {
   position: absolute;
@@ -412,15 +426,16 @@ body.focus-mode .stream-item:not(.focused) {
   height: 100%;
 }
 
+/* Chat: responsive heights (vh fallback → dvh dynamic) */
 .stream-chat {
-  /* height: calc(
-    100svh - var(--header-h) - 420px
-  ); 16px = padding/margin tweak */
-  height: 55dvh;
+  /* Old: height: 55svh;  */
+  height: 55vh; /* fallback */
+  height: 55dvh; /* dynamic viewport for modern browsers */
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   border-radius: 0 0 15px 15px;
+  min-height: 0; /* allow shrinking when inside grid/flex */
 }
 .stream-chat iframe {
   width: 100%;
@@ -429,23 +444,14 @@ body.focus-mode .stream-item:not(.focused) {
   border-radius: 0 0 15px 15px;
 }
 
-.no-streams {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.2rem;
-}
-
 /* ========== Single-card layout (video left + chat right) ========== */
-:root {
-  --chat-w: 340px;
-  --header-h: 76px; /* adjust if your header is taller/shorter */
-}
 .stream-item.single {
   display: grid;
   grid-template-columns: 1fr var(--chat-w);
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr); /* header + leftover space */
   align-items: stretch;
+  /* Make the single layout fill the viewport nicely */
+  height: calc(100dvh - var(--header-h) - 16px);
 }
 .stream-item.single .stream-header {
   grid-column: 1 / -1;
@@ -458,8 +464,10 @@ body.focus-mode .stream-item:not(.focused) {
 .stream-item.single .stream-chat {
   grid-column: 2;
   grid-row: 2;
-  height: auto;
+  height: auto; /* let the grid row define height */
   border-radius: 0;
+  min-height: 0; /* critical so it can shrink */
+  overflow: hidden; /* or auto if you want internal scrollbars */
 }
 .stream-item.single .stream-chat iframe {
   width: 100%;
@@ -467,26 +475,28 @@ body.focus-mode .stream-item:not(.focused) {
   display: block;
 }
 
-/* When focusing, hide chat on non-focused to keep things tidy */
+/* When focusing, keep non-focused cards tidy but responsive */
 body.focus-mode .stream-item:not(.focused) .stream-chat {
+  /* Previously fixed 420px; make it responsive to viewport instead */
+  height: 40vh; /* fallback */
+  height: 40dvh; /* dynamic */
   display: flex;
-  height: 420px;
 }
-
-/* make sure the iframe fills whatever height you set */
 body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
   height: 100%;
   width: 100%;
   display: block;
 }
 
-/* optional: slightly shorter on mobile */
-/* @media (max-width: 768px) {
-  body.focus-mode .stream-item:not(.focused) .stream-chat {
-    height: 260px;
-  }
-} */
+/* No streams */
+.no-streams {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.2rem;
+}
 
+/* Buttons */
 .focus-btn {
   background: #2dd4bf;
   border: 0;
@@ -506,17 +516,14 @@ body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #9146ff;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #772ce8;
 }
