@@ -5,14 +5,12 @@ import {
   loadDemoFollowedChannels,
   updateFollowedChannelsUI,
   fetchRealFollowedChannels,
-  startSidebarAutoRefresh,
-  stopSidebarAutoRefresh,
 } from "./follows.js";
 import { setupAutoSuggest } from "./search.js";
 import { updateUI, addStream, addStreamFromSidebar } from "./ui.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Buttons
+  // Wire top-level buttons
   document.getElementById("addStreamBtn").addEventListener("click", addStream);
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) loginBtn.addEventListener("click", loginToTwitch);
@@ -24,10 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Custom events
-  window.addEventListener("sidebar:addStream", (e) =>
-    addStreamFromSidebar(e.detail)
-  );
+  // Listen for sidebar actions
+  window.addEventListener("sidebar:addStream", (e) => {
+    addStreamFromSidebar(e.detail);
+  });
+
+  // Listen for Enter/addStream from search
   window.addEventListener("ui:addStream", addStream);
 
   // Boot
@@ -36,20 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
   updateUI();
   setupAutoSuggest();
 
-  if (!state.user) loadDemoFollowedChannels();
+  if (!state.user) {
+    loadDemoFollowedChannels();
+  }
   updateFollowedChannelsUI();
   updateUserInfo();
-
-  // Auto-refresh lifecycle
-  startSidebarAutoRefresh();
-
-  // Pause/resume when tab visibility changes
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopSidebarAutoRefresh();
-    else startSidebarAutoRefresh();
-  });
-
-  // Handle network status
-  window.addEventListener("online", () => startSidebarAutoRefresh());
-  window.addEventListener("offline", () => stopSidebarAutoRefresh());
 });
