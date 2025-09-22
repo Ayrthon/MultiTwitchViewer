@@ -70,12 +70,8 @@ body {
 }
 
 /* ========== Sidebar ========== */
-
-/* variables + transition */
-:root {
-  --sidebar-w: 240px;
-}
 .sidebar {
+  width: 240px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-right: 2px solid rgba(145, 70, 255, 0.3);
@@ -84,47 +80,6 @@ body {
   position: sticky;
   top: 80px;
   height: calc(100vh - 80px);
-  overflow: hidden;
-  width: var(--sidebar-w);
-  transition: width 0.28s ease, transform 0.28s ease, opacity 0.2s ease,
-    border-right-width 0.2s ease;
-}
-.sidebar-toggle {
-  position: fixed;
-  top: 92px; /* just under your sticky header */
-  left: 12px;
-  z-index: 2000;
-  border: none;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(6px);
-  display: none; /* default hidden */
-}
-body.sidebar-collapsed .sidebar-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-/* a little hover delight */
-.sidebar-toggle:hover {
-  transform: translateY(-1px);
-}
-/* optional: hide chats rule tweak if you previously hid non-focused chats */
-/* body.focus-mode .stream-item:not(.focused) .stream-chat { display: flex; height: 320px; }
-body.focus-mode .stream-item:not(.focused) .stream-chat iframe { height: 100%; } */
-
-/* collapsed: free space for main content and slide left a bit */
-body.sidebar-collapsed .sidebar {
-  width: 0;
-  transform: translateX(-20px);
-  opacity: 0;
-  border-right-width: 0;
-  pointer-events: none;
   overflow: hidden;
 }
 .followed-channels {
