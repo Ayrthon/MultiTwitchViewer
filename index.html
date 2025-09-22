@@ -593,6 +593,40 @@
           background: rgba(126, 0, 105, 0.37);
         }
       }
+      /* === Single stream: video left (16:9) + chat right, no spacing === */
+      .stream-item.single {
+        display: grid;
+        grid-template-columns: 1fr var(--chat-w, 340px); /* video | chat */
+        grid-template-rows: auto 1fr; /* header on top, then content */
+        column-gap: 0;
+        row-gap: 0;
+        align-items: stretch;
+      }
+
+      /* Header spans both columns */
+      .stream-item.single .stream-header {
+        grid-column: 1 / -1;
+      }
+
+      /* Side-by-side content row */
+      .stream-item.single .stream-video-container {
+        grid-column: 1;
+        grid-row: 2;
+        /* we’ll set explicit width/height via JS to keep 16:9 and fit viewport */
+      }
+
+      .stream-item.single .stream-chat {
+        grid-column: 2;
+        grid-row: 2;
+        height: auto; /* JS will size to match the video height */
+        border-radius: 0; /* keep edges flush with video */
+      }
+
+      .stream-item.single .stream-chat iframe {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -1697,6 +1731,109 @@
         const card = document.querySelector(".stream-item.single");
         if (card) sizeSingle(card);
       }
+      /* === Single-stream layout controller ===================================== */
+      (() => {
+        const CHAT_W = 340; // chat panel width (px). Adjust if you like.
+
+        function sizeSingle(card) {
+          const grid = document.getElementById("streamsGrid");
+          const header = document.querySelector(".header");
+          if (!card || !grid) return;
+
+          // Available space
+          const headerH = header ? header.offsetHeight : 0;
+          const gridRect = grid.getBoundingClientRect();
+          const availW = gridRect.width; // content width
+          const availH = window.innerHeight - headerH; // from below header to bottom
+
+          // Respect grid/content padding if any (a little safety margin)
+          const verticalMargin = 16; // tweak if needed
+          const usableH = Math.max(0, availH - verticalMargin);
+
+          // Compute 16:9 player that also leaves room for chat on the right
+          const chatW = CHAT_W;
+          const maxVidW = Math.max(0, availW - chatW); // width left for the 16:9 video
+          const maxVidH_fromW = maxVidW / (16 / 9);
+
+          // Final video height is capped by viewport height and width constraint
+          const videoH = Math.floor(Math.min(usableH, maxVidH_fromW));
+          const videoW = Math.floor(videoH * (16 / 9));
+
+          const video = card.querySelector(".stream-video-container");
+          const chat = card.querySelector(".stream-chat");
+          if (!video || !chat) return;
+
+          // If it really can't fit side-by-side (super narrow), gracefully fall back stacked
+          if (videoH <= 0 || videoW <= 0) {
+            resetSingleSizing(card);
+            card.classList.remove("single");
+            return;
+          }
+
+          // Apply sizes
+          card.style.setProperty("--chat-w", chatW + "px");
+          video.style.width = videoW + "px";
+          video.style.height = videoH + "px";
+          chat.style.width = chatW + "px";
+          chat.style.height = videoH + "px";
+        }
+
+        function resetSingleSizing(card) {
+          const video = card.querySelector(".stream-video-container");
+          const chat = card.querySelector(".stream-chat");
+          if (video) {
+            video.style.width = "";
+            video.style.height = "";
+          }
+          if (chat) {
+            chat.style.width = "";
+            chat.style.height = "";
+          }
+          card.style.removeProperty("--chat-w");
+        }
+
+        function applySingleOrGrid() {
+          const grid = document.getElementById("streamsGrid");
+          if (!grid) return;
+
+          const cards = grid.querySelectorAll(".stream-item");
+          // Only apply when there is exactly one stream
+          if (cards.length === 1) {
+            const card = cards[0];
+            card.classList.add("single");
+            sizeSingle(card);
+            window.addEventListener("resize", onSingleResize);
+          } else {
+            // Remove single layout from any cards and reset sizing
+            grid.querySelectorAll(".stream-item.single").forEach((card) => {
+              resetSingleSizing(card);
+              card.classList.remove("single");
+            });
+            window.removeEventListener("resize", onSingleResize);
+          }
+        }
+
+        function onSingleResize() {
+          const card = document.querySelector(".stream-item.single");
+          if (card) sizeSingle(card);
+        }
+
+        // Keep layout correct whenever cards are added/removed/reordered
+        document.addEventListener("DOMContentLoaded", () => {
+          const grid = document.getElementById("streamsGrid");
+          if (!grid) return;
+
+          // Observe card list changes and re-apply layout automatically
+          const obs = new MutationObserver(applySingleOrGrid);
+          obs.observe(grid, { childList: true });
+
+          // First pass
+          applySingleOrGrid();
+        });
+
+        // Also expose a global in case you want to call it manually
+        window.applySingleOrGrid = applySingleOrGrid;
+      })();
     </script>
   </body>
 </html>
