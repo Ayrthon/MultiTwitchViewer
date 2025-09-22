@@ -414,7 +414,7 @@ body.focus-mode .stream-item:not(.focused) {
 
 .stream-chat {
   background: rgba(0, 0, 0, 0.6);
-  height: 700px;
+  height: 52svh;
   display: flex;
   flex-direction: column;
   border-radius: 0 0 15px 15px;
