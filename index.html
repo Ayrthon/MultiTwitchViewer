@@ -11,7 +11,6 @@
         padding: 0;
         box-sizing: border-box;
       }
-
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
@@ -20,13 +19,11 @@
         display: flex;
         flex-direction: column;
       }
-
       .app-container {
         display: flex;
         flex: 1;
         min-height: calc(100vh - 80px);
       }
-
       .header {
         background: rgba(0, 0, 0, 0.8);
         backdrop-filter: blur(10px);
@@ -39,20 +36,17 @@
         top: 0;
         z-index: 1000;
       }
-
       .logo {
         font-size: 1.8rem;
         font-weight: bold;
         color: #9146ff;
         text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
       }
-
       .user-info {
         display: flex;
         align-items: center;
         gap: 1rem;
       }
-
       .login-btn,
       .add-stream-btn {
         background: linear-gradient(45deg, #9146ff, #772ce8);
@@ -71,7 +65,6 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
       }
-
       .user-avatar {
         width: 32px;
         height: 32px;
@@ -96,7 +89,6 @@
         height: calc(100vh - 80px);
         overflow: hidden;
       }
-
       .followed-channels {
         flex: 1;
         overflow-y: auto;
@@ -105,7 +97,6 @@
       .channel-category {
         margin-bottom: 1rem;
       }
-
       .category-header {
         padding: 0.5rem 1rem;
         font-size: 0.8rem;
@@ -116,7 +107,6 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         margin-bottom: 0.5rem;
       }
-
       .channel-item {
         padding: 0.7rem 1rem;
         cursor: pointer;
@@ -137,7 +127,6 @@
         background: rgba(255, 107, 107, 0.2);
         border-left-color: #ff6b6b;
       }
-
       .channel-avatar {
         width: 32px;
         height: 32px;
@@ -149,7 +138,6 @@
         border-color: #ff6b6b;
         box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
       }
-
       .channel-info {
         flex: 1;
         min-width: 0;
@@ -179,7 +167,6 @@
         font-weight: bold;
         margin-top: 2px;
       }
-
       .live-indicator,
       .offline-indicator {
         width: 8px;
@@ -194,7 +181,6 @@
       .offline-indicator {
         background: #adadb8;
       }
-
       @keyframes pulse {
         0%,
         100% {
@@ -204,7 +190,6 @@
           opacity: 0.4;
         }
       }
-
       .refresh-button {
         margin: 1rem;
         padding: 0.6rem 1rem;
@@ -226,7 +211,6 @@
         cursor: not-allowed;
         transform: none;
       }
-
       .no-channels {
         text-align: center;
         padding: 2rem 1rem;
@@ -241,7 +225,6 @@
         display: flex;
         flex-direction: column;
       }
-
       .controls {
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(5px);
@@ -250,13 +233,11 @@
         align-items: center;
         flex-wrap: wrap;
       }
-
       .input-container {
         flex: 1;
         min-width: 300px;
         position: relative;
       }
-
       .stream-input {
         width: 100%;
         padding: 0.7rem 1rem;
@@ -275,7 +256,6 @@
       .stream-input::placeholder {
         color: rgba(255, 255, 255, 0.6);
       }
-
       .suggestions-dropdown {
         position: absolute;
         top: 100%;
@@ -338,7 +318,6 @@
         color: #9146ff;
         font-style: italic;
       }
-
       .main-content {
         padding: 2rem;
       }
@@ -351,7 +330,6 @@
         max-width: calc(4 * 500px);
         margin: 0 auto;
       }
-
       .stream-item {
         background: rgba(0, 0, 0, 0.4);
         border-radius: 15px;
@@ -368,7 +346,6 @@
         transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(145, 70, 255, 0.2);
       }
-
       .stream-header {
         padding: 1rem;
         background: rgba(145, 70, 255, 0.2);
@@ -389,7 +366,6 @@
         align-items: center;
         flex-wrap: wrap;
       }
-
       .remove-btn {
         background: #ff4757;
         border: none;
@@ -410,11 +386,10 @@
         cursor: not-allowed;
         transform: none;
       }
-
       .stream-video-container {
         position: relative;
         width: 100%;
-        aspect-ratio: 16 / 9;
+        aspect-ratio: 16/9;
         background: #000;
         cursor: pointer;
       }
@@ -424,7 +399,6 @@
         width: 100%;
         height: 100%;
       }
-
       .stream-chat {
         background: rgba(0, 0, 0, 0.6);
         height: 700px;
@@ -438,7 +412,6 @@
         border: none;
         border-radius: 0 0 15px 15px;
       }
-
       .no-streams {
         text-align: center;
         padding: 4rem 2rem;
@@ -516,7 +489,7 @@
           min-width: auto;
         }
         .stream-video-container {
-          aspect-ratio: 16 / 9;
+          aspect-ratio: 16/9;
         }
         .stream-chat {
           height: 300px;
@@ -539,7 +512,7 @@
       .stream-item.single {
         display: grid;
         grid-template-columns: 1fr var(--chat-w, 340px);
-        grid-template-rows: auto 1fr; /* header on row 1, content on row 2 */
+        grid-template-rows: auto 1fr;
         column-gap: 0;
         row-gap: 0;
         align-items: stretch;
@@ -556,23 +529,22 @@
         grid-column: 2;
         grid-row: 2;
         height: auto;
-        border-radius: 0; /* flush edge */
+        border-radius: 0;
       }
       .stream-item.single .stream-chat iframe {
         width: 100%;
         height: 100%;
         display: block;
       }
-
-      /* Ensure non-single cards keep responsive 16:9 + default chat height */
       .stream-item:not(.single) .stream-video-container {
         width: 100%;
         height: auto;
-        aspect-ratio: 16 / 9;
+        aspect-ratio: 16/9;
       }
       .stream-item:not(.single) .stream-chat {
         height: 700px;
       }
+
       /* ===== Focus mode ===== */
       .focus-btn {
         background: #2dd4bf;
@@ -591,13 +563,11 @@
 
       body.focus-mode .streams-grid {
         display: block; /* stack focused on top, others below inline */
+        width: 100%; /* ensure measurable width for sizing */
       }
-
       .stream-item.focused {
         margin-bottom: 16px;
       }
-
-      /* Compact cards below the focused one */
       .stream-item.compact {
         display: inline-block;
         vertical-align: top;
@@ -605,16 +575,12 @@
         margin: 0 12px 12px 0;
         border-radius: 12px;
       }
-
-      /* Compact: hide chat, keep 16:9 video */
       .stream-item.compact .stream-chat {
         display: none;
       }
       .stream-item.compact .stream-video-container {
-        aspect-ratio: 16 / 9;
+        aspect-ratio: 16/9;
       }
-
-      /* Optional: tone down header on compact */
       .stream-item.compact .stream-header {
         background: rgba(145, 70, 255, 0.12);
         padding: 0.6rem 0.8rem;
@@ -647,7 +613,6 @@
     </div>
 
     <div class="app-container">
-      <!-- Sidebar -->
       <div class="sidebar">
         <div class="followed-channels" id="followedChannels">
           <div class="no-channels" id="noFollowedChannels">
@@ -663,7 +628,6 @@
         </button>
       </div>
 
-      <!-- Main Content -->
       <div class="main-wrapper">
         <div class="main-content">
           <div class="streams-grid" id="streamsGrid">
@@ -716,7 +680,6 @@
         const params = new URLSearchParams(hash);
         const accessToken = params.get("access_token");
         const error = params.get("error");
-
         if (error) {
           alert(`Login failed: ${error}`);
           return;
@@ -759,10 +722,10 @@
         const userInfo = document.getElementById("userInfo");
         if (user) {
           userInfo.innerHTML = `
-                  <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
-                  <span class="username">${user.display_name}</span>
-                  <button class="login-btn" onclick="logout()" style="background:#ff4757;">Logout</button>
-                `;
+            <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
+            <span class="username">${user.display_name}</span>
+            <button class="login-btn" onclick="logout()" style="background:#ff4757;">Logout</button>
+          `;
         } else {
           userInfo.innerHTML = `<button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>`;
           followedChannels = [];
@@ -809,7 +772,6 @@
             url.searchParams.set("user_id", user.id);
             url.searchParams.set("first", "100");
             if (afterFollows) url.searchParams.set("after", afterFollows);
-
             const res = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -838,7 +800,6 @@
             url.searchParams.set("user_id", user.id);
             url.searchParams.set("first", "100");
             if (afterLive) url.searchParams.set("after", afterLive);
-
             const res = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -858,7 +819,7 @@
           const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
           const usersById = new Map();
           for (const chunk of chunkArray(idsToFetch, 100)) {
-            if (chunk.length === 0) continue;
+            if (!chunk.length) continue;
             const usersUrl =
               "https://api.twitch.tv/helix/users?" +
               chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
@@ -962,7 +923,6 @@
 
       function updateFollowedChannelsUI() {
         const container = document.getElementById("followedChannels");
-
         if (!user) {
           container.innerHTML =
             '<div class="no-channels">Login to see followed channels</div>';
@@ -984,7 +944,6 @@
 
         const liveChannels = sorted.filter((ch) => ch.is_live);
         const offlineAll = sorted.filter((ch) => !ch.is_live);
-
         const totalOffline = offlineAll.length;
         const toShow = Math.min(offlineVisibleCount, totalOffline);
         const offlineShown = offlineAll.slice(0, toShow);
@@ -993,32 +952,28 @@
         let html = "";
         if (liveChannels.length > 0) {
           html += `
-                  <div class="channel-category">
-                    <div class="category-header">Live (${
-                      liveChannels.length
-                    })</div>
-                    ${liveChannels.map(createChannelHTML).join("")}
-                  </div>`;
+            <div class="channel-category">
+              <div class="category-header">Live (${liveChannels.length})</div>
+              ${liveChannels.map(createChannelHTML).join("")}
+            </div>`;
         }
-
         html += `
-                <div class="channel-category">
-                  <div class="category-header">Offline (${totalOffline})</div>
-                  ${
-                    totalOffline === 0
-                      ? '<div class="no-channels">No offline channels 🎉</div>'
-                      : offlineShown.map(createChannelHTML).join("")
-                  }
-                  ${
-                    hasMore
-                      ? `<div class="show-more-wrap"><button id="offlineShowMore" class="show-more-btn">Show ${Math.min(
-                          OFFLINE_PAGE_SIZE,
-                          totalOffline - toShow
-                        )} more</button></div>`
-                      : ""
-                  }
-                </div>`;
-
+          <div class="channel-category">
+            <div class="category-header">Offline (${totalOffline})</div>
+            ${
+              totalOffline === 0
+                ? '<div class="no-channels">No offline channels 🎉</div>'
+                : offlineShown.map(createChannelHTML).join("")
+            }
+            ${
+              hasMore
+                ? `<div class="show-more-wrap"><button id="offlineShowMore" class="show-more-btn">Show ${Math.min(
+                    OFFLINE_PAGE_SIZE,
+                    totalOffline - toShow
+                  )} more</button></div>`
+                : ""
+            }
+          </div>`;
         container.innerHTML = html;
 
         container.querySelectorAll(".channel-item").forEach((item) => {
@@ -1036,7 +991,6 @@
             item.style.opacity = "0.7";
           }
         });
-
         const showMoreBtn = document.getElementById("offlineShowMore");
         if (showMoreBtn)
           showMoreBtn.addEventListener("click", () => showMoreOffline());
@@ -1054,21 +1008,21 @@
             )} viewers</div>`
           : "";
         return `
-                <div class="channel-item ${
-                  channel.is_live ? "live" : ""
-                }" data-channel="${channel.login}">
-                  <img src="${channel.profile_image_url}" alt="${
+          <div class="channel-item ${
+            channel.is_live ? "live" : ""
+          }" data-channel="${channel.login}">
+            <img src="${channel.profile_image_url}" alt="${
           channel.display_name
         }" class="channel-avatar">
-                  <div class="channel-info">
-                    <div class="channel-name">${channel.display_name}</div>
-                    <div class="channel-game">${channel.game_name}</div>
-                    ${viewerText}
-                  </div>
-                  <div class="${
-                    channel.is_live ? "live-indicator" : "offline-indicator"
-                  }"></div>
-                </div>`;
+            <div class="channel-info">
+              <div class="channel-name">${channel.display_name}</div>
+              <div class="channel-game">${channel.game_name}</div>
+              ${viewerText}
+            </div>
+            <div class="${
+              channel.is_live ? "live-indicator" : "offline-indicator"
+            }"></div>
+          </div>`;
       }
 
       function formatViewerCount(count) {
@@ -1249,7 +1203,6 @@
             thumbnail_url: ch.thumbnail_url || "",
             title: ch.title || "",
           }));
-
           currentSuggestions = results;
           displaySuggestions(results);
         } catch (err) {
@@ -1273,28 +1226,24 @@
         dropdown.innerHTML = channels
           .map(
             (channel, index) => `
-                  <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
+          <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
               channel.display_name
             }">
-                    <img src="${channel.thumbnail_url || ""}" alt="${
+            <img src="${channel.thumbnail_url || ""}" alt="${
               channel.display_name
             }" class="suggestion-avatar">
-                    <div class="suggestion-info">
-                      <div class="suggestion-name">${channel.display_name}</div>
-                      <div class="suggestion-game">${
-                        channel.game_name || ""
-                      }</div>
-                    </div>
-                    <span class="suggestion-viewers">${
-                      channel.is_live ? "🔴 LIVE" : ""
-                    }</span>
-                  </div>
-                `
+            <div class="suggestion-info">
+              <div class="suggestion-name">${channel.display_name}</div>
+              <div class="suggestion-game">${channel.game_name || ""}</div>
+            </div>
+            <span class="suggestion-viewers">${
+              channel.is_live ? "🔴 LIVE" : ""
+            }</span>
+          </div>`
           )
           .join("");
 
         dropdown.style.display = "block";
-
         dropdown.querySelectorAll(".suggestion-item").forEach((item) => {
           item.addEventListener("click", () => {
             const idx = Number(item.getAttribute("data-index"));
@@ -1336,7 +1285,6 @@
       function addStream() {
         const input = document.getElementById("streamInput");
         const channelName = input.value.trim().toLowerCase();
-
         if (!channelName) {
           alert("Please enter a channel name");
           return;
@@ -1370,23 +1318,19 @@
         const idx = streams.findIndex((s) => s.id === streamId);
         if (idx === -1) return;
 
-        // Update state
         streams.splice(idx, 1);
         saveStreamsToStorage();
 
-        // Remove the DOM node
         const card = document.querySelector(
           `.stream-item[data-id="${streamId}"]`
         );
         if (card) card.remove();
 
-        // Reindex remaining cards
         const grid = document.getElementById("streamsGrid");
         grid.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
         });
 
-        // Empty state if needed
         if (streams.length === 0 && !grid.querySelector(".no-streams")) {
           const n = document.createElement("div");
           n.className = "no-streams";
@@ -1395,7 +1339,6 @@
           grid.appendChild(n);
         }
 
-        // Let the DOM settle before re-sizing layout (helps embeds keep state)
         Promise.resolve().then(() => applyLayout());
       }
 
@@ -1418,13 +1361,11 @@
           return;
         }
 
-        // Remove cards not in state
         Array.from(existingCards).forEach((card) => {
           const id = Number(card.dataset.id);
           if (!streams.some((s) => s.id === id)) card.remove();
         });
 
-        // Add new cards
         streams.forEach((s, idx) => {
           if (!findCardById(s.id))
             document
@@ -1432,7 +1373,6 @@
               .appendChild(createStreamElement(s, idx));
         });
 
-        // Reorder DOM to match state (no reloads)
         const gridNow = document.getElementById("streamsGrid");
         const orderMap = new Map(streams.map((s, i) => [String(s.id), i]));
         Array.from(gridNow.querySelectorAll(".stream-item"))
@@ -1462,7 +1402,6 @@
           }
         });
       }
-
       function onDragStart(e) {
         const item = e.currentTarget;
         dragIndex = Number(item.dataset.index);
@@ -1479,90 +1418,66 @@
       function onDragLeave(e) {
         e.currentTarget.classList.remove("drop-target");
       }
-
       function onDrop(e) {
         e.preventDefault();
         const target = e.currentTarget;
         target.classList.remove("drop-target");
-
         const from = dragIndex;
         const to = Number(target.dataset.index);
         if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
           return;
-
         const [moved] = streams.splice(from, 1);
         streams.splice(to, 0, moved);
         saveStreamsToStorage();
 
-        // Reposition DOM node directly to avoid iframe reloads
         const grid = document.getElementById("streamsGrid");
         const nodes = Array.from(grid.querySelectorAll(".stream-item"));
         const movingEl = nodes[from];
         const referenceEl = nodes[to];
         if (from < to) grid.insertBefore(movingEl, referenceEl.nextSibling);
         else grid.insertBefore(movingEl, referenceEl);
-
         refreshItemIndices(grid);
         applyLayout();
       }
-
       function onDragEnd(e) {
         e.currentTarget.classList.remove("dragging");
         dragIndex = null;
       }
 
+      /* ========================== Focus ========================== */
       function toggleFocus(streamId) {
-        if (focusedId === streamId) {
-          focusedId = null;
-        } else {
-          focusedId = streamId;
-        }
-        saveStreamsToStorage(); // optional if you want to persist later
+        focusedId = focusedId === streamId ? null : streamId;
+        saveStreamsToStorage();
         applyLayout();
+        updateFocusButtonsLabel();
       }
 
       function applyFocusLayout() {
         const grid = document.getElementById("streamsGrid");
         if (!grid) return;
-
         document.body.classList.toggle("focus-mode", !!focusedId);
 
         const cards = grid.querySelectorAll(".stream-item");
+        // clear any stale .single first
+        cards.forEach((c) => c.classList.remove("single"));
+
         cards.forEach((card) => {
           const id = Number(card.dataset.id);
           const isFocused = focusedId === id;
 
-          // classes
           card.classList.toggle("focused", isFocused);
-          card.classList.toggle("single", isFocused); // reuse your single layout (video left + chat right)
-          card.classList.toggle("compact", !isFocused); // others go compact
-
-          // mute logic
-          // setIframeMuted(card, !isFocused);
+          if (isFocused) card.classList.add("single"); // only focused gets single layout
+          card.classList.toggle("compact", !isFocused);
+          // no src changes -> no reloads
         });
 
-        // Put focused card at the top of the grid
         reorderFocusedFirst(grid);
-
-        // Size the focused "single" layout (reuse your existing sizing)
-        if (focusedId) {
-          // Run the single-card sizing if your controller exposes it (it does via applyLayout)
-          // We'll call applySingle sizing via applyLayout below.
-        }
-
         updateFocusButtonsLabel();
       }
 
       /* ========================== Storage & Helpers ========================== */
       function setIframeMuted(card, muted) {
-        // No-op: do not touch iframe.src or it will reload.
-        // Let the user click the Twitch player UI to un/mute.
-        // const iframe = card.querySelector(".stream-video");
-        // if (!iframe) return;
-        // const url = new URL(iframe.src);
-        // url.searchParams.set("muted", muted ? "true" : "false");
-        // // Only reload if it actually changes
-        // if (iframe.src !== url.toString()) iframe.src = url.toString();
+        // Intentionally no-op to avoid player reloads.
       }
 
       function updateFocusButtonsVisibility() {
@@ -1594,7 +1509,6 @@
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
       }
-
       function loadStreamsFromStorage() {
         const stored = localStorage.getItem("multistream_data");
         if (stored) {
@@ -1606,7 +1520,6 @@
           }));
         }
       }
-
       function findCardById(id) {
         return document.querySelector(`.stream-item[data-id="${id}"]`);
       }
@@ -1638,15 +1551,8 @@
           <div class="stream-header">
             <span class="stream-title">${stream.channel}</span>
             <div class="stream-controls">
-              <button class="focus-btn"
-                      data-role="focus-toggle"
-                      onclick="event.stopPropagation(); toggleFocus(${stream.id})">
-                Focus
-              </button>
-              <button class="remove-btn"
-                      onclick="event.stopPropagation(); removeStream(${stream.id})">
-                Remove
-              </button>
+              <button class="focus-btn" data-role="focus-toggle" onclick="event.stopPropagation(); toggleFocus(${stream.id})">Focus</button>
+              <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${stream.id})">Remove</button>
             </div>
           </div>
           <div class="stream-video-container" data-stream-id="${stream.id}">
@@ -1674,9 +1580,8 @@
       /* ========================== Unified layout controller (Single & Focus) ========================== */
       (() => {
         const CHAT_W = 340;
-
-        let isApplyingLayout = false; // reentrancy guard
-        let layoutRaf = null; // rAF debouncer
+        let isApplyingLayout = false;
+        let layoutRaf = null;
 
         function sizeSingle(card) {
           const grid = document.getElementById("streamsGrid");
@@ -1685,7 +1590,13 @@
 
           const headerH = header ? header.offsetHeight : 0;
           const gridRect = grid.getBoundingClientRect();
-          const availW = gridRect.width;
+          const availW =
+            Math.max(
+              grid.clientWidth,
+              gridRect.width,
+              grid.parentElement?.clientWidth || 0,
+              window.innerWidth
+            ) || 0;
           const availH = window.innerHeight - headerH;
 
           const verticalMargin = 16;
@@ -1702,11 +1613,7 @@
           const chat = card.querySelector(".stream-chat");
           if (!video || !chat) return;
 
-          if (videoH <= 0 || videoW <= 0) {
-            resetSingleSizing(card);
-            card.classList.remove("single");
-            return;
-          }
+          if (videoH <= 0 || videoW <= 0) return; // wait for next frame when sizes are ready
 
           card.style.setProperty("--chat-w", chatW + "px");
           video.style.width = videoW + "px";
@@ -1732,11 +1639,10 @@
         function applySingleModeIfNeeded() {
           const grid = document.getElementById("streamsGrid");
           const cards = grid ? grid.querySelectorAll(".stream-item") : [];
-          if (!grid || focusedId) return; // focus mode handles its own
+          if (!grid || focusedId) return;
 
           if (cards.length === 1) {
             const card = cards[0];
-            // clear single on others (just in case)
             grid.querySelectorAll(".stream-item.single").forEach((c) => {
               if (c !== card) {
                 resetSingleSizing(c);
@@ -1744,7 +1650,7 @@
               }
             });
             card.classList.add("single");
-            sizeSingle(card);
+            requestAnimationFrame(() => sizeSingle(card));
             window.addEventListener("resize", onResize);
           } else {
             grid.querySelectorAll(".stream-item.single").forEach((card) => {
@@ -1763,12 +1669,12 @@
         }
 
         function applyLayout() {
-          if (isApplyingLayout) return; // prevent re-entry
+          if (isApplyingLayout) return;
           isApplyingLayout = true;
           try {
             updateFocusButtonsVisibility();
 
-            // if focused card was removed, clear focus
+            // clear focus if the card no longer exists
             if (
               focusedId &&
               !document.querySelector(`.stream-item[data-id="${focusedId}"]`)
@@ -1781,14 +1687,14 @@
               const focusedCard = document.querySelector(
                 ".stream-item.focused"
               );
-              if (focusedCard) sizeSingle(focusedCard);
+              if (focusedCard)
+                requestAnimationFrame(() => sizeSingle(focusedCard));
               window.addEventListener("resize", onResize);
             } else {
               document.body.classList.remove("focus-mode");
               focusedId = null;
               document.querySelectorAll(".stream-item").forEach((card) => {
                 card.classList.remove("focused", "compact", "single");
-                // setIframeMuted(card, false);
                 resetSingleSizing(card);
               });
               applySingleModeIfNeeded();
@@ -1798,25 +1704,21 @@
           }
         }
 
-        // Observe grid for changes
         document.addEventListener("DOMContentLoaded", () => {
           const grid = document.getElementById("streamsGrid");
           if (!grid) return;
-
           const obs = new MutationObserver(() => {
-            if (isApplyingLayout) return; // ignore mutations caused by ourselves
-            if (layoutRaf) return; // already queued
+            if (isApplyingLayout) return;
+            if (layoutRaf) return;
             layoutRaf = requestAnimationFrame(() => {
               layoutRaf = null;
               applyLayout();
             });
           });
-
           obs.observe(grid, { childList: true, subtree: false });
           applyLayout();
         });
 
-        // expose globally
         window.applyLayout = applyLayout;
       })();
     </script>
