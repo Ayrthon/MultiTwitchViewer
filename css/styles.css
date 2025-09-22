@@ -456,8 +456,8 @@ body.focus-mode .stream-item:not(.focused) {
   align-items: stretch;
 
   /* Cap to viewport same as normal cards */
-  max-height: calc(100vh - var(--header-h) - 16px);
-  max-height: calc(100dvh - var(--header-h) - 16px);
+  height: calc(100vh - var(--header-h) - 35px);
+  height: calc(100dvh - var(--header-h) - 35px);
   min-height: 0;
 }
 .stream-item.single .stream-header {
