@@ -330,40 +330,30 @@ body.focus-mode .streams-grid {
   align-items: flex-start;
   margin: 0 auto;
 }
-/* Stream card: cap to viewport and let chat flex into leftover space */
+
 .stream-item {
   background: rgba(0, 0, 0, 0.4);
   border-radius: 15px;
-  overflow: hidden; /* prevent internal overflow */
+  overflow: hidden;
   border: 2px solid transparent;
   transition: 0.3s;
   position: relative;
-
   display: flex;
   flex-direction: column;
-
-  /* Cap each card height to the viewport (fallback vh -> dvh for iOS/Chrome mobile) */
-  max-height: calc(100vh - var(--header-h) - 16px);
-  max-height: calc(100dvh - var(--header-h) - 16px);
-  min-height: 0; /* allow children to shrink */
+  height: fit-content;
 }
 .stream-item:hover {
   border-color: #9146ff;
   transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(145, 70, 255, 0.2);
 }
-
 /* Focus-mode sizing using flex without DOM moves */
 body.focus-mode .stream-item.focused {
   order: -1;
   width: 100%;
-  /* also capped to viewport */
-  max-height: calc(100vh - var(--header-h));
-  max-height: calc(100dvh - var(--header-h));
 }
 body.focus-mode .stream-item:not(.focused) {
   width: 420px;
-  /* inherit the same viewport cap via .stream-item */
 }
 
 .stream-header {
@@ -413,7 +403,6 @@ body.focus-mode .stream-item:not(.focused) {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
-  flex: 0 0 auto; /* fixed based on width (aspect-ratio) */
 }
 .stream-video {
   position: absolute;
@@ -423,15 +412,13 @@ body.focus-mode .stream-item:not(.focused) {
 }
 
 .stream-chat {
-  /* REMOVE fixed heights; this is the key fix */
-  height: auto;
-  flex: 1 1 auto;
-  min-height: 0; /* critical so it can shrink inside the card */
+  height: calc(
+    100svh - var(--header-h) - 416px
+  ); /* 16px = padding/margin tweak */
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   border-radius: 0 0 15px 15px;
-  overflow: hidden; /* keep iframe fully inside the card */
 }
 .stream-chat iframe {
   width: 100%;
@@ -448,17 +435,15 @@ body.focus-mode .stream-item:not(.focused) {
 }
 
 /* ========== Single-card layout (video left + chat right) ========== */
+:root {
+  --chat-w: 340px;
+  --header-h: 76px; /* adjust if your header is taller/shorter */
+}
 .stream-item.single {
   display: grid;
   grid-template-columns: 1fr var(--chat-w);
-  /* header row + "leftover space" row; leftover bounded by card max-height above */
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
   align-items: stretch;
-
-  /* cap the single layout to viewport just like normal cards */
-  max-height: calc(100vh - var(--header-h) - 16px);
-  max-height: calc(100dvh - var(--header-h) - 16px);
-  min-height: 0;
 }
 .stream-item.single .stream-header {
   grid-column: 1 / -1;
@@ -471,10 +456,8 @@ body.focus-mode .stream-item:not(.focused) {
 .stream-item.single .stream-chat {
   grid-column: 2;
   grid-row: 2;
-  height: auto; /* derive from grid row */
+  height: auto;
   border-radius: 0;
-  min-height: 0; /* allow shrinking */
-  overflow: hidden; /* keep iframe contained */
 }
 .stream-item.single .stream-chat iframe {
   width: 100%;
@@ -482,13 +465,13 @@ body.focus-mode .stream-item:not(.focused) {
   display: block;
 }
 
+/* When focusing, hide chat on non-focused to keep things tidy */
 body.focus-mode .stream-item:not(.focused) .stream-chat {
   display: flex;
-  height: auto; /* no fixed px height */
-  flex: 1 1 auto;
-  min-height: 0;
+  height: 420px;
 }
 
+/* make sure the iframe fills whatever height you set */
 body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
   height: 100%;
   width: 100%;

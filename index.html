@@ -55,29 +55,5 @@
 
     <!-- App entry -->
     <script type="module" src="./js/app.js"></script>
-    <script>
-      (() => {
-        const root = document.documentElement;
-        const header = document.querySelector(".header");
-
-        function setHeaderVar() {
-          const h = header
-            ? Math.round(header.getBoundingClientRect().height)
-            : 80;
-          root.style.setProperty("--header-h", h + "px");
-        }
-
-        // Run on load/resize and whenever the header layout changes size
-        window.addEventListener("load", setHeaderVar, { once: true });
-        window.addEventListener("resize", setHeaderVar);
-
-        if ("ResizeObserver" in window && header) {
-          const ro = new ResizeObserver(setHeaderVar);
-          ro.observe(header);
-        }
-
-        setHeaderVar();
-      })();
-    </script>
   </body>
 </html>
