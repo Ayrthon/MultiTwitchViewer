@@ -320,7 +320,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 1rem;
-  max-width: calc(4 * 500px);
+  /* max-width: calc(4 * 500px); */
   margin: 0 auto;
 }
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
@@ -445,7 +445,6 @@ body.focus-mode .stream-item:not(.focused) {
   grid-template-columns: 1fr var(--chat-w);
   grid-template-rows: auto 1fr;
   align-items: stretch;
-  width: 85svw;
 }
 .stream-item.single .stream-header {
   grid-column: 1 / -1;
