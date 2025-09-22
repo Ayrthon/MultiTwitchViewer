@@ -676,1143 +676,1145 @@
     </div>
 
     <script>
-      /* ========================== Config & State ========================== */
-      const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
-      let streams = [];
-      let user = null;
-      let searchTimeout = null;
-      let selectedSuggestionIndex = -1;
-      let currentSuggestions = [];
-      let followedChannels = [];
-      const OFFLINE_PAGE_SIZE = 100;
-      let offlineVisibleCount = OFFLINE_PAGE_SIZE;
-      let dragIndex = null;
-      let focusedId = null; // null = no focus
+            /* ========================== Config & State ========================== */
+            const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
+            let streams = [];
+            let user = null;
+            let searchTimeout = null;
+            let selectedSuggestionIndex = -1;
+            let currentSuggestions = [];
+            let followedChannels = [];
+            const OFFLINE_PAGE_SIZE = 100;
+            let offlineVisibleCount = OFFLINE_PAGE_SIZE;
+            let dragIndex = null;
+            let focusedId = null; // null = no focus
 
-      /* ========================== Boot ========================== */
-      document.addEventListener("DOMContentLoaded", () => {
-        checkAuthFromURL();
-        loadStreamsFromStorage();
-        updateUI();
-        setupAutoSuggest();
-        loadDemoFollowedChannels();
-        updateFollowedChannelsUI();
-      });
-
-      /* ========================== Auth ========================== */
-      function loginToTwitch() {
-        const authUrl =
-          `https://id.twitch.tv/oauth2/authorize` +
-          `?client_id=${CLIENT_ID}` +
-          `&redirect_uri=${encodeURIComponent(window.location.origin)}` +
-          `&response_type=token` +
-          `&scope=user:read:email user:read:follows` +
-          `&force_verify=true`;
-        window.location.href = authUrl;
-      }
-
-      function checkAuthFromURL() {
-        const hash = window.location.hash.slice(1);
-        const params = new URLSearchParams(hash);
-        const accessToken = params.get("access_token");
-        const error = params.get("error");
-
-        if (error) {
-          alert(`Login failed: ${error}`);
-          return;
-        }
-        if (accessToken) {
-          localStorage.setItem("twitch_token", accessToken);
-          window.location.hash = "";
-          fetchUserData(accessToken);
-        } else {
-          const storedToken = localStorage.getItem("twitch_token");
-          if (storedToken) fetchUserData(storedToken);
-        }
-      }
-
-      async function fetchUserData(token) {
-        try {
-          const response = await fetch("https://api.twitch.tv/helix/users", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Client-Id": CLIENT_ID,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data.data && data.data.length > 0) {
-              user = data.data[0];
-              updateUserInfo();
-              fetchRealFollowedChannels();
-            }
-          } else {
-            localStorage.removeItem("twitch_token");
-          }
-        } catch (e) {
-          console.error("Error fetching user data:", e);
-          localStorage.removeItem("twitch_token");
-        }
-      }
-
-      function updateUserInfo() {
-        const userInfo = document.getElementById("userInfo");
-        if (user) {
-          userInfo.innerHTML = `
-            <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
-            <span class="username">${user.display_name}</span>
-            <button class="login-btn" onclick="logout()" style="background:#ff4757;">Logout</button>
-          `;
-        } else {
-          userInfo.innerHTML = `<button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>`;
-          followedChannels = [];
-          updateFollowedChannelsUI();
-        }
-      }
-
-      function logout() {
-        localStorage.removeItem("twitch_token");
-        user = null;
-        location.reload();
-      }
-
-      /* ========================== Follows ========================== */
-      function chunkArray(arr, size) {
-        const chunks = [];
-        for (let i = 0; i < arr.length; i += size)
-          chunks.push(arr.slice(i, i + size));
-        return chunks;
-      }
-
-      async function fetchRealFollowedChannels() {
-        if (!user) {
-          loadDemoFollowedChannels();
-          updateFollowedChannelsUI();
-          return;
-        }
-
-        const refreshButton = document.getElementById("refreshButton");
-        if (refreshButton) {
-          refreshButton.disabled = true;
-          refreshButton.textContent = "🔄 Loading follows...";
-        }
-
-        const token = localStorage.getItem("twitch_token");
-        try {
-          // All follows (paginated)
-          let afterFollows = null;
-          const allFollows = [];
-          do {
-            const url = new URL(
-              "https://api.twitch.tv/helix/channels/followed"
-            );
-            url.searchParams.set("user_id", user.id);
-            url.searchParams.set("first", "100");
-            if (afterFollows) url.searchParams.set("after", afterFollows);
-
-            const res = await fetch(url, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Client-Id": CLIENT_ID,
-              },
+            /* ========================== Boot ========================== */
+            document.addEventListener("DOMContentLoaded", () => {
+              checkAuthFromURL();
+              loadStreamsFromStorage();
+              updateUI();
+              setupAutoSuggest();
+              loadDemoFollowedChannels();
+              updateFollowedChannelsUI();
             });
-            if (res.status === 401 || res.status === 403) {
+
+            /* ========================== Auth ========================== */
+            function loginToTwitch() {
+              const authUrl =
+                `https://id.twitch.tv/oauth2/authorize` +
+                `?client_id=${CLIENT_ID}` +
+                `&redirect_uri=${encodeURIComponent(window.location.origin)}` +
+                `&response_type=token` +
+                `&scope=user:read:email user:read:follows` +
+                `&force_verify=true`;
+              window.location.href = authUrl;
+            }
+
+            function checkAuthFromURL() {
+              const hash = window.location.hash.slice(1);
+              const params = new URLSearchParams(hash);
+              const accessToken = params.get("access_token");
+              const error = params.get("error");
+
+              if (error) {
+                alert(`Login failed: ${error}`);
+                return;
+              }
+              if (accessToken) {
+                localStorage.setItem("twitch_token", accessToken);
+                window.location.hash = "";
+                fetchUserData(accessToken);
+              } else {
+                const storedToken = localStorage.getItem("twitch_token");
+                if (storedToken) fetchUserData(storedToken);
+              }
+            }
+
+            async function fetchUserData(token) {
+              try {
+                const response = await fetch("https://api.twitch.tv/helix/users", {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Client-Id": CLIENT_ID,
+                  },
+                });
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data.data && data.data.length > 0) {
+                    user = data.data[0];
+                    updateUserInfo();
+                    fetchRealFollowedChannels();
+                  }
+                } else {
+                  localStorage.removeItem("twitch_token");
+                }
+              } catch (e) {
+                console.error("Error fetching user data:", e);
+                localStorage.removeItem("twitch_token");
+              }
+            }
+
+            function updateUserInfo() {
+              const userInfo = document.getElementById("userInfo");
+              if (user) {
+                userInfo.innerHTML = `
+                  <img src="${user.profile_image_url}" alt="Avatar" class="user-avatar">
+                  <span class="username">${user.display_name}</span>
+                  <button class="login-btn" onclick="logout()" style="background:#ff4757;">Logout</button>
+                `;
+              } else {
+                userInfo.innerHTML = `<button class="login-btn" onclick="loginToTwitch()">🎮 Login with Twitch</button>`;
+                followedChannels = [];
+                updateFollowedChannelsUI();
+              }
+            }
+
+            function logout() {
               localStorage.removeItem("twitch_token");
-              throw new Error(
-                `Auth error ${res.status} — please log in again.`
+              user = null;
+              location.reload();
+            }
+
+            /* ========================== Follows ========================== */
+            function chunkArray(arr, size) {
+              const chunks = [];
+              for (let i = 0; i < arr.length; i += size)
+                chunks.push(arr.slice(i, i + size));
+              return chunks;
+            }
+
+            async function fetchRealFollowedChannels() {
+              if (!user) {
+                loadDemoFollowedChannels();
+                updateFollowedChannelsUI();
+                return;
+              }
+
+              const refreshButton = document.getElementById("refreshButton");
+              if (refreshButton) {
+                refreshButton.disabled = true;
+                refreshButton.textContent = "🔄 Loading follows...";
+              }
+
+              const token = localStorage.getItem("twitch_token");
+              try {
+                // All follows (paginated)
+                let afterFollows = null;
+                const allFollows = [];
+                do {
+                  const url = new URL(
+                    "https://api.twitch.tv/helix/channels/followed"
+                  );
+                  url.searchParams.set("user_id", user.id);
+                  url.searchParams.set("first", "100");
+                  if (afterFollows) url.searchParams.set("after", afterFollows);
+
+                  const res = await fetch(url, {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      "Client-Id": CLIENT_ID,
+                    },
+                  });
+                  if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem("twitch_token");
+                    throw new Error(
+                      `Auth error ${res.status} — please log in again.`
+                    );
+                  }
+                  if (!res.ok) throw new Error(`Follows API ${res.status}`);
+                  const json = await res.json();
+                  allFollows.push(...json.data);
+                  afterFollows = json.pagination?.cursor || null;
+                } while (afterFollows);
+
+                const allFollowIds = allFollows.map((f) => f.broadcaster_id);
+
+                // Live followed streams (paginated)
+                let afterLive = null;
+                const liveStreams = [];
+                do {
+                  const url = new URL("https://api.twitch.tv/helix/streams/followed");
+                  url.searchParams.set("user_id", user.id);
+                  url.searchParams.set("first", "100");
+                  if (afterLive) url.searchParams.set("after", afterLive);
+
+                  const res = await fetch(url, {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      "Client-Id": CLIENT_ID,
+                    },
+                  });
+                  if (!res.ok) throw new Error(`Streams API ${res.status}`);
+                  const json = await res.json();
+                  liveStreams.push(...json.data);
+                  afterLive = json.pagination?.cursor || null;
+                } while (afterLive);
+
+                const liveIds = new Set(liveStreams.map((s) => s.user_id));
+                const offlineIds = allFollowIds.filter((id) => !liveIds.has(id));
+
+                // Users enrichment in chunks of 100
+                const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
+                const usersById = new Map();
+                for (const chunk of chunkArray(idsToFetch, 100)) {
+                  if (chunk.length === 0) continue;
+                  const usersUrl =
+                    "https://api.twitch.tv/helix/users?" +
+                    chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
+                  const usersRes = await fetch(usersUrl, {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      "Client-Id": CLIENT_ID,
+                    },
+                  });
+                  if (!usersRes.ok) throw new Error(`Users API ${usersRes.status}`);
+                  const usersJson = await usersRes.json();
+                  usersJson.data.forEach((u) => usersById.set(u.id, u));
+                }
+
+                const liveList = liveStreams.map((s) => {
+                  const u = usersById.get(s.user_id);
+                  return {
+                    id: s.user_id,
+                    login: s.user_login,
+                    display_name: s.user_name,
+                    profile_image_url: u?.profile_image_url || "",
+                    is_live: true,
+                    game_name: s.game_name,
+                    viewer_count: s.viewer_count || 0,
+                    title: s.title || "",
+                  };
+                });
+
+                const offlineList = offlineIds.map((id) => {
+                  const u = usersById.get(id);
+                  return {
+                    id,
+                    login: u?.login || "",
+                    display_name: u?.display_name || (u?.login ?? ""),
+                    profile_image_url: u?.profile_image_url || "",
+                    is_live: false,
+                    game_name: "Offline",
+                    viewer_count: 0,
+                    title: "",
+                  };
+                });
+
+                followedChannels = [...liveList, ...offlineList];
+                offlineVisibleCount = OFFLINE_PAGE_SIZE;
+              } catch (err) {
+                console.error("Follows/live error:", err);
+                loadDemoFollowedChannels();
+              } finally {
+                updateFollowedChannelsUI();
+                if (refreshButton) {
+                  refreshButton.disabled = false;
+                  refreshButton.textContent = "🔄 Refresh";
+                }
+              }
+            }
+
+            function loadDemoFollowedChannels() {
+              followedChannels = [
+                {
+                  id: "1",
+                  login: "ninja",
+                  display_name: "Ninja",
+                  profile_image_url:
+                    "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
+                  is_live: true,
+                  game_name: "Fortnite",
+                  viewer_count: 45732,
+                },
+                {
+                  id: "2",
+                  login: "pokimane",
+                  display_name: "Pokimane",
+                  profile_image_url:
+                    "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
+                  is_live: true,
+                  game_name: "Just Chatting",
+                  viewer_count: 28456,
+                },
+                {
+                  id: "3",
+                  login: "shroud",
+                  display_name: "shroud",
+                  profile_image_url:
+                    "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
+                  is_live: false,
+                  game_name: "Offline",
+                  viewer_count: 0,
+                },
+                {
+                  id: "4",
+                  login: "xqc",
+                  display_name: "xQc",
+                  profile_image_url:
+                    "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
+                  is_live: true,
+                  game_name: "Grand Theft Auto V",
+                  viewer_count: 67234,
+                },
+              ];
+            }
+
+            function updateFollowedChannelsUI() {
+              const container = document.getElementById("followedChannels");
+
+              if (!user) {
+                container.innerHTML =
+                  '<div class="no-channels">Login to see followed channels</div>';
+                return;
+              }
+              if (followedChannels.length === 0) {
+                container.innerHTML =
+                  '<div class="no-channels">No followed channels found</div>';
+                return;
+              }
+
+              const sorted = [...followedChannels].sort((a, b) => {
+                if (a.is_live && !b.is_live) return -1;
+                if (!a.is_live && b.is_live) return 1;
+                if (a.is_live && b.is_live)
+                  return (b.viewer_count || 0) - (a.viewer_count || 0);
+                return a.display_name.localeCompare(b.display_name);
+              });
+
+              const liveChannels = sorted.filter((ch) => ch.is_live);
+              const offlineAll = sorted.filter((ch) => !ch.is_live);
+
+              const totalOffline = offlineAll.length;
+              const toShow = Math.min(offlineVisibleCount, totalOffline);
+              const offlineShown = offlineAll.slice(0, toShow);
+              const hasMore = toShow < totalOffline;
+
+              let html = "";
+              if (liveChannels.length > 0) {
+                html += `
+                  <div class="channel-category">
+                    <div class="category-header">Live (${liveChannels.length})</div>
+                    ${liveChannels.map(createChannelHTML).join("")}
+                  </div>`;
+              }
+
+              html += `
+                <div class="channel-category">
+                  <div class="category-header">Offline (${totalOffline})</div>
+                  ${
+                    totalOffline === 0
+                      ? '<div class="no-channels">No offline channels 🎉</div>'
+                      : offlineShown.map(createChannelHTML).join("")
+                  }
+                  ${
+                    hasMore
+                      ? `<div class="show-more-wrap"><button id="offlineShowMore" class="show-more-btn">Show ${Math.min(
+                          OFFLINE_PAGE_SIZE,
+                          totalOffline - toShow
+                        )} more</button></div>`
+                      : ""
+                  }
+                </div>`;
+
+              container.innerHTML = html;
+
+              container.querySelectorAll(".channel-item").forEach((item) => {
+                const channelLogin = item.dataset.channel;
+                if (
+                  channelLogin &&
+                  !channelLogin.includes("_info") &&
+                  !channelLogin.includes("_note")
+                ) {
+                  item.addEventListener("click", () =>
+                    addStreamFromSidebar(channelLogin)
+                  );
+                } else {
+                  item.style.cursor = "default";
+                  item.style.opacity = "0.7";
+                }
+              });
+
+              const showMoreBtn = document.getElementById("offlineShowMore");
+              if (showMoreBtn)
+                showMoreBtn.addEventListener("click", () => showMoreOffline());
+            }
+
+            function showMoreOffline() {
+              offlineVisibleCount += OFFLINE_PAGE_SIZE;
+              updateFollowedChannelsUI();
+            }
+
+            function createChannelHTML(channel) {
+              const viewerText = channel.is_live
+                ? `<div class="channel-viewers">${formatViewerCount(
+                    channel.viewer_count
+                  )} viewers</div>`
+                : "";
+              return `
+                <div class="channel-item ${
+                  channel.is_live ? "live" : ""
+                }" data-channel="${channel.login}">
+                  <img src="${channel.profile_image_url}" alt="${
+                channel.display_name
+              }" class="channel-avatar">
+                  <div class="channel-info">
+                    <div class="channel-name">${channel.display_name}</div>
+                    <div class="channel-game">${channel.game_name}</div>
+                    ${viewerText}
+                  </div>
+                  <div class="${
+                    channel.is_live ? "live-indicator" : "offline-indicator"
+                  }"></div>
+                </div>`;
+            }
+
+            function formatViewerCount(count) {
+              if (count >= 1_000_000) return (count / 1_000_000).toFixed(1) + "M";
+              if (count >= 1_000) return (count / 1_000).toFixed(1) + "K";
+              return String(count);
+            }
+
+            /* ========================== Streams: add/remove/UI ========================== */
+            function addStreamFromSidebar(channelLogin) {
+              if (streams.find((s) => s.channel === channelLogin)) {
+                alert("This stream is already added");
+                return;
+              }
+              const stream = { id: Date.now(), channel: channelLogin, locked: false };
+              streams.push(stream);
+              saveStreamsToStorage();
+
+              const grid = document.getElementById("streamsGrid");
+              const empty = grid.querySelector(".no-streams");
+              if (empty) empty.remove();
+
+              const card = createStreamElement(stream, streams.length - 1);
+              grid.appendChild(card);
+
+              enableDragAndDrop(grid);
+              refreshItemIndices(grid);
+              applyLayout();
+              updateFocusButtonsVisibility();
+              updateFocusButtonsLabel();
+
+              const channelItem = document.querySelector(
+                `[data-channel="${channelLogin}"]`
+              );
+              if (channelItem) {
+                const originalBg = channelItem.style.background;
+                channelItem.style.background = "rgba(76, 175, 80, 0.3)";
+                setTimeout(() => {
+                  channelItem.style.background = originalBg;
+                }, 1000);
+              }
+            }
+
+            function refreshFollowedChannels() {
+              if (user) fetchRealFollowedChannels();
+              else {
+                loadDemoFollowedChannels();
+                updateFollowedChannelsUI();
+              }
+            }
+
+            function setupAutoSuggest() {
+              const input = document.getElementById("streamInput");
+              input.addEventListener("input", (e) => {
+                const query = e.target.value.trim();
+                if (query.length < 2) {
+                  hideSuggestions();
+                  return;
+                }
+                if (searchTimeout) clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => searchChannels(query), 300);
+              });
+
+              input.addEventListener("keydown", (e) => {
+                const dropdown = document.getElementById("suggestionsDropdown");
+                if (dropdown.style.display === "none") return;
+
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  selectedSuggestionIndex = Math.min(
+                    selectedSuggestionIndex + 1,
+                    currentSuggestions.length - 1
+                  );
+                  updateSuggestionSelection();
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                  updateSuggestionSelection();
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (
+                    selectedSuggestionIndex >= 0 &&
+                    currentSuggestions[selectedSuggestionIndex]
+                  ) {
+                    selectSuggestion(currentSuggestions[selectedSuggestionIndex]);
+                  } else {
+                    addStream();
+                  }
+                } else if (e.key === "Escape") {
+                  hideSuggestions();
+                }
+              });
+
+              input.addEventListener("blur", () =>
+                setTimeout(() => hideSuggestions(), 150)
               );
             }
-            if (!res.ok) throw new Error(`Follows API ${res.status}`);
-            const json = await res.json();
-            allFollows.push(...json.data);
-            afterFollows = json.pagination?.cursor || null;
-          } while (afterFollows);
 
-          const allFollowIds = allFollows.map((f) => f.broadcaster_id);
+            async function searchChannels(query) {
+              const dropdown = document.getElementById("suggestionsDropdown");
+              dropdown.innerHTML =
+                '<div class="loading-suggestion">🔍 Searching channels...</div>';
+              dropdown.style.display = "block";
 
-          // Live followed streams (paginated)
-          let afterLive = null;
-          const liveStreams = [];
-          do {
-            const url = new URL("https://api.twitch.tv/helix/streams/followed");
-            url.searchParams.set("user_id", user.id);
-            url.searchParams.set("first", "100");
-            if (afterLive) url.searchParams.set("after", afterLive);
+              const token = localStorage.getItem("twitch_token");
+              if (!token) {
+                const fallback = [
+                  {
+                    id: "19571641",
+                    broadcaster_login: "ninja",
+                    display_name: "Ninja",
+                    game_name: "Fortnite",
+                    is_live: false,
+                    thumbnail_url:
+                      "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-70x70.png",
+                  },
+                  {
+                    id: "44445592",
+                    broadcaster_login: "pokimane",
+                    display_name: "Pokimane",
+                    game_name: "Just Chatting",
+                    is_live: false,
+                    thumbnail_url:
+                      "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-70x70.png",
+                  },
+                  {
+                    id: "37402112",
+                    broadcaster_login: "shroud",
+                    display_name: "shroud",
+                    game_name: "VALORANT",
+                    is_live: false,
+                    thumbnail_url:
+                      "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-70x70.png",
+                  },
+                  {
+                    id: "71092938",
+                    broadcaster_login: "xqc",
+                    display_name: "xQc",
+                    game_name: "Grand Theft Auto V",
+                    is_live: false,
+                    thumbnail_url:
+                      "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-70x70.png",
+                  },
+                ].filter(
+                  (c) =>
+                    c.display_name.toLowerCase().includes(query.toLowerCase()) ||
+                    c.broadcaster_login.toLowerCase().includes(query.toLowerCase())
+                );
+                currentSuggestions = fallback;
+                displaySuggestions(fallback);
+                return;
+              }
 
-            const res = await fetch(url, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Client-Id": CLIENT_ID,
-              },
-            });
-            if (!res.ok) throw new Error(`Streams API ${res.status}`);
-            const json = await res.json();
-            liveStreams.push(...json.data);
-            afterLive = json.pagination?.cursor || null;
-          } while (afterLive);
+              try {
+                const url = new URL("https://api.twitch.tv/helix/search/channels");
+                url.searchParams.set("query", query);
+                url.searchParams.set("first", "10");
+                const res = await fetch(url, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Client-Id": CLIENT_ID,
+                  },
+                });
+                if (res.status === 401 || res.status === 403) {
+                  localStorage.removeItem("twitch_token");
+                  throw new Error(`Auth error ${res.status}`);
+                }
+                if (res.status === 429) throw new Error("Rate limited (429)");
+                if (!res.ok) throw new Error(`search/channels ${res.status}`);
 
-          const liveIds = new Set(liveStreams.map((s) => s.user_id));
-          const offlineIds = allFollowIds.filter((id) => !liveIds.has(id));
+                const json = await res.json();
+                const results = (json.data || []).map((ch) => ({
+                  id: ch.id,
+                  broadcaster_login: ch.broadcaster_login,
+                  display_name: ch.display_name || ch.broadcaster_login,
+                  game_name: ch.game_name || "",
+                  is_live: !!ch.is_live,
+                  thumbnail_url: ch.thumbnail_url || "",
+                  title: ch.title || "",
+                }));
 
-          // Users enrichment in chunks of 100
-          const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
-          const usersById = new Map();
-          for (const chunk of chunkArray(idsToFetch, 100)) {
-            if (chunk.length === 0) continue;
-            const usersUrl =
-              "https://api.twitch.tv/helix/users?" +
-              chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
-            const usersRes = await fetch(usersUrl, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Client-Id": CLIENT_ID,
-              },
-            });
-            if (!usersRes.ok) throw new Error(`Users API ${usersRes.status}`);
-            const usersJson = await usersRes.json();
-            usersJson.data.forEach((u) => usersById.set(u.id, u));
-          }
-
-          const liveList = liveStreams.map((s) => {
-            const u = usersById.get(s.user_id);
-            return {
-              id: s.user_id,
-              login: s.user_login,
-              display_name: s.user_name,
-              profile_image_url: u?.profile_image_url || "",
-              is_live: true,
-              game_name: s.game_name,
-              viewer_count: s.viewer_count || 0,
-              title: s.title || "",
-            };
-          });
-
-          const offlineList = offlineIds.map((id) => {
-            const u = usersById.get(id);
-            return {
-              id,
-              login: u?.login || "",
-              display_name: u?.display_name || (u?.login ?? ""),
-              profile_image_url: u?.profile_image_url || "",
-              is_live: false,
-              game_name: "Offline",
-              viewer_count: 0,
-              title: "",
-            };
-          });
-
-          followedChannels = [...liveList, ...offlineList];
-          offlineVisibleCount = OFFLINE_PAGE_SIZE;
-        } catch (err) {
-          console.error("Follows/live error:", err);
-          loadDemoFollowedChannels();
-        } finally {
-          updateFollowedChannelsUI();
-          if (refreshButton) {
-            refreshButton.disabled = false;
-            refreshButton.textContent = "🔄 Refresh";
-          }
-        }
-      }
-
-      function loadDemoFollowedChannels() {
-        followedChannels = [
-          {
-            id: "1",
-            login: "ninja",
-            display_name: "Ninja",
-            profile_image_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
-            is_live: true,
-            game_name: "Fortnite",
-            viewer_count: 45732,
-          },
-          {
-            id: "2",
-            login: "pokimane",
-            display_name: "Pokimane",
-            profile_image_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
-            is_live: true,
-            game_name: "Just Chatting",
-            viewer_count: 28456,
-          },
-          {
-            id: "3",
-            login: "shroud",
-            display_name: "shroud",
-            profile_image_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
-            is_live: false,
-            game_name: "Offline",
-            viewer_count: 0,
-          },
-          {
-            id: "4",
-            login: "xqc",
-            display_name: "xQc",
-            profile_image_url:
-              "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
-            is_live: true,
-            game_name: "Grand Theft Auto V",
-            viewer_count: 67234,
-          },
-        ];
-      }
-
-      function updateFollowedChannelsUI() {
-        const container = document.getElementById("followedChannels");
-
-        if (!user) {
-          container.innerHTML =
-            '<div class="no-channels">Login to see followed channels</div>';
-          return;
-        }
-        if (followedChannels.length === 0) {
-          container.innerHTML =
-            '<div class="no-channels">No followed channels found</div>';
-          return;
-        }
-
-        const sorted = [...followedChannels].sort((a, b) => {
-          if (a.is_live && !b.is_live) return -1;
-          if (!a.is_live && b.is_live) return 1;
-          if (a.is_live && b.is_live)
-            return (b.viewer_count || 0) - (a.viewer_count || 0);
-          return a.display_name.localeCompare(b.display_name);
-        });
-
-        const liveChannels = sorted.filter((ch) => ch.is_live);
-        const offlineAll = sorted.filter((ch) => !ch.is_live);
-
-        const totalOffline = offlineAll.length;
-        const toShow = Math.min(offlineVisibleCount, totalOffline);
-        const offlineShown = offlineAll.slice(0, toShow);
-        const hasMore = toShow < totalOffline;
-
-        let html = "";
-        if (liveChannels.length > 0) {
-          html += `
-            <div class="channel-category">
-              <div class="category-header">Live (${liveChannels.length})</div>
-              ${liveChannels.map(createChannelHTML).join("")}
-            </div>`;
-        }
-
-        html += `
-          <div class="channel-category">
-            <div class="category-header">Offline (${totalOffline})</div>
-            ${
-              totalOffline === 0
-                ? '<div class="no-channels">No offline channels 🎉</div>'
-                : offlineShown.map(createChannelHTML).join("")
+                currentSuggestions = results;
+                displaySuggestions(results);
+              } catch (err) {
+                console.error("Channel search error:", err);
+                dropdown.innerHTML =
+                  '<div class="loading-suggestion">Couldn’t search Twitch right now.</div>';
+              }
             }
-            ${
-              hasMore
-                ? `<div class="show-more-wrap"><button id="offlineShowMore" class="show-more-btn">Show ${Math.min(
-                    OFFLINE_PAGE_SIZE,
-                    totalOffline - toShow
-                  )} more</button></div>`
-                : ""
+
+            function displaySuggestions(channels) {
+              const dropdown = document.getElementById("suggestionsDropdown");
+              selectedSuggestionIndex = -1;
+
+              if (!Array.isArray(channels) || channels.length === 0) {
+                dropdown.innerHTML =
+                  '<div class="loading-suggestion">No channels found</div>';
+                dropdown.style.display = "block";
+                return;
+              }
+
+              dropdown.innerHTML = channels
+                .map(
+                  (channel, index) => `
+                  <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
+                    channel.display_name
+                  }">
+                    <img src="${channel.thumbnail_url || ""}" alt="${
+                    channel.display_name
+                  }" class="suggestion-avatar">
+                    <div class="suggestion-info">
+                      <div class="suggestion-name">${channel.display_name}</div>
+                      <div class="suggestion-game">${channel.game_name || ""}</div>
+                    </div>
+                    <span class="suggestion-viewers">${
+                      channel.is_live ? "🔴 LIVE" : ""
+                    }</span>
+                  </div>
+                `
+                )
+                .join("");
+
+              dropdown.style.display = "block";
+
+              dropdown.querySelectorAll(".suggestion-item").forEach((item) => {
+                item.addEventListener("click", () => {
+                  const idx = Number(item.getAttribute("data-index"));
+                  selectSuggestion(channels[idx]);
+                });
+                item.addEventListener("keydown", (e) => {
+                  if (e.key === "Enter") {
+                    const idx = Number(item.getAttribute("data-index"));
+                    selectSuggestion(channels[idx]);
+                  }
+                });
+              });
             }
-          </div>`;
 
-        container.innerHTML = html;
+            function updateSuggestionSelection() {
+              document.querySelectorAll(".suggestion-item").forEach((item, index) => {
+                item.classList.toggle("selected", index === selectedSuggestionIndex);
+              });
+            }
 
-        container.querySelectorAll(".channel-item").forEach((item) => {
-          const channelLogin = item.dataset.channel;
-          if (
-            channelLogin &&
-            !channelLogin.includes("_info") &&
-            !channelLogin.includes("_note")
-          ) {
-            item.addEventListener("click", () =>
-              addStreamFromSidebar(channelLogin)
-            );
-          } else {
-            item.style.cursor = "default";
-            item.style.opacity = "0.7";
-          }
-        });
-
-        const showMoreBtn = document.getElementById("offlineShowMore");
-        if (showMoreBtn)
-          showMoreBtn.addEventListener("click", () => showMoreOffline());
-      }
-
-      function showMoreOffline() {
-        offlineVisibleCount += OFFLINE_PAGE_SIZE;
-        updateFollowedChannelsUI();
-      }
-
-      function createChannelHTML(channel) {
-        const viewerText = channel.is_live
-          ? `<div class="channel-viewers">${formatViewerCount(
-              channel.viewer_count
-            )} viewers</div>`
-          : "";
-        return `
-          <div class="channel-item ${
-            channel.is_live ? "live" : ""
-          }" data-channel="${channel.login}">
-            <img src="${channel.profile_image_url}" alt="${
-          channel.display_name
-        }" class="channel-avatar">
-            <div class="channel-info">
-              <div class="channel-name">${channel.display_name}</div>
-              <div class="channel-game">${channel.game_name}</div>
-              ${viewerText}
-            </div>
-            <div class="${
-              channel.is_live ? "live-indicator" : "offline-indicator"
-            }"></div>
-          </div>`;
-      }
-
-      function formatViewerCount(count) {
-        if (count >= 1_000_000) return (count / 1_000_000).toFixed(1) + "M";
-        if (count >= 1_000) return (count / 1_000).toFixed(1) + "K";
-        return String(count);
-      }
-
-      /* ========================== Streams: add/remove/UI ========================== */
-      function addStreamFromSidebar(channelLogin) {
-        if (streams.find((s) => s.channel === channelLogin)) {
-          alert("This stream is already added");
-          return;
-        }
-        const stream = { id: Date.now(), channel: channelLogin, locked: false };
-        streams.push(stream);
-        saveStreamsToStorage();
-
-        const grid = document.getElementById("streamsGrid");
-        const empty = grid.querySelector(".no-streams");
-        if (empty) empty.remove();
-
-        const card = createStreamElement(stream, streams.length - 1);
-        grid.appendChild(card);
-
-        enableDragAndDrop(grid);
-        refreshItemIndices(grid);
-        applyLayout();
-        updateFocusButtonsVisibility();
-        updateFocusButtonsLabel();
-
-        const channelItem = document.querySelector(
-          `[data-channel="${channelLogin}"]`
-        );
-        if (channelItem) {
-          const originalBg = channelItem.style.background;
-          channelItem.style.background = "rgba(76, 175, 80, 0.3)";
-          setTimeout(() => {
-            channelItem.style.background = originalBg;
-          }, 1000);
-        }
-      }
-
-      function refreshFollowedChannels() {
-        if (user) fetchRealFollowedChannels();
-        else {
-          loadDemoFollowedChannels();
-          updateFollowedChannelsUI();
-        }
-      }
-
-      function setupAutoSuggest() {
-        const input = document.getElementById("streamInput");
-        input.addEventListener("input", (e) => {
-          const query = e.target.value.trim();
-          if (query.length < 2) {
-            hideSuggestions();
-            return;
-          }
-          if (searchTimeout) clearTimeout(searchTimeout);
-          searchTimeout = setTimeout(() => searchChannels(query), 300);
-        });
-
-        input.addEventListener("keydown", (e) => {
-          const dropdown = document.getElementById("suggestionsDropdown");
-          if (dropdown.style.display === "none") return;
-
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            selectedSuggestionIndex = Math.min(
-              selectedSuggestionIndex + 1,
-              currentSuggestions.length - 1
-            );
-            updateSuggestionSelection();
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
-            updateSuggestionSelection();
-          } else if (e.key === "Enter") {
-            e.preventDefault();
-            if (
-              selectedSuggestionIndex >= 0 &&
-              currentSuggestions[selectedSuggestionIndex]
-            ) {
-              selectSuggestion(currentSuggestions[selectedSuggestionIndex]);
-            } else {
+            function selectSuggestion(channel) {
+              const input = document.getElementById("streamInput");
+              input.value = (
+                channel.broadcaster_login ||
+                channel.display_name ||
+                ""
+              ).toLowerCase();
+              hideSuggestions();
               addStream();
             }
-          } else if (e.key === "Escape") {
-            hideSuggestions();
-          }
-        });
 
-        input.addEventListener("blur", () =>
-          setTimeout(() => hideSuggestions(), 150)
-        );
-      }
-
-      async function searchChannels(query) {
-        const dropdown = document.getElementById("suggestionsDropdown");
-        dropdown.innerHTML =
-          '<div class="loading-suggestion">🔍 Searching channels...</div>';
-        dropdown.style.display = "block";
-
-        const token = localStorage.getItem("twitch_token");
-        if (!token) {
-          const fallback = [
-            {
-              id: "19571641",
-              broadcaster_login: "ninja",
-              display_name: "Ninja",
-              game_name: "Fortnite",
-              is_live: false,
-              thumbnail_url:
-                "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-70x70.png",
-            },
-            {
-              id: "44445592",
-              broadcaster_login: "pokimane",
-              display_name: "Pokimane",
-              game_name: "Just Chatting",
-              is_live: false,
-              thumbnail_url:
-                "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-70x70.png",
-            },
-            {
-              id: "37402112",
-              broadcaster_login: "shroud",
-              display_name: "shroud",
-              game_name: "VALORANT",
-              is_live: false,
-              thumbnail_url:
-                "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-70x70.png",
-            },
-            {
-              id: "71092938",
-              broadcaster_login: "xqc",
-              display_name: "xQc",
-              game_name: "Grand Theft Auto V",
-              is_live: false,
-              thumbnail_url:
-                "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-70x70.png",
-            },
-          ].filter(
-            (c) =>
-              c.display_name.toLowerCase().includes(query.toLowerCase()) ||
-              c.broadcaster_login.toLowerCase().includes(query.toLowerCase())
-          );
-          currentSuggestions = fallback;
-          displaySuggestions(fallback);
-          return;
-        }
-
-        try {
-          const url = new URL("https://api.twitch.tv/helix/search/channels");
-          url.searchParams.set("query", query);
-          url.searchParams.set("first", "10");
-          const res = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Client-Id": CLIENT_ID,
-            },
-          });
-          if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem("twitch_token");
-            throw new Error(`Auth error ${res.status}`);
-          }
-          if (res.status === 429) throw new Error("Rate limited (429)");
-          if (!res.ok) throw new Error(`search/channels ${res.status}`);
-
-          const json = await res.json();
-          const results = (json.data || []).map((ch) => ({
-            id: ch.id,
-            broadcaster_login: ch.broadcaster_login,
-            display_name: ch.display_name || ch.broadcaster_login,
-            game_name: ch.game_name || "",
-            is_live: !!ch.is_live,
-            thumbnail_url: ch.thumbnail_url || "",
-            title: ch.title || "",
-          }));
-
-          currentSuggestions = results;
-          displaySuggestions(results);
-        } catch (err) {
-          console.error("Channel search error:", err);
-          dropdown.innerHTML =
-            '<div class="loading-suggestion">Couldn’t search Twitch right now.</div>';
-        }
-      }
-
-      function displaySuggestions(channels) {
-        const dropdown = document.getElementById("suggestionsDropdown");
-        selectedSuggestionIndex = -1;
-
-        if (!Array.isArray(channels) || channels.length === 0) {
-          dropdown.innerHTML =
-            '<div class="loading-suggestion">No channels found</div>';
-          dropdown.style.display = "block";
-          return;
-        }
-
-        dropdown.innerHTML = channels
-          .map(
-            (channel, index) => `
-            <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
-              channel.display_name
-            }">
-              <img src="${channel.thumbnail_url || ""}" alt="${
-              channel.display_name
-            }" class="suggestion-avatar">
-              <div class="suggestion-info">
-                <div class="suggestion-name">${channel.display_name}</div>
-                <div class="suggestion-game">${channel.game_name || ""}</div>
-              </div>
-              <span class="suggestion-viewers">${
-                channel.is_live ? "🔴 LIVE" : ""
-              }</span>
-            </div>
-          `
-          )
-          .join("");
-
-        dropdown.style.display = "block";
-
-        dropdown.querySelectorAll(".suggestion-item").forEach((item) => {
-          item.addEventListener("click", () => {
-            const idx = Number(item.getAttribute("data-index"));
-            selectSuggestion(channels[idx]);
-          });
-          item.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-              const idx = Number(item.getAttribute("data-index"));
-              selectSuggestion(channels[idx]);
+            function hideSuggestions() {
+              const dropdown = document.getElementById("suggestionsDropdown");
+              dropdown.style.display = "none";
+              selectedSuggestionIndex = -1;
+              currentSuggestions = [];
             }
-          });
-        });
-      }
 
-      function updateSuggestionSelection() {
-        document.querySelectorAll(".suggestion-item").forEach((item, index) => {
-          item.classList.toggle("selected", index === selectedSuggestionIndex);
-        });
-      }
+            function addStream() {
+              const input = document.getElementById("streamInput");
+              const channelName = input.value.trim().toLowerCase();
 
-      function selectSuggestion(channel) {
-        const input = document.getElementById("streamInput");
-        input.value = (
-          channel.broadcaster_login ||
-          channel.display_name ||
-          ""
-        ).toLowerCase();
-        hideSuggestions();
-        addStream();
-      }
-
-      function hideSuggestions() {
-        const dropdown = document.getElementById("suggestionsDropdown");
-        dropdown.style.display = "none";
-        selectedSuggestionIndex = -1;
-        currentSuggestions = [];
-      }
-
-      function addStream() {
-        const input = document.getElementById("streamInput");
-        const channelName = input.value.trim().toLowerCase();
-
-        if (!channelName) {
-          alert("Please enter a channel name");
-          return;
-        }
-        if (streams.find((s) => s.channel === channelName)) {
-          alert("This stream is already added");
-          return;
-        }
-
-        const stream = { id: Date.now(), channel: channelName, locked: false };
-        streams.push(stream);
-        saveStreamsToStorage();
-
-        const grid = document.getElementById("streamsGrid");
-        if (grid.querySelector(".no-streams")) grid.innerHTML = "";
-        const card = createStreamElement(stream, streams.length - 1);
-        grid.appendChild(card);
-
-        enableDragAndDrop(grid);
-        refreshItemIndices(grid);
-        showEmptyState(false);
-        applyLayout();
-        updateFocusButtonsVisibility();
-        updateFocusButtonsLabel();
-
-        input.value = "";
-        hideSuggestions();
-      }
-
-      function removeStream(streamId) {
-        const idx = streams.findIndex((s) => s.id === streamId);
-        if (idx === -1) return;
-
-        // Update state
-        streams.splice(idx, 1);
-        saveStreamsToStorage();
-
-        // Remove the DOM node
-        const card = document.querySelector(
-          `.stream-item[data-id="${streamId}"]`
-        );
-        if (card) card.remove();
-
-        // Reindex remaining cards
-        const grid = document.getElementById("streamsGrid");
-        grid.querySelectorAll(".stream-item").forEach((el, i) => {
-          el.dataset.index = String(i);
-        });
-
-        // Empty state if needed
-        if (streams.length === 0 && !grid.querySelector(".no-streams")) {
-          const n = document.createElement("div");
-          n.className = "no-streams";
-          n.textContent =
-            "No streams added yet. Add a Twitch channel to get started!";
-          grid.appendChild(n);
-        }
-
-        // Let the DOM settle before re-sizing layout (helps embeds keep state)
-        Promise.resolve().then(() => applyLayout());
-      }
-
-      function updateUI() {
-        const grid = document.getElementById("streamsGrid");
-        const existingCards = grid.querySelectorAll(".stream-item");
-
-        if (existingCards.length === 0) {
-          if (streams.length === 0) {
-            grid.innerHTML = "";
-            showEmptyState(true);
-            return;
-          }
-          grid.innerHTML = "";
-          streams.forEach((stream, idx) =>
-            grid.appendChild(createStreamElement(stream, idx))
-          );
-          enableDragAndDrop(grid);
-          showEmptyState(false);
-          return;
-        }
-
-        // Remove cards not in state
-        Array.from(existingCards).forEach((card) => {
-          const id = Number(card.dataset.id);
-          if (!streams.some((s) => s.id === id)) card.remove();
-        });
-
-        // Add new cards
-        streams.forEach((s, idx) => {
-          if (!findCardById(s.id))
-            document
-              .getElementById("streamsGrid")
-              .appendChild(createStreamElement(s, idx));
-        });
-
-        // Reorder DOM to match state (no reloads)
-        const gridNow = document.getElementById("streamsGrid");
-        const orderMap = new Map(streams.map((s, i) => [String(s.id), i]));
-        Array.from(gridNow.querySelectorAll(".stream-item"))
-          .sort(
-            (a, b) => orderMap.get(a.dataset.id) - orderMap.get(b.dataset.id)
-          )
-          .forEach((el) => gridNow.appendChild(el));
-
-        refreshItemIndices(gridNow);
-        enableDragAndDrop(gridNow);
-        showEmptyState(streams.length === 0);
-        applyLayout();
-        updateFocusButtonsVisibility();
-        updateFocusButtonsLabel();
-      }
-
-      /* ========================== Drag & Drop ========================== */
-      function enableDragAndDrop(container) {
-        container.querySelectorAll(".stream-item").forEach((item) => {
-          if (!item._dndBound) {
-            item.addEventListener("dragstart", onDragStart);
-            item.addEventListener("dragover", onDragOver);
-            item.addEventListener("dragleave", onDragLeave);
-            item.addEventListener("drop", onDrop);
-            item.addEventListener("dragend", onDragEnd);
-            item._dndBound = true;
-          }
-        });
-      }
-
-      function onDragStart(e) {
-        const item = e.currentTarget;
-        dragIndex = Number(item.dataset.index);
-        item.classList.add("dragging");
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", String(dragIndex));
-      }
-      function onDragOver(e) {
-        e.preventDefault();
-        const t = e.currentTarget;
-        if (!t.classList.contains("drop-target"))
-          t.classList.add("drop-target");
-      }
-      function onDragLeave(e) {
-        e.currentTarget.classList.remove("drop-target");
-      }
-
-      function onDrop(e) {
-        e.preventDefault();
-        const target = e.currentTarget;
-        target.classList.remove("drop-target");
-
-        const from = dragIndex;
-        const to = Number(target.dataset.index);
-        if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
-          return;
-
-        const [moved] = streams.splice(from, 1);
-        streams.splice(to, 0, moved);
-        saveStreamsToStorage();
-
-        // Reposition DOM node directly to avoid iframe reloads
-        const grid = document.getElementById("streamsGrid");
-        const nodes = Array.from(grid.querySelectorAll(".stream-item"));
-        const movingEl = nodes[from];
-        const referenceEl = nodes[to];
-        if (from < to) grid.insertBefore(movingEl, referenceEl.nextSibling);
-        else grid.insertBefore(movingEl, referenceEl);
-
-        refreshItemIndices(grid);
-        applyLayout();
-      }
-
-      function onDragEnd(e) {
-        e.currentTarget.classList.remove("dragging");
-        dragIndex = null;
-      }
-
-      function toggleFocus(streamId) {
-        if (focusedId === streamId) {
-          focusedId = null;
-        } else {
-          focusedId = streamId;
-        }
-        saveStreamsToStorage(); // optional if you want to persist later
-        applyLayout();
-      }
-
-      function applyFocusLayout() {
-        const grid = document.getElementById("streamsGrid");
-        if (!grid) return;
-
-        document.body.classList.toggle("focus-mode", !!focusedId);
-
-        const cards = grid.querySelectorAll(".stream-item");
-        cards.forEach((card) => {
-          const id = Number(card.dataset.id);
-          const isFocused = focusedId === id;
-
-          // classes
-          card.classList.toggle("focused", isFocused);
-          card.classList.toggle("single", isFocused); // reuse your single layout (video left + chat right)
-          card.classList.toggle("compact", !isFocused); // others go compact
-
-          // mute logic
-          setIframeMuted(card, !isFocused);
-        });
-
-        // Put focused card at the top of the grid
-        reorderFocusedFirst(grid);
-
-        // Size the focused "single" layout (reuse your existing sizing)
-        if (focusedId) {
-          // Run the single-card sizing if your controller exposes it (it does via applyLayout)
-          // We'll call applySingle sizing via applyLayout below.
-        }
-
-        updateFocusButtonsLabel();
-      }
-
-      /* ========================== Storage & Helpers ========================== */
-      function setIframeMuted(card, muted) {
-        const iframe = card.querySelector(".stream-video");
-        if (!iframe) return;
-        const url = new URL(iframe.src);
-        url.searchParams.set("muted", muted ? "true" : "false");
-        // Only reload if it actually changes
-        if (iframe.src !== url.toString()) iframe.src = url.toString();
-      }
-
-      function updateFocusButtonsVisibility() {
-        const hasMultiple = streams.length > 1;
-        document
-          .querySelectorAll('[data-role="focus-toggle"]')
-          .forEach((btn) => {
-            btn.style.display = hasMultiple ? "" : "none";
-          });
-      }
-
-      function updateFocusButtonsLabel() {
-        document.querySelectorAll(".stream-item").forEach((card) => {
-          const id = Number(card.dataset.id);
-          const btn = card.querySelector('[data-role="focus-toggle"]');
-          if (!btn) return;
-          btn.textContent = focusedId === id ? "Unfocus" : "Focus";
-        });
-      }
-
-      function reorderFocusedFirst(grid) {
-        if (!focusedId) return;
-        const focused = grid.querySelector(
-          `.stream-item[data-id="${focusedId}"]`
-        );
-        if (focused) grid.insertBefore(focused, grid.firstChild);
-      }
-
-      function saveStreamsToStorage() {
-        localStorage.setItem("multistream_data", JSON.stringify(streams));
-      }
-
-      function loadStreamsFromStorage() {
-        const stored = localStorage.getItem("multistream_data");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          streams = parsed.map((s) => ({
-            id: s.id,
-            channel: s.channel,
-            locked: s.locked || false,
-          }));
-        }
-      }
-
-      function findCardById(id) {
-        return document.querySelector(`.stream-item[data-id="${id}"]`);
-      }
-
-      function showEmptyState(show) {
-        const grid = document.getElementById("streamsGrid");
-        const empty = grid.querySelector(".no-streams");
-        if (show) {
-          if (!empty) {
-            const n = document.createElement("div");
-            n.className = "no-streams";
-            n.textContent =
-              "No streams added yet. Add a Twitch channel to get started!";
-            grid.appendChild(n);
-          }
-        } else if (empty) {
-          empty.remove();
-        }
-      }
-
-      function createStreamElement(stream, index) {
-        const card = document.createElement("div");
-        card.className = "stream-item";
-        card.setAttribute("draggable", "true");
-        card.dataset.index = String(index);
-        card.dataset.id = String(stream.id);
-
-        card.innerHTML = `
-    <div class="stream-header">
-      <span class="stream-title">${stream.channel}</span>
-      <div class="stream-controls">
-        <button class="focus-btn"
-                data-role="focus-toggle"
-                onclick="event.stopPropagation(); toggleFocus(${stream.id})">
-          Focus
-        </button>
-        <button class="remove-btn"
-                onclick="event.stopPropagation(); removeStream(${stream.id})">
-          Remove
-        </button>
-      </div>
-    </div>
-    <div class="stream-video-container" data-stream-id="${stream.id}">
-      <iframe
-        src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-        class="stream-video" frameborder="0" allowfullscreen="true" scrolling="no">
-      </iframe>
-    </div>
-    <div class="stream-chat">
-      <iframe
-        src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-        frameborder="0" scrolling="no">
-      </iframe>
-    </div>
-  `;
-        return card;
-      }
-
-      function refreshItemIndices(container) {
-        container.querySelectorAll(".stream-item").forEach((el, i) => {
-          el.dataset.index = String(i);
-        });
-      }
-
-      /* ========================== Unified layout controller (Single & Focus) ========================== */
-      (() => {
-        const CHAT_W = 340;
-
-        let isApplyingLayout = false; // reentrancy guard
-        let layoutRaf = null; // rAF debouncer
-
-        function sizeSingle(card) {
-          const grid = document.getElementById("streamsGrid");
-          const header = document.querySelector(".header");
-          if (!card || !grid) return;
-
-          const headerH = header ? header.offsetHeight : 0;
-          const gridRect = grid.getBoundingClientRect();
-          const availW = gridRect.width;
-          const availH = window.innerHeight - headerH;
-
-          const verticalMargin = 16;
-          const usableH = Math.max(0, availH - verticalMargin);
-
-          const chatW = CHAT_W;
-          const maxVidW = Math.max(0, availW - chatW);
-          const maxVidH_fromW = maxVidW / (16 / 9);
-
-          const videoH = Math.floor(Math.min(usableH, maxVidH_fromW));
-          const videoW = Math.floor(videoH * (16 / 9));
-
-          const video = card.querySelector(".stream-video-container");
-          const chat = card.querySelector(".stream-chat");
-          if (!video || !chat) return;
-
-          if (videoH <= 0 || videoW <= 0) {
-            resetSingleSizing(card);
-            card.classList.remove("single");
-            return;
-          }
-
-          card.style.setProperty("--chat-w", chatW + "px");
-          video.style.width = videoW + "px";
-          video.style.height = videoH + "px";
-          chat.style.width = chatW + "px";
-          chat.style.height = videoH + "px";
-        }
-
-        function resetSingleSizing(card) {
-          const video = card.querySelector(".stream-video-container");
-          const chat = card.querySelector(".stream-chat");
-          if (video) {
-            video.style.width = "";
-            video.style.height = "";
-          }
-          if (chat) {
-            chat.style.width = "";
-            chat.style.height = "";
-          }
-          card.style.removeProperty("--chat-w");
-        }
-
-        function applySingleModeIfNeeded() {
-          const grid = document.getElementById("streamsGrid");
-          const cards = grid ? grid.querySelectorAll(".stream-item") : [];
-          if (!grid || focusedId) return; // focus mode handles its own
-
-          if (cards.length === 1) {
-            const card = cards[0];
-            // clear single on others (just in case)
-            grid.querySelectorAll(".stream-item.single").forEach((c) => {
-              if (c !== card) {
-                resetSingleSizing(c);
-                c.classList.remove("single");
+              if (!channelName) {
+                alert("Please enter a channel name");
+                return;
               }
-            });
-            card.classList.add("single");
-            sizeSingle(card);
-            window.addEventListener("resize", onResize);
-          } else {
-            grid.querySelectorAll(".stream-item.single").forEach((card) => {
-              resetSingleSizing(card);
-              card.classList.remove("single");
-            });
-            window.removeEventListener("resize", onResize);
-          }
-        }
+              if (streams.find((s) => s.channel === channelName)) {
+                alert("This stream is already added");
+                return;
+              }
 
-        function onResize() {
-          const card =
-            document.querySelector(".stream-item.focused") ||
-            document.querySelector(".stream-item.single");
-          if (card) sizeSingle(card);
-        }
+              const stream = { id: Date.now(), channel: channelName, locked: false };
+              streams.push(stream);
+              saveStreamsToStorage();
 
-        function applyLayout() {
-          if (isApplyingLayout) return; // prevent re-entry
-          isApplyingLayout = true;
-          try {
-            updateFocusButtonsVisibility();
+              const grid = document.getElementById("streamsGrid");
+              if (grid.querySelector(".no-streams")) grid.innerHTML = "";
+              const card = createStreamElement(stream, streams.length - 1);
+              grid.appendChild(card);
 
-            // if focused card was removed, clear focus
-            if (
-              focusedId &&
-              !document.querySelector(`.stream-item[data-id="${focusedId}"]`)
-            ) {
-              focusedId = null;
-            }
-
-            if (focusedId && streams.length > 1) {
-              applyFocusLayout();
-              const focusedCard = document.querySelector(
-                ".stream-item.focused"
-              );
-              if (focusedCard) sizeSingle(focusedCard);
-              window.addEventListener("resize", onResize);
-            } else {
-              document.body.classList.remove("focus-mode");
-              focusedId = null;
-              document.querySelectorAll(".stream-item").forEach((card) => {
-                card.classList.remove("focused", "compact", "single");
-                setIframeMuted(card, false);
-                resetSingleSizing(card);
-              });
-              applySingleModeIfNeeded();
-            }
-          } finally {
-            isApplyingLayout = false;
-          }
-        }
-
-        // Observe grid for changes
-        document.addEventListener("DOMContentLoaded", () => {
-          const grid = document.getElementById("streamsGrid");
-          if (!grid) return;
-
-          const obs = new MutationObserver(() => {
-            if (isApplyingLayout) return; // ignore mutations caused by ourselves
-            if (layoutRaf) return; // already queued
-            layoutRaf = requestAnimationFrame(() => {
-              layoutRaf = null;
+              enableDragAndDrop(grid);
+              refreshItemIndices(grid);
+              showEmptyState(false);
               applyLayout();
-            });
-          });
+              updateFocusButtonsVisibility();
+              updateFocusButtonsLabel();
 
-          obs.observe(grid, { childList: true, subtree: false });
-          applyLayout();
-        });
+              input.value = "";
+              hideSuggestions();
+            }
 
-        // expose globally
-        window.applyLayout = applyLayout;
-      })();
+            function removeStream(streamId) {
+              const idx = streams.findIndex((s) => s.id === streamId);
+              if (idx === -1) return;
+
+              // Update state
+              streams.splice(idx, 1);
+              saveStreamsToStorage();
+
+              // Remove the DOM node
+              const card = document.querySelector(
+                `.stream-item[data-id="${streamId}"]`
+              );
+              if (card) card.remove();
+
+              // Reindex remaining cards
+              const grid = document.getElementById("streamsGrid");
+              grid.querySelectorAll(".stream-item").forEach((el, i) => {
+                el.dataset.index = String(i);
+              });
+
+              // Empty state if needed
+              if (streams.length === 0 && !grid.querySelector(".no-streams")) {
+                const n = document.createElement("div");
+                n.className = "no-streams";
+                n.textContent =
+                  "No streams added yet. Add a Twitch channel to get started!";
+                grid.appendChild(n);
+              }
+
+              // Let the DOM settle before re-sizing layout (helps embeds keep state)
+              Promise.resolve().then(() => applyLayout());
+            }
+
+            function updateUI() {
+              const grid = document.getElementById("streamsGrid");
+              const existingCards = grid.querySelectorAll(".stream-item");
+
+              if (existingCards.length === 0) {
+                if (streams.length === 0) {
+                  grid.innerHTML = "";
+                  showEmptyState(true);
+                  return;
+                }
+                grid.innerHTML = "";
+                streams.forEach((stream, idx) =>
+                  grid.appendChild(createStreamElement(stream, idx))
+                );
+                enableDragAndDrop(grid);
+                showEmptyState(false);
+                return;
+              }
+
+              // Remove cards not in state
+              Array.from(existingCards).forEach((card) => {
+                const id = Number(card.dataset.id);
+                if (!streams.some((s) => s.id === id)) card.remove();
+              });
+
+              // Add new cards
+              streams.forEach((s, idx) => {
+                if (!findCardById(s.id))
+                  document
+                    .getElementById("streamsGrid")
+                    .appendChild(createStreamElement(s, idx));
+              });
+
+              // Reorder DOM to match state (no reloads)
+              const gridNow = document.getElementById("streamsGrid");
+              const orderMap = new Map(streams.map((s, i) => [String(s.id), i]));
+              Array.from(gridNow.querySelectorAll(".stream-item"))
+                .sort(
+                  (a, b) => orderMap.get(a.dataset.id) - orderMap.get(b.dataset.id)
+                )
+                .forEach((el) => gridNow.appendChild(el));
+
+              refreshItemIndices(gridNow);
+              enableDragAndDrop(gridNow);
+              showEmptyState(streams.length === 0);
+              applyLayout();
+              updateFocusButtonsVisibility();
+              updateFocusButtonsLabel();
+            }
+
+            /* ========================== Drag & Drop ========================== */
+            function enableDragAndDrop(container) {
+              container.querySelectorAll(".stream-item").forEach((item) => {
+                if (!item._dndBound) {
+                  item.addEventListener("dragstart", onDragStart);
+                  item.addEventListener("dragover", onDragOver);
+                  item.addEventListener("dragleave", onDragLeave);
+                  item.addEventListener("drop", onDrop);
+                  item.addEventListener("dragend", onDragEnd);
+                  item._dndBound = true;
+                }
+              });
+            }
+
+            function onDragStart(e) {
+              const item = e.currentTarget;
+              dragIndex = Number(item.dataset.index);
+              item.classList.add("dragging");
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("text/plain", String(dragIndex));
+            }
+            function onDragOver(e) {
+              e.preventDefault();
+              const t = e.currentTarget;
+              if (!t.classList.contains("drop-target"))
+                t.classList.add("drop-target");
+            }
+            function onDragLeave(e) {
+              e.currentTarget.classList.remove("drop-target");
+            }
+
+            function onDrop(e) {
+              e.preventDefault();
+              const target = e.currentTarget;
+              target.classList.remove("drop-target");
+
+              const from = dragIndex;
+              const to = Number(target.dataset.index);
+              if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
+                return;
+
+              const [moved] = streams.splice(from, 1);
+              streams.splice(to, 0, moved);
+              saveStreamsToStorage();
+
+              // Reposition DOM node directly to avoid iframe reloads
+              const grid = document.getElementById("streamsGrid");
+              const nodes = Array.from(grid.querySelectorAll(".stream-item"));
+              const movingEl = nodes[from];
+              const referenceEl = nodes[to];
+              if (from < to) grid.insertBefore(movingEl, referenceEl.nextSibling);
+              else grid.insertBefore(movingEl, referenceEl);
+
+              refreshItemIndices(grid);
+              applyLayout();
+            }
+
+            function onDragEnd(e) {
+              e.currentTarget.classList.remove("dragging");
+              dragIndex = null;
+            }
+
+            function toggleFocus(streamId) {
+              if (focusedId === streamId) {
+                focusedId = null;
+              } else {
+                focusedId = streamId;
+              }
+              saveStreamsToStorage(); // optional if you want to persist later
+              applyLayout();
+            }
+
+            function applyFocusLayout() {
+              const grid = document.getElementById("streamsGrid");
+              if (!grid) return;
+
+              document.body.classList.toggle("focus-mode", !!focusedId);
+
+              const cards = grid.querySelectorAll(".stream-item");
+              cards.forEach((card) => {
+                const id = Number(card.dataset.id);
+                const isFocused = focusedId === id;
+
+                // classes
+                card.classList.toggle("focused", isFocused);
+                card.classList.toggle("single", isFocused); // reuse your single layout (video left + chat right)
+                card.classList.toggle("compact", !isFocused); // others go compact
+
+                // mute logic
+                // setIframeMuted(card, !isFocused);
+              });
+
+              // Put focused card at the top of the grid
+              reorderFocusedFirst(grid);
+
+              // Size the focused "single" layout (reuse your existing sizing)
+              if (focusedId) {
+                // Run the single-card sizing if your controller exposes it (it does via applyLayout)
+                // We'll call applySingle sizing via applyLayout below.
+              }
+
+              updateFocusButtonsLabel();
+            }
+
+            /* ========================== Storage & Helpers ========================== */
+            function setIframeMuted(card, muted) {
+              // No-op: do not touch iframe.src or it will reload.
+      +       // Let the user click the Twitch player UI to un/mute.
+              // const iframe = card.querySelector(".stream-video");
+              // if (!iframe) return;
+              // const url = new URL(iframe.src);
+              // url.searchParams.set("muted", muted ? "true" : "false");
+              // // Only reload if it actually changes
+              // if (iframe.src !== url.toString()) iframe.src = url.toString();
+            }
+
+            function updateFocusButtonsVisibility() {
+              const hasMultiple = streams.length > 1;
+              document
+                .querySelectorAll('[data-role="focus-toggle"]')
+                .forEach((btn) => {
+                  btn.style.display = hasMultiple ? "" : "none";
+                });
+            }
+
+            function updateFocusButtonsLabel() {
+              document.querySelectorAll(".stream-item").forEach((card) => {
+                const id = Number(card.dataset.id);
+                const btn = card.querySelector('[data-role="focus-toggle"]');
+                if (!btn) return;
+                btn.textContent = focusedId === id ? "Unfocus" : "Focus";
+              });
+            }
+
+            function reorderFocusedFirst(grid) {
+              if (!focusedId) return;
+              const focused = grid.querySelector(
+                `.stream-item[data-id="${focusedId}"]`
+              );
+              if (focused) grid.insertBefore(focused, grid.firstChild);
+            }
+
+            function saveStreamsToStorage() {
+              localStorage.setItem("multistream_data", JSON.stringify(streams));
+            }
+
+            function loadStreamsFromStorage() {
+              const stored = localStorage.getItem("multistream_data");
+              if (stored) {
+                const parsed = JSON.parse(stored);
+                streams = parsed.map((s) => ({
+                  id: s.id,
+                  channel: s.channel,
+                  locked: s.locked || false,
+                }));
+              }
+            }
+
+            function findCardById(id) {
+              return document.querySelector(`.stream-item[data-id="${id}"]`);
+            }
+
+            function showEmptyState(show) {
+              const grid = document.getElementById("streamsGrid");
+              const empty = grid.querySelector(".no-streams");
+              if (show) {
+                if (!empty) {
+                  const n = document.createElement("div");
+                  n.className = "no-streams";
+                  n.textContent =
+                    "No streams added yet. Add a Twitch channel to get started!";
+                  grid.appendChild(n);
+                }
+              } else if (empty) {
+                empty.remove();
+              }
+            }
+
+            function createStreamElement(stream, index) {
+              const card = document.createElement("div");
+              card.className = "stream-item";
+              card.setAttribute("draggable", "true");
+              card.dataset.index = String(index);
+              card.dataset.id = String(stream.id);
+
+              card.innerHTML = `
+          <div class="stream-header">
+            <span class="stream-title">${stream.channel}</span>
+            <div class="stream-controls">
+              <button class="focus-btn"
+                      data-role="focus-toggle"
+                      onclick="event.stopPropagation(); toggleFocus(${stream.id})">
+                Focus
+              </button>
+              <button class="remove-btn"
+                      onclick="event.stopPropagation(); removeStream(${stream.id})">
+                Remove
+              </button>
+            </div>
+          </div>
+          <div class="stream-video-container" data-stream-id="${stream.id}">
+            <iframe
+              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=true&autoplay=true"
+              class="stream-video" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="true" scrolling="no">
+            </iframe>
+          </div>
+          <div class="stream-chat">
+            <iframe
+              src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+              frameborder="0" scrolling="no">
+            </iframe>
+          </div>
+        `;
+              return card;
+            }
+
+            function refreshItemIndices(container) {
+              container.querySelectorAll(".stream-item").forEach((el, i) => {
+                el.dataset.index = String(i);
+              });
+            }
+
+            /* ========================== Unified layout controller (Single & Focus) ========================== */
+            (() => {
+              const CHAT_W = 340;
+
+              let isApplyingLayout = false; // reentrancy guard
+              let layoutRaf = null; // rAF debouncer
+
+              function sizeSingle(card) {
+                const grid = document.getElementById("streamsGrid");
+                const header = document.querySelector(".header");
+                if (!card || !grid) return;
+
+                const headerH = header ? header.offsetHeight : 0;
+                const gridRect = grid.getBoundingClientRect();
+                const availW = gridRect.width;
+                const availH = window.innerHeight - headerH;
+
+                const verticalMargin = 16;
+                const usableH = Math.max(0, availH - verticalMargin);
+
+                const chatW = CHAT_W;
+                const maxVidW = Math.max(0, availW - chatW);
+                const maxVidH_fromW = maxVidW / (16 / 9);
+
+                const videoH = Math.floor(Math.min(usableH, maxVidH_fromW));
+                const videoW = Math.floor(videoH * (16 / 9));
+
+                const video = card.querySelector(".stream-video-container");
+                const chat = card.querySelector(".stream-chat");
+                if (!video || !chat) return;
+
+                if (videoH <= 0 || videoW <= 0) {
+                  resetSingleSizing(card);
+                  card.classList.remove("single");
+                  return;
+                }
+
+                card.style.setProperty("--chat-w", chatW + "px");
+                video.style.width = videoW + "px";
+                video.style.height = videoH + "px";
+                chat.style.width = chatW + "px";
+                chat.style.height = videoH + "px";
+              }
+
+              function resetSingleSizing(card) {
+                const video = card.querySelector(".stream-video-container");
+                const chat = card.querySelector(".stream-chat");
+                if (video) {
+                  video.style.width = "";
+                  video.style.height = "";
+                }
+                if (chat) {
+                  chat.style.width = "";
+                  chat.style.height = "";
+                }
+                card.style.removeProperty("--chat-w");
+              }
+
+              function applySingleModeIfNeeded() {
+                const grid = document.getElementById("streamsGrid");
+                const cards = grid ? grid.querySelectorAll(".stream-item") : [];
+                if (!grid || focusedId) return; // focus mode handles its own
+
+                if (cards.length === 1) {
+                  const card = cards[0];
+                  // clear single on others (just in case)
+                  grid.querySelectorAll(".stream-item.single").forEach((c) => {
+                    if (c !== card) {
+                      resetSingleSizing(c);
+                      c.classList.remove("single");
+                    }
+                  });
+                  card.classList.add("single");
+                  sizeSingle(card);
+                  window.addEventListener("resize", onResize);
+                } else {
+                  grid.querySelectorAll(".stream-item.single").forEach((card) => {
+                    resetSingleSizing(card);
+                    card.classList.remove("single");
+                  });
+                  window.removeEventListener("resize", onResize);
+                }
+              }
+
+              function onResize() {
+                const card =
+                  document.querySelector(".stream-item.focused") ||
+                  document.querySelector(".stream-item.single");
+                if (card) sizeSingle(card);
+              }
+
+              function applyLayout() {
+                if (isApplyingLayout) return; // prevent re-entry
+                isApplyingLayout = true;
+                try {
+                  updateFocusButtonsVisibility();
+
+                  // if focused card was removed, clear focus
+                  if (
+                    focusedId &&
+                    !document.querySelector(`.stream-item[data-id="${focusedId}"]`)
+                  ) {
+                    focusedId = null;
+                  }
+
+                  if (focusedId && streams.length > 1) {
+                    applyFocusLayout();
+                    const focusedCard = document.querySelector(
+                      ".stream-item.focused"
+                    );
+                    if (focusedCard) sizeSingle(focusedCard);
+                    window.addEventListener("resize", onResize);
+                  } else {
+                    document.body.classList.remove("focus-mode");
+                    focusedId = null;
+                    document.querySelectorAll(".stream-item").forEach((card) => {
+                      card.classList.remove("focused", "compact", "single");
+                      // setIframeMuted(card, false);
+                      resetSingleSizing(card);
+                    });
+                    applySingleModeIfNeeded();
+                  }
+                } finally {
+                  isApplyingLayout = false;
+                }
+              }
+
+              // Observe grid for changes
+              document.addEventListener("DOMContentLoaded", () => {
+                const grid = document.getElementById("streamsGrid");
+                if (!grid) return;
+
+                const obs = new MutationObserver(() => {
+                  if (isApplyingLayout) return; // ignore mutations caused by ourselves
+                  if (layoutRaf) return; // already queued
+                  layoutRaf = requestAnimationFrame(() => {
+                    layoutRaf = null;
+                    applyLayout();
+                  });
+                });
+
+                obs.observe(grid, { childList: true, subtree: false });
+                applyLayout();
+              });
+
+              // expose globally
+              window.applyLayout = applyLayout;
+            })();
     </script>
   </body>
 </html>
