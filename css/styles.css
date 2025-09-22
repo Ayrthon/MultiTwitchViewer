@@ -70,6 +70,79 @@ body {
 }
 
 /* ========== Sidebar ========== */
+/* ===== Sidebar overlay drawer ===== */
+:root {
+  --sidebar-w: 240px; /* adjust if you changed your sidebar width */
+  --header-h: 80px; /* matches your sticky header approx; tweak if needed */
+}
+
+/* Turn the sidebar into a fixed overlay drawer */
+.sidebar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  height: calc(100vh - var(--header-h));
+  width: var(--sidebar-w);
+  transform: translateX(-100%); /* hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1500;
+  transition: transform 0.28s ease, opacity 0.2s ease;
+}
+
+/* When open, slide in and accept pointer events */
+body.sidebar-open .sidebar {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Backdrop behind the drawer */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1400;
+}
+body.sidebar-open .sidebar-backdrop {
+  display: block;
+}
+.sidebar-backdrop[hidden] {
+  display: none;
+}
+
+/* Burger button */
+.sidebar-toggle {
+  position: fixed;
+  top: calc(var(--header-h) + 12px);
+  left: 12px;
+  z-index: 2000;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+}
+.sidebar-toggle:hover {
+  transform: translateY(-1px);
+}
+
+/* The main content should act as if there's no sidebar now,
+   since the drawer overlays it; your flex layout will naturally expand. */
+
+/* Mobile: the drawer can be a bit wider */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-w: 88vw;
+    --header-h: 80px;
+  }
+}
+
 .sidebar {
   width: 240px;
   background: rgba(0, 0, 0, 0.8);
