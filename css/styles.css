@@ -447,6 +447,7 @@ body.focus-mode .stream-item:not(.focused) {
   grid-template-columns: 1fr var(--chat-w);
   grid-template-rows: auto 1fr;
   align-items: stretch;
+  width: 90svw;
 }
 .stream-item.single .stream-header {
   grid-column: 1 / -1;
