@@ -519,7 +519,22 @@ body.focus-mode .stream-item:not(.focused) {
 
 /* When focusing, hide chat on non-focused to keep things tidy */
 body.focus-mode .stream-item:not(.focused) .stream-chat {
-  display: none;
+  display: flex;
+  height: 320px; /* tweak to taste */
+}
+
+/* make sure the iframe fills whatever height you set */
+body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+
+/* optional: slightly shorter on mobile */
+@media (max-width: 768px) {
+  body.focus-mode .stream-item:not(.focused) .stream-chat {
+    height: 260px;
+  }
 }
 
 .focus-btn {
