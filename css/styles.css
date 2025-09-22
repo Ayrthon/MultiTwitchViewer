@@ -320,7 +320,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  width: 80svw;
+  width: 100svw;
   margin: 0 auto;
 }
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
