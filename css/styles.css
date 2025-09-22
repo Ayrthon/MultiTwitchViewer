@@ -345,7 +345,7 @@ body.focus-mode .streams-grid {
   height: calc(100vh - var(--header-h) - 35px);
   height: calc(100dvh - var(--header-h) - 35px);
   min-height: 0; /* allow children to shrink */
-  height: auto; /* important: don't force a fixed height */
+  /* height: auto; */
 }
 
 .stream-item:hover {
