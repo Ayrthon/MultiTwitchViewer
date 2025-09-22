@@ -322,6 +322,7 @@ body {
   gap: 1rem;
   max-width: calc(4 * 500px);
   margin: 0 auto;
+  border: 1px solid red;
 }
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
 body.focus-mode .streams-grid {
