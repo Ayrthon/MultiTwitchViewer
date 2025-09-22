@@ -9,17 +9,6 @@
 
   <body>
     <div class="header">
-      <!-- Toggle button belongs in the header -->
-      <button
-        class="drawer-toggle"
-        data-drawer-toggle
-        aria-controls="app-drawer"
-        aria-expanded="true"
-        title="Toggle sidebar"
-      >
-        ☰
-      </button>
-
       <div class="logo">StreamsViewer <i>(beta)</i></div>
 
       <div class="controls">
@@ -71,51 +60,5 @@
 
     <!-- App entry -->
     <script type="module" src="./js/app.js"></script>
-
-    <!-- Drawer script (place BEFORE </body>) -->
-    <script>
-      (() => {
-        const app = document.querySelector(".app-container");
-        const btn = document.querySelector("[data-drawer-toggle]");
-        const sidebar = document.getElementById("app-drawer");
-        const scrim = document.querySelector("[data-drawer-scrim]");
-
-        if (!app || !btn || !sidebar) return;
-
-        const isMobile = () => window.matchMedia("(max-width: 768px)").matches;
-
-        const setState = (closed) => {
-          app.toggleAttribute("data-drawer-closed", closed);
-          btn.setAttribute("aria-expanded", String(!closed));
-
-          // Scrim only for mobile overlay
-          if (scrim) {
-            if (isMobile() && !closed) {
-              scrim.hidden = false;
-            } else {
-              scrim.hidden = true;
-            }
-          }
-        };
-
-        // Toggle via button
-        btn.addEventListener("click", () => {
-          setState(!app.hasAttribute("data-drawer-closed"));
-        });
-
-        // Close on scrim click (mobile)
-        scrim?.addEventListener("click", () => setState(true));
-
-        // Close on Escape (mobile)
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && isMobile()) setState(true);
-        });
-
-        // Start closed on small screens, open on desktop
-        const mq = window.matchMedia("(max-width: 768px)");
-        setState(mq.matches);
-        mq.addEventListener?.("change", (e) => setState(e.matches));
-      })();
-    </script>
   </body>
 </html>
