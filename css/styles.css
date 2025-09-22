@@ -339,14 +339,13 @@ body.focus-mode .streams-grid {
   border: 2px solid transparent;
   transition: 0.3s;
   position: relative;
-
   display: flex;
   flex-direction: column;
 
   /* Cap each card to the viewport height minus header.
      Use dvh for dynamic viewport; vh as fallback. */
-  max-height: calc(100vh - var(--header-h) - 16px);
-  max-height: calc(100dvh - var(--header-h) - 16px);
+  height: calc(100vh - var(--header-h) - 16px);
+  height: calc(100dvh - var(--header-h) - 16px);
   min-height: 0; /* allow children to shrink */
 }
 
