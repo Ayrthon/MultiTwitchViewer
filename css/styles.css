@@ -317,8 +317,8 @@ body {
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  display: flex;
+  /* grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); */
   gap: 1rem;
   margin: 0 auto;
 }
@@ -341,6 +341,7 @@ body.focus-mode .streams-grid {
   display: flex;
   flex-direction: column;
   height: fit-content;
+  min-width: 746px;
 }
 .stream-item:hover {
   border-color: #9146ff;
