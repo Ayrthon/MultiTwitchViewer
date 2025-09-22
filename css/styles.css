@@ -335,14 +335,21 @@ body.focus-mode .streams-grid {
 .stream-item {
   background: rgba(0, 0, 0, 0.4);
   border-radius: 15px;
-  overflow: hidden;
+  overflow: hidden; /* keep internals contained */
   border: 2px solid transparent;
   transition: 0.3s;
   position: relative;
+
   display: flex;
   flex-direction: column;
-  height: fit-content;
+
+  /* Cap each card to the viewport height minus header.
+     Use dvh for dynamic viewport; vh as fallback. */
+  max-height: calc(100vh - var(--header-h) - 16px);
+  max-height: calc(100dvh - var(--header-h) - 16px);
+  min-height: 0; /* allow children to shrink */
 }
+
 .stream-item:hover {
   border-color: #9146ff;
   transform: translateY(-5px);
@@ -404,6 +411,7 @@ body.focus-mode .stream-item:not(.focused) {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
+  flex: 0 0 auto; /* don't grow */
 }
 .stream-video {
   position: absolute;
@@ -413,14 +421,16 @@ body.focus-mode .stream-item:not(.focused) {
 }
 
 .stream-chat {
-  height: calc(
-    100svh - var(--header-h) - 416px
-  ); /* 16px = padding/margin tweak */
+  height: auto; /* critical: no fixed height */
+  flex: 1 1 auto; /* fill leftover after header + video */
+  min-height: 0; /* allow shrinking inside the card */
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   border-radius: 0 0 15px 15px;
+  overflow: hidden; /* keep iframe inside the card */
 }
+
 .stream-chat iframe {
   width: 100%;
   height: 100%;
