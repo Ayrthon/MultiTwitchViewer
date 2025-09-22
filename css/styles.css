@@ -312,14 +312,14 @@ body {
   font-style: italic;
 }
 .main-content {
-  padding: 2rem;
+  padding: 1rem;
 }
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: calc(4 * 500px);
   margin: 0 auto;
 }
@@ -327,7 +327,7 @@ body {
 body.focus-mode .streams-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1rem;
   align-items: flex-start;
   margin: 0 auto;
 }
@@ -528,13 +528,6 @@ body.focus-mode .stream-item:not(.focused) .stream-chat iframe {
   height: 100%;
   width: 100%;
   display: block;
-}
-
-/* optional: slightly shorter on mobile */
-@media (max-width: 768px) {
-  body.focus-mode .stream-item:not(.focused) .stream-chat {
-    height: 260px;
-  }
 }
 
 .focus-btn {
