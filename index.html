@@ -366,6 +366,7 @@
         align-items: center;
         flex-wrap: wrap;
       }
+
       .remove-btn {
         background: #ff4757;
         border: none;
@@ -386,12 +387,12 @@
         cursor: not-allowed;
         transform: none;
       }
+
       .stream-video-container {
         position: relative;
         width: 100%;
-        aspect-ratio: 16/9;
+        aspect-ratio: 16 / 9;
         background: #000;
-        cursor: pointer;
       }
       .stream-video {
         position: absolute;
@@ -399,6 +400,7 @@
         width: 100%;
         height: 100%;
       }
+
       .stream-chat {
         background: rgba(0, 0, 0, 0.6);
         height: 700px;
@@ -412,27 +414,12 @@
         border: none;
         border-radius: 0 0 15px 15px;
       }
+
       .no-streams {
         text-align: center;
         padding: 4rem 2rem;
         color: rgba(255, 255, 255, 0.6);
         font-size: 1.2rem;
-      }
-
-      /* ========== Scrollbar ========== */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #9146ff;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #772ce8;
       }
 
       /* ========== Responsive ========== */
@@ -488,9 +475,6 @@
         .input-container {
           min-width: auto;
         }
-        .stream-video-container {
-          aspect-ratio: 16/9;
-        }
         .stream-chat {
           height: 300px;
         }
@@ -508,13 +492,16 @@
         }
       }
 
-      /* ========== Single-card layout (video left 16:9 + chat right) ========== */
+      /* ========== Focused / Single layout ========== */
+      :root {
+        --chat-w: 340px;
+      }
+
+      /* When a card is "single" (either focused or only one stream), make that card split: video left, chat right */
       .stream-item.single {
         display: grid;
-        grid-template-columns: 1fr var(--chat-w, 340px);
+        grid-template-columns: 1fr var(--chat-w);
         grid-template-rows: auto 1fr;
-        column-gap: 0;
-        row-gap: 0;
         align-items: stretch;
       }
       .stream-item.single .stream-header {
@@ -536,16 +523,15 @@
         height: 100%;
         display: block;
       }
-      .stream-item:not(.single) .stream-video-container {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 16/9;
+
+      /* Focus mode: the focused card spans all columns; others keep their 16:9 video and hide chat */
+      body.focus-mode .stream-item.focused {
+        grid-column: 1 / -1;
       }
-      .stream-item:not(.single) .stream-chat {
-        height: 700px;
+      body.focus-mode .stream-item:not(.focused) .stream-chat {
+        display: none;
       }
 
-      /* ===== Focus mode ===== */
       .focus-btn {
         background: #2dd4bf;
         border: none;
@@ -559,31 +545,6 @@
       }
       .focus-btn:hover {
         filter: brightness(0.95);
-      }
-
-      body.focus-mode .streams-grid {
-        display: block; /* stack focused on top, others below inline */
-        width: 100%; /* ensure measurable width for sizing */
-      }
-      .stream-item.focused {
-        margin-bottom: 16px;
-      }
-      .stream-item.compact {
-        display: inline-block;
-        vertical-align: top;
-        width: 420px;
-        margin: 0 12px 12px 0;
-        border-radius: 12px;
-      }
-      .stream-item.compact .stream-chat {
-        display: none;
-      }
-      .stream-item.compact .stream-video-container {
-        aspect-ratio: 16/9;
-      }
-      .stream-item.compact .stream-header {
-        background: rgba(145, 70, 255, 0.12);
-        padding: 0.6rem 0.8rem;
       }
     </style>
   </head>
@@ -613,6 +574,7 @@
     </div>
 
     <div class="app-container">
+      <!-- Sidebar -->
       <div class="sidebar">
         <div class="followed-channels" id="followedChannels">
           <div class="no-channels" id="noFollowedChannels">
@@ -628,6 +590,7 @@
         </button>
       </div>
 
+      <!-- Main Content -->
       <div class="main-wrapper">
         <div class="main-content">
           <div class="streams-grid" id="streamsGrid">
@@ -642,6 +605,7 @@
     <script>
       /* ========================== Config & State ========================== */
       const CLIENT_ID = "6gc6nxubck1j20tumdvsl7ry72zlzd";
+      const PARENT = window.location.hostname; // must match your host for Twitch embeds
       let streams = [];
       let user = null;
       let searchTimeout = null;
@@ -680,6 +644,7 @@
         const params = new URLSearchParams(hash);
         const accessToken = params.get("access_token");
         const error = params.get("error");
+
         if (error) {
           alert(`Login failed: ${error}`);
           return;
@@ -772,6 +737,7 @@
             url.searchParams.set("user_id", user.id);
             url.searchParams.set("first", "100");
             if (afterFollows) url.searchParams.set("after", afterFollows);
+
             const res = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -800,6 +766,7 @@
             url.searchParams.set("user_id", user.id);
             url.searchParams.set("first", "100");
             if (afterLive) url.searchParams.set("after", afterLive);
+
             const res = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -819,7 +786,7 @@
           const idsToFetch = [...new Set([...liveIds, ...offlineIds])];
           const usersById = new Map();
           for (const chunk of chunkArray(idsToFetch, 100)) {
-            if (!chunk.length) continue;
+            if (chunk.length === 0) continue;
             const usersUrl =
               "https://api.twitch.tv/helix/users?" +
               chunk.map((id) => `id=${encodeURIComponent(id)}`).join("&");
@@ -923,6 +890,7 @@
 
       function updateFollowedChannelsUI() {
         const container = document.getElementById("followedChannels");
+
         if (!user) {
           container.innerHTML =
             '<div class="no-channels">Login to see followed channels</div>';
@@ -944,6 +912,7 @@
 
         const liveChannels = sorted.filter((ch) => ch.is_live);
         const offlineAll = sorted.filter((ch) => !ch.is_live);
+
         const totalOffline = offlineAll.length;
         const toShow = Math.min(offlineVisibleCount, totalOffline);
         const offlineShown = offlineAll.slice(0, toShow);
@@ -957,6 +926,7 @@
               ${liveChannels.map(createChannelHTML).join("")}
             </div>`;
         }
+
         html += `
           <div class="channel-category">
             <div class="category-header">Offline (${totalOffline})</div>
@@ -974,6 +944,7 @@
                 : ""
             }
           </div>`;
+
         container.innerHTML = html;
 
         container.querySelectorAll(".channel-item").forEach((item) => {
@@ -991,6 +962,7 @@
             item.style.opacity = "0.7";
           }
         });
+
         const showMoreBtn = document.getElementById("offlineShowMore");
         if (showMoreBtn)
           showMoreBtn.addEventListener("click", () => showMoreOffline());
@@ -1203,6 +1175,7 @@
             thumbnail_url: ch.thumbnail_url || "",
             title: ch.title || "",
           }));
+
           currentSuggestions = results;
           displaySuggestions(results);
         } catch (err) {
@@ -1226,24 +1199,26 @@
         dropdown.innerHTML = channels
           .map(
             (channel, index) => `
-          <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
+            <div class="suggestion-item" data-index="${index}" tabindex="0" role="button" aria-label="Select ${
               channel.display_name
             }">
-            <img src="${channel.thumbnail_url || ""}" alt="${
+              <img src="${channel.thumbnail_url || ""}" alt="${
               channel.display_name
             }" class="suggestion-avatar">
-            <div class="suggestion-info">
-              <div class="suggestion-name">${channel.display_name}</div>
-              <div class="suggestion-game">${channel.game_name || ""}</div>
+              <div class="suggestion-info">
+                <div class="suggestion-name">${channel.display_name}</div>
+                <div class="suggestion-game">${channel.game_name || ""}</div>
+              </div>
+              <span class="suggestion-viewers">${
+                channel.is_live ? "🔴 LIVE" : ""
+              }</span>
             </div>
-            <span class="suggestion-viewers">${
-              channel.is_live ? "🔴 LIVE" : ""
-            }</span>
-          </div>`
+          `
           )
           .join("");
 
         dropdown.style.display = "block";
+
         dropdown.querySelectorAll(".suggestion-item").forEach((item) => {
           item.addEventListener("click", () => {
             const idx = Number(item.getAttribute("data-index"));
@@ -1285,6 +1260,7 @@
       function addStream() {
         const input = document.getElementById("streamInput");
         const channelName = input.value.trim().toLowerCase();
+
         if (!channelName) {
           alert("Please enter a channel name");
           return;
@@ -1318,19 +1294,23 @@
         const idx = streams.findIndex((s) => s.id === streamId);
         if (idx === -1) return;
 
+        // Update state
         streams.splice(idx, 1);
         saveStreamsToStorage();
 
+        // Remove the DOM node
         const card = document.querySelector(
           `.stream-item[data-id="${streamId}"]`
         );
         if (card) card.remove();
 
+        // Reindex remaining cards
         const grid = document.getElementById("streamsGrid");
         grid.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
         });
 
+        // Empty state if needed
         if (streams.length === 0 && !grid.querySelector(".no-streams")) {
           const n = document.createElement("div");
           n.className = "no-streams";
@@ -1339,7 +1319,7 @@
           grid.appendChild(n);
         }
 
-        Promise.resolve().then(() => applyLayout());
+        applyLayout();
       }
 
       function updateUI() {
@@ -1361,11 +1341,13 @@
           return;
         }
 
+        // Remove cards not in state
         Array.from(existingCards).forEach((card) => {
           const id = Number(card.dataset.id);
           if (!streams.some((s) => s.id === id)) card.remove();
         });
 
+        // Add new cards
         streams.forEach((s, idx) => {
           if (!findCardById(s.id))
             document
@@ -1373,6 +1355,7 @@
               .appendChild(createStreamElement(s, idx));
         });
 
+        // Reorder DOM to match state (no reloads)
         const gridNow = document.getElementById("streamsGrid");
         const orderMap = new Map(streams.map((s, i) => [String(s.id), i]));
         Array.from(gridNow.querySelectorAll(".stream-item"))
@@ -1402,6 +1385,7 @@
           }
         });
       }
+
       function onDragStart(e) {
         const item = e.currentTarget;
         dragIndex = Number(item.dataset.index);
@@ -1422,20 +1406,24 @@
         e.preventDefault();
         const target = e.currentTarget;
         target.classList.remove("drop-target");
+
         const from = dragIndex;
         const to = Number(target.dataset.index);
         if (!Number.isInteger(from) || !Number.isInteger(to) || from === to)
           return;
+
         const [moved] = streams.splice(from, 1);
         streams.splice(to, 0, moved);
         saveStreamsToStorage();
 
+        // Reposition DOM node directly to avoid iframe reloads
         const grid = document.getElementById("streamsGrid");
         const nodes = Array.from(grid.querySelectorAll(".stream-item"));
         const movingEl = nodes[from];
         const referenceEl = nodes[to];
         if (from < to) grid.insertBefore(movingEl, referenceEl.nextSibling);
         else grid.insertBefore(movingEl, referenceEl);
+
         refreshItemIndices(grid);
         applyLayout();
       }
@@ -1444,40 +1432,46 @@
         dragIndex = null;
       }
 
-      /* ========================== Focus ========================== */
+      /* ========================== Focus (CSS-driven) ========================== */
       function toggleFocus(streamId) {
         focusedId = focusedId === streamId ? null : streamId;
-        saveStreamsToStorage();
         applyLayout();
         updateFocusButtonsLabel();
       }
 
-      function applyFocusLayout() {
+      function applyLayout() {
         const grid = document.getElementById("streamsGrid");
         if (!grid) return;
-        document.body.classList.toggle("focus-mode", !!focusedId);
 
         const cards = grid.querySelectorAll(".stream-item");
-        // clear any stale .single first
-        cards.forEach((c) => c.classList.remove("single"));
 
-        cards.forEach((card) => {
-          const id = Number(card.dataset.id);
-          const isFocused = focusedId === id;
+        // If focused card was removed, clear focus
+        if (
+          focusedId &&
+          !grid.querySelector(`.stream-item[data-id="${focusedId}"]`)
+        ) {
+          focusedId = null;
+        }
 
-          card.classList.toggle("focused", isFocused);
-          if (isFocused) card.classList.add("single"); // only focused gets single layout
-          card.classList.toggle("compact", !isFocused);
-          // no src changes -> no reloads
-        });
+        // Clear classes
+        cards.forEach((card) => card.classList.remove("focused", "single"));
 
-        reorderFocusedFirst(grid);
-        updateFocusButtonsLabel();
-      }
-
-      /* ========================== Storage & Helpers ========================== */
-      function setIframeMuted(card, muted) {
-        // Intentionally no-op to avoid player reloads.
+        if (focusedId && streams.length > 1) {
+          document.body.classList.add("focus-mode");
+          // Mark the focused card
+          const focused = grid.querySelector(
+            `.stream-item[data-id="${focusedId}"]`
+          );
+          if (focused) {
+            focused.classList.add("focused", "single"); // single = two-column layout
+            // Move it to the top so it spans full width, others flow below
+            grid.insertBefore(focused, grid.firstChild);
+          }
+        } else {
+          document.body.classList.remove("focus-mode");
+          // If only one stream, show single layout (video + chat)
+          if (cards.length === 1) cards[0].classList.add("single");
+        }
       }
 
       function updateFocusButtonsVisibility() {
@@ -1498,17 +1492,11 @@
         });
       }
 
-      function reorderFocusedFirst(grid) {
-        if (!focusedId) return;
-        const focused = grid.querySelector(
-          `.stream-item[data-id="${focusedId}"]`
-        );
-        if (focused) grid.insertBefore(focused, grid.firstChild);
-      }
-
+      /* ========================== Storage & Helpers ========================== */
       function saveStreamsToStorage() {
         localStorage.setItem("multistream_data", JSON.stringify(streams));
       }
+
       function loadStreamsFromStorage() {
         const stored = localStorage.getItem("multistream_data");
         if (stored) {
@@ -1520,6 +1508,7 @@
           }));
         }
       }
+
       function findCardById(id) {
         return document.querySelector(`.stream-item[data-id="${id}"]`);
       }
@@ -1551,19 +1540,26 @@
           <div class="stream-header">
             <span class="stream-title">${stream.channel}</span>
             <div class="stream-controls">
-              <button class="focus-btn" data-role="focus-toggle" onclick="event.stopPropagation(); toggleFocus(${stream.id})">Focus</button>
-              <button class="remove-btn" onclick="event.stopPropagation(); removeStream(${stream.id})">Remove</button>
+              <button class="focus-btn"
+                      data-role="focus-toggle"
+                      onclick="event.stopPropagation(); toggleFocus(${stream.id})">
+                Focus
+              </button>
+              <button class="remove-btn"
+                      onclick="event.stopPropagation(); removeStream(${stream.id})">
+                Remove
+              </button>
             </div>
           </div>
           <div class="stream-video-container" data-stream-id="${stream.id}">
             <iframe
-              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=true&autoplay=true"
+              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${PARENT}&muted=true&autoplay=true"
               class="stream-video" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="true" scrolling="no">
             </iframe>
           </div>
           <div class="stream-chat">
             <iframe
-              src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
+              src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${PARENT}"
               frameborder="0" scrolling="no">
             </iframe>
           </div>
@@ -1576,151 +1572,6 @@
           el.dataset.index = String(i);
         });
       }
-
-      /* ========================== Unified layout controller (Single & Focus) ========================== */
-      (() => {
-        const CHAT_W = 340;
-        let isApplyingLayout = false;
-        let layoutRaf = null;
-
-        function sizeSingle(card) {
-          const grid = document.getElementById("streamsGrid");
-          const header = document.querySelector(".header");
-          if (!card || !grid) return;
-
-          const headerH = header ? header.offsetHeight : 0;
-          const gridRect = grid.getBoundingClientRect();
-          const availW =
-            Math.max(
-              grid.clientWidth,
-              gridRect.width,
-              grid.parentElement?.clientWidth || 0,
-              window.innerWidth
-            ) || 0;
-          const availH = window.innerHeight - headerH;
-
-          const verticalMargin = 16;
-          const usableH = Math.max(0, availH - verticalMargin);
-
-          const chatW = CHAT_W;
-          const maxVidW = Math.max(0, availW - chatW);
-          const maxVidH_fromW = maxVidW / (16 / 9);
-
-          const videoH = Math.floor(Math.min(usableH, maxVidH_fromW));
-          const videoW = Math.floor(videoH * (16 / 9));
-
-          const video = card.querySelector(".stream-video-container");
-          const chat = card.querySelector(".stream-chat");
-          if (!video || !chat) return;
-
-          if (videoH <= 0 || videoW <= 0) return; // wait for next frame when sizes are ready
-
-          card.style.setProperty("--chat-w", chatW + "px");
-          video.style.width = videoW + "px";
-          video.style.height = videoH + "px";
-          chat.style.width = chatW + "px";
-          chat.style.height = videoH + "px";
-        }
-
-        function resetSingleSizing(card) {
-          const video = card.querySelector(".stream-video-container");
-          const chat = card.querySelector(".stream-chat");
-          if (video) {
-            video.style.width = "";
-            video.style.height = "";
-          }
-          if (chat) {
-            chat.style.width = "";
-            chat.style.height = "";
-          }
-          card.style.removeProperty("--chat-w");
-        }
-
-        function applySingleModeIfNeeded() {
-          const grid = document.getElementById("streamsGrid");
-          const cards = grid ? grid.querySelectorAll(".stream-item") : [];
-          if (!grid || focusedId) return;
-
-          if (cards.length === 1) {
-            const card = cards[0];
-            grid.querySelectorAll(".stream-item.single").forEach((c) => {
-              if (c !== card) {
-                resetSingleSizing(c);
-                c.classList.remove("single");
-              }
-            });
-            card.classList.add("single");
-            requestAnimationFrame(() => sizeSingle(card));
-            window.addEventListener("resize", onResize);
-          } else {
-            grid.querySelectorAll(".stream-item.single").forEach((card) => {
-              resetSingleSizing(card);
-              card.classList.remove("single");
-            });
-            window.removeEventListener("resize", onResize);
-          }
-        }
-
-        function onResize() {
-          const card =
-            document.querySelector(".stream-item.focused") ||
-            document.querySelector(".stream-item.single");
-          if (card) sizeSingle(card);
-        }
-
-        function applyLayout() {
-          if (isApplyingLayout) return;
-          isApplyingLayout = true;
-          try {
-            updateFocusButtonsVisibility();
-
-            // clear focus if the card no longer exists
-            if (
-              focusedId &&
-              !document.querySelector(`.stream-item[data-id="${focusedId}"]`)
-            ) {
-              focusedId = null;
-            }
-
-            if (focusedId && streams.length > 1) {
-              applyFocusLayout();
-              const focusedCard = document.querySelector(
-                ".stream-item.focused"
-              );
-              if (focusedCard)
-                requestAnimationFrame(() => sizeSingle(focusedCard));
-              window.addEventListener("resize", onResize);
-            } else {
-              document.body.classList.remove("focus-mode");
-              focusedId = null;
-              document.querySelectorAll(".stream-item").forEach((card) => {
-                card.classList.remove("focused", "compact", "single");
-                resetSingleSizing(card);
-              });
-              applySingleModeIfNeeded();
-            }
-          } finally {
-            isApplyingLayout = false;
-          }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-          const grid = document.getElementById("streamsGrid");
-          if (!grid) return;
-          const obs = new MutationObserver(() => {
-            if (isApplyingLayout) return;
-            if (layoutRaf) return;
-            layoutRaf = requestAnimationFrame(() => {
-              layoutRaf = null;
-              applyLayout();
-            });
-          });
-          obs.observe(grid, { childList: true, subtree: false });
-          applyLayout();
-        });
-
-        window.applyLayout = applyLayout;
-      })();
     </script>
   </body>
 </html>
