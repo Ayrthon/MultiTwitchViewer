@@ -3,13 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StreamsViewer beta</title>
-    <link rel="stylesheet" href="./css/styles.css" />
-  </head>
+    <title>Streams Viewer</title>
 
+    <!-- your existing stylesheet -->
+    <link rel="stylesheet" href="./css/styles.css" />
+
+    <!-- NEW: sidebar overlay styles (no blur) -->
+    <link rel="stylesheet" href="./css/sidebar-overlay.css" />
+  </head>
   <body>
+    <!-- Header (leave as-is; tweak text if you want) -->
     <div class="header">
-      <div class="logo">StreamsViewer <i>(beta)</i></div>
+      <div class="logo">StreamsViewer</div>
 
       <div class="controls">
         <div class="input-container">
@@ -30,9 +35,20 @@
       </div>
     </div>
 
+    <!-- Burger button + backdrop for overlay -->
+    <button
+      id="sidebarToggle"
+      class="sidebar-toggle"
+      aria-controls="sidebar"
+      aria-expanded="false"
+    >
+      ☰
+    </button>
+    <div id="sidebarBackdrop" class="sidebar-backdrop" hidden></div>
+
     <div class="app-container">
-      <!-- Sidebar -->
-      <div class="sidebar">
+      <!-- Sidebar (give it an id) -->
+      <div id="sidebar" class="sidebar">
         <div class="followed-channels" id="followedChannels">
           <div class="no-channels" id="noFollowedChannels">
             Login to see followed channels
@@ -53,7 +69,10 @@
       </div>
     </div>
 
-    <!-- App entry -->
-    <script type="module" src="./js/app.js"></script>
+    <!-- your existing app -->
+    <script src="./js/app.js"></script>
+
+    <!-- NEW: smart collapse + overlay behavior -->
+    <script src="./js/sidebar-overlay.js"></script>
   </body>
 </html>

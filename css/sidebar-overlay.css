@@ -1,0 +1,83 @@
+/* ===== Sidebar overlay + smart collapse (no blur) ===== */
+:root {
+  /* match your current layout */
+  --sidebar-w: 240px;
+  --header-h: 80px; /* adjust if your header is taller/shorter */
+}
+
+/* keep your existing .sidebar look; just add transitions for smoothness */
+.sidebar {
+  transition: width 0.25s ease, transform 0.25s ease, opacity 0.2s ease,
+    border-right-width 0.2s ease;
+}
+
+/* collapsed: sidebar is hidden to free space for grid (docked state) */
+body.sidebar-collapsed .sidebar {
+  width: 0 !important;
+  transform: translateX(-20px);
+  opacity: 0;
+  border-right-width: 0 !important;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* overlay: when user taps the burger, show sidebar over streams (no blur) */
+body.sidebar-overlay .sidebar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  height: calc(100vh - var(--header-h));
+  width: var(--sidebar-w);
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1500;
+}
+
+/* simple dim backdrop (NO blur) */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1400;
+}
+.sidebar-backdrop[hidden] {
+  display: none;
+}
+
+/* Burger button – visible when collapsed or when overlay is open */
+.sidebar-toggle {
+  position: fixed;
+  top: calc(var(--header-h) + 12px);
+  left: 12px;
+  z-index: 2000;
+  border: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  display: none;
+}
+body.sidebar-collapsed .sidebar-toggle,
+body.sidebar-overlay .sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-toggle:hover {
+  transform: translateY(-1px);
+}
+
+/* Mobile: a bit wider drawer is nicer */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-w: 88vw;
+  }
+}
+
+/* (Optional) If you previously hid non-focused chats in focus-mode and want them visible: */
+/* body.focus-mode .stream-item:not(.focused) .stream-chat{ display:flex; height:320px } */
+/* body.focus-mode .stream-item:not(.focused) .stream-chat iframe{ height:100% } */
