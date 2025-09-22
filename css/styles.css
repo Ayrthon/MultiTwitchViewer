@@ -320,6 +320,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 1rem;
+  max-width: calc(4 * 500px);
   margin: 0 auto;
 }
 /* In focus-mode switch to FLEX so we can use 'order' without touching DOM */
