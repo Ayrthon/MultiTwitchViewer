@@ -317,8 +317,8 @@ body {
 
 /* ========== Streams layout (grid by default) ========== */
 .streams-grid {
-  display: flex;
-  /* grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 1rem;
   margin: 0 auto;
 }
@@ -444,6 +444,7 @@ body.focus-mode .stream-item:not(.focused) {
   grid-template-columns: 1fr var(--chat-w);
   grid-template-rows: auto 1fr;
   align-items: stretch;
+  width: 85svw;
 }
 .stream-item.single .stream-header {
   grid-column: 1 / -1;
