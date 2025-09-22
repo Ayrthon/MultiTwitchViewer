@@ -413,8 +413,9 @@ body.focus-mode .stream-item:not(.focused) {
 }
 
 .stream-chat {
-  flex: 1;
-  min-height: 350px;
+  height: calc(
+    100svh - var(--header-h) - 16px
+  ); /* 16px = padding/margin tweak */
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
@@ -491,6 +492,7 @@ body.focus-mode .stream-item:not(.focused) {
 /* ========== Single-card layout (video left + chat right) ========== */
 :root {
   --chat-w: 340px;
+  --header-h: 80px; /* adjust if your header is taller/shorter */
 }
 .stream-item.single {
   display: grid;
