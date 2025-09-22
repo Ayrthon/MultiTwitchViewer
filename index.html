@@ -1314,19 +1314,24 @@
       function removeStream(streamId) {
         const idx = streams.findIndex((s) => s.id === streamId);
         if (idx === -1) return;
+
+        // Update state
         streams.splice(idx, 1);
         saveStreamsToStorage();
 
+        // Remove the DOM node
         const card = document.querySelector(
           `.stream-item[data-id="${streamId}"]`
         );
         if (card) card.remove();
 
+        // Reindex remaining cards
         const grid = document.getElementById("streamsGrid");
         grid.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
         });
 
+        // Empty state if needed
         if (streams.length === 0 && !grid.querySelector(".no-streams")) {
           const n = document.createElement("div");
           n.className = "no-streams";
@@ -1334,7 +1339,9 @@
             "No streams added yet. Add a Twitch channel to get started!";
           grid.appendChild(n);
         }
-        applySingleOrGrid();
+
+        // Let the DOM settle before re-sizing layout (helps embeds keep state)
+        Promise.resolve().then(() => applySingleOrGrid());
       }
 
       function updateUI() {
@@ -1500,14 +1507,22 @@
           </div>
           <div class="stream-video-container" data-stream-id="${stream.id}">
             <iframe
-              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&muted=false&autoplay=true"
-              class="stream-video" frameborder="0" allowfullscreen="true" scrolling="no">
+              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${window.location.hostname}&autoplay=true&muted=true"
+              class="stream-video"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              playsinline
+              title="Twitch stream: ${stream.channel}"
+              scrolling="no">
             </iframe>
           </div>
           <div class="stream-chat">
             <iframe
               src="https://www.twitch.tv/embed/${stream.channel}/chat?darkpopout&parent=${window.location.hostname}"
-              frameborder="0" scrolling="no">
+              frameborder="0"
+              title="Twitch chat: ${stream.channel}"
+              scrolling="no">
             </iframe>
           </div>
         `;
