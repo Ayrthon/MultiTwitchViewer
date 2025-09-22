@@ -342,8 +342,8 @@ body.focus-mode .streams-grid {
   display: flex;
   flex-direction: column;
 
-  max-height: calc(100vh - var(--header-h) - 35px);
-  max-height: calc(100dvh - var(--header-h) - 35px);
+  height: calc(100vh - var(--header-h) - 35px);
+  height: calc(100dvh - var(--header-h) - 35px);
   min-height: 0; /* allow children to shrink */
   height: auto; /* important: don't force a fixed height */
 }
