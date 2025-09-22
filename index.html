@@ -1095,6 +1095,8 @@
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
         applyLayout();
+        updateFocusButtonsVisibility();
+        updateFocusButtonsLabel();
 
         const channelItem = document.querySelector(
           `[data-channel="${channelLogin}"]`
@@ -1353,6 +1355,8 @@
         refreshItemIndices(grid);
         showEmptyState(false);
         applyLayout();
+        updateFocusButtonsVisibility();
+        updateFocusButtonsLabel();
 
         input.value = "";
         hideSuggestions();
@@ -1437,6 +1441,8 @@
         enableDragAndDrop(gridNow);
         showEmptyState(streams.length === 0);
         applyLayout();
+        updateFocusButtonsVisibility();
+        updateFocusButtonsLabel();
       }
 
       /* ========================== Drag & Drop ========================== */
@@ -1661,7 +1667,10 @@
 
       /* ========================== Unified layout controller (Single & Focus) ========================== */
       (() => {
-        const CHAT_W = 340; // px
+        const CHAT_W = 340;
+
+        let isApplyingLayout = false; // reentrancy guard
+        let layoutRaf = null; // rAF debouncer
 
         function sizeSingle(card) {
           const grid = document.getElementById("streamsGrid");
@@ -1748,24 +1757,38 @@
         }
 
         function applyLayout() {
-          updateFocusButtonsVisibility();
+          if (isApplyingLayout) return; // prevent re-entry
+          isApplyingLayout = true;
+          try {
+            updateFocusButtonsVisibility();
 
-          if (focusedId && streams.length > 1) {
-            applyFocusLayout();
-            // size the focused single
-            const focusedCard = document.querySelector(".stream-item.focused");
-            if (focusedCard) sizeSingle(focusedCard);
-            window.addEventListener("resize", onResize);
-          } else {
-            // clear focus state
-            document.body.classList.remove("focus-mode");
-            focusedId = null;
-            // unmute all and restore classes
-            document.querySelectorAll(".stream-item").forEach((card) => {
-              card.classList.remove("focused", "compact");
-              setIframeMuted(card, false);
-            });
-            applySingleModeIfNeeded();
+            // if focused card was removed, clear focus
+            if (
+              focusedId &&
+              !document.querySelector(`.stream-item[data-id="${focusedId}"]`)
+            ) {
+              focusedId = null;
+            }
+
+            if (focusedId && streams.length > 1) {
+              applyFocusLayout();
+              const focusedCard = document.querySelector(
+                ".stream-item.focused"
+              );
+              if (focusedCard) sizeSingle(focusedCard);
+              window.addEventListener("resize", onResize);
+            } else {
+              document.body.classList.remove("focus-mode");
+              focusedId = null;
+              document.querySelectorAll(".stream-item").forEach((card) => {
+                card.classList.remove("focused", "compact", "single");
+                setIframeMuted(card, false);
+                resetSingleSizing(card);
+              });
+              applySingleModeIfNeeded();
+            }
+          } finally {
+            isApplyingLayout = false;
           }
         }
 
@@ -1773,12 +1796,21 @@
         document.addEventListener("DOMContentLoaded", () => {
           const grid = document.getElementById("streamsGrid");
           if (!grid) return;
-          const obs = new MutationObserver(applyLayout);
+
+          const obs = new MutationObserver(() => {
+            if (isApplyingLayout) return; // ignore mutations caused by ourselves
+            if (layoutRaf) return; // already queued
+            layoutRaf = requestAnimationFrame(() => {
+              layoutRaf = null;
+              applyLayout();
+            });
+          });
+
           obs.observe(grid, { childList: true, subtree: false });
           applyLayout();
         });
 
-        // Expose globally
+        // expose globally
         window.applyLayout = applyLayout;
       })();
     </script>
