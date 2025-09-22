@@ -497,7 +497,6 @@
         --chat-w: 340px;
       }
 
-      /* When a card is "single" (either focused or only one stream), make that card split: video left, chat right */
       .stream-item.single {
         display: grid;
         grid-template-columns: 1fr var(--chat-w);
@@ -524,7 +523,6 @@
         display: block;
       }
 
-      /* Focus mode: the focused card spans all columns; others keep their 16:9 video and hide chat */
       body.focus-mode .stream-item.focused {
         grid-column: 1 / -1;
       }
@@ -1463,7 +1461,7 @@
             `.stream-item[data-id="${focusedId}"]`
           );
           if (focused) {
-            focused.classList.add("focused", "single"); // single = two-column layout
+            focused.classList.add("focused", "single"); // two-column layout
             // Move it to the top so it spans full width, others flow below
             grid.insertBefore(focused, grid.firstChild);
           }
@@ -1553,8 +1551,8 @@
           </div>
           <div class="stream-video-container" data-stream-id="${stream.id}">
             <iframe
-              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${PARENT}&muted=true&autoplay=true"
-              class="stream-video" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="true" scrolling="no">
+              src="https://player.twitch.tv/?channel=${stream.channel}&parent=${PARENT}"
+              class="stream-video" frameborder="0" allow="fullscreen; picture-in-picture" allowfullscreen="true" scrolling="no">
             </iframe>
           </div>
           <div class="stream-chat">
