@@ -342,6 +342,35 @@
         padding: 2rem;
       }
 
+      /* Single-stream layout: header on top, player left, chat right */
+      .stream-item.single {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+          "header header"
+          "video chat";
+        gap: 12px;
+      }
+
+      /* Place existing children into the grid areas */
+      .stream-item.single .stream-header {
+        grid-area: header;
+      }
+      .stream-item.single .stream-video-container {
+        grid-area: video;
+      }
+      .stream-item.single .stream-chat {
+        grid-area: chat;
+      }
+
+      /* Ensure iframes expand to their containers */
+      .stream-item.single .stream-video,
+      .stream-item.single .stream-chat iframe {
+        width: 100%;
+        height: 100%;
+      }
+
       .streams-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -1066,6 +1095,7 @@
         // ensure DnD is wired and indices are correct
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
+        applySingleLayoutIfNeeded();
 
         // little visual tickle on the clicked sidebar item (optional)
         const channelItem = document.querySelector(
@@ -1342,6 +1372,7 @@
         enableDragAndDrop(grid);
         refreshItemIndices(grid);
         showEmptyState(false);
+        applySingleLayoutIfNeeded();
 
         input.value = "";
         hideSuggestions();
@@ -1373,6 +1404,7 @@
             "No streams added yet. Add a Twitch channel to get started!";
           grid.appendChild(n);
         }
+        applySingleLayoutIfNeeded();
       }
 
       function updateUI() {
@@ -1424,6 +1456,7 @@
         refreshItemIndices(gridNow);
         enableDragAndDrop(gridNow);
         showEmptyState(streams.length === 0);
+        applySingleLayoutIfNeeded();
       }
 
       function enableDragAndDrop(container) {
@@ -1488,6 +1521,7 @@
         }
 
         refreshItemIndices(grid);
+        applySingleLayoutIfNeeded();
       }
 
       function onDragEnd(e) {
@@ -1514,20 +1548,20 @@
         e.currentTarget.classList.remove("drop-target");
       }
 
-      function onDrop(e) {
-        e.preventDefault();
-        const target = e.currentTarget;
-        target.classList.remove("drop-target");
+      // function onDrop(e) {
+      //   e.preventDefault();
+      //   const target = e.currentTarget;
+      //   target.classList.remove("drop-target");
 
-        const from = dragIndex;
-        const to = Number(target.dataset.index);
-        if (Number.isInteger(from) && Number.isInteger(to) && from !== to) {
-          const [moved] = streams.splice(from, 1);
-          streams.splice(to, 0, moved);
-          saveStreamsToStorage();
-          updateUI();
-        }
-      }
+      //   const from = dragIndex;
+      //   const to = Number(target.dataset.index);
+      //   if (Number.isInteger(from) && Number.isInteger(to) && from !== to) {
+      //     const [moved] = streams.splice(from, 1);
+      //     streams.splice(to, 0, moved);
+      //     saveStreamsToStorage();
+      //     updateUI();
+      //   }
+      // }
 
       function onDragEnd(e) {
         e.currentTarget.classList.remove("dragging");
@@ -1613,6 +1647,64 @@
         container.querySelectorAll(".stream-item").forEach((el, i) => {
           el.dataset.index = String(i);
         });
+      }
+
+      function applySingleLayoutIfNeeded() {
+        const grid = document.getElementById("streamsGrid");
+        const items = grid.querySelectorAll(".stream-item");
+
+        // toggle single layout class
+        if (streams.length === 1 && items[0]) {
+          items.forEach((i) => i.classList.remove("single"));
+          items[0].classList.add("single");
+          sizeSingle(items[0]);
+          window.addEventListener("resize", onResizeSingle);
+        } else {
+          items.forEach((i) => i.classList.remove("single"));
+          window.removeEventListener("resize", onResizeSingle);
+          // reset heights if we leave single mode
+          grid
+            .querySelectorAll(".stream-video-container,.stream-chat")
+            .forEach((el) => {
+              el.style.height = "";
+            });
+        }
+      }
+
+      function sizeSingle(card) {
+        // available height = viewport - sticky header - main-content vertical padding
+        const header = document.querySelector(".header");
+        const headerH = header ? header.offsetHeight : 0;
+
+        // match your .main-content { padding: 2rem } => 32px top + 32px bottom
+        const MAIN_CONTENT_VERTICAL_PADDING = 32 * 2;
+
+        // also subtract the stream card header height + the grid gap between header and row
+        const streamHeader = card.querySelector(".stream-header");
+        const streamHeaderH = streamHeader ? streamHeader.offsetHeight : 0;
+
+        // little extra breathing room for borders, rounding, etc.
+        const EXTRA = 12;
+
+        const available =
+          window.innerHeight -
+          headerH -
+          MAIN_CONTENT_VERTICAL_PADDING -
+          streamHeaderH -
+          EXTRA;
+
+        const video = card.querySelector(".stream-video-container");
+        const chat = card.querySelector(".stream-chat");
+        if (available > 200) {
+          // guard against tiny viewports
+          video.style.height = `${available}px`;
+          chat.style.height = `${available}px`;
+        }
+      }
+
+      function onResizeSingle() {
+        const card = document.querySelector(".stream-item.single");
+        if (card) sizeSingle(card);
       }
     </script>
   </body>
