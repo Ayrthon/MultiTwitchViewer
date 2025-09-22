@@ -627,6 +627,16 @@
         height: 100%;
         display: block;
       }
+
+      /* Ensure non-single cards always render as responsive 16:9 */
+      .stream-item:not(.single) .stream-video-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+      }
+      .stream-item:not(.single) .stream-chat {
+        height: 700px; /* your original default */
+      }
     </style>
   </head>
   <body>
@@ -1419,6 +1429,7 @@
         refreshItemIndices(grid);
         showEmptyState(false);
         applySingleLayoutIfNeeded();
+        applySingleOrGrid();
 
         input.value = "";
         hideSuggestions();
@@ -1451,6 +1462,7 @@
           grid.appendChild(n);
         }
         applySingleLayoutIfNeeded();
+        applySingleOrGrid();
       }
 
       function updateUI() {
@@ -1568,6 +1580,7 @@
 
         refreshItemIndices(grid);
         applySingleLayoutIfNeeded();
+        applySingleOrGrid();
       }
 
       function onDragEnd(e) {
@@ -1731,9 +1744,9 @@
         const card = document.querySelector(".stream-item.single");
         if (card) sizeSingle(card);
       }
-      /* === Single-stream layout controller ===================================== */
+      /* === Single-stream layout controller (refined) ============================ */
       (() => {
-        const CHAT_W = 340; // chat panel width (px). Adjust if you like.
+        const CHAT_W = 340; // chat width in px
 
         function sizeSingle(card) {
           const grid = document.getElementById("streamsGrid");
@@ -1746,16 +1759,14 @@
           const availW = gridRect.width; // content width
           const availH = window.innerHeight - headerH; // from below header to bottom
 
-          // Respect grid/content padding if any (a little safety margin)
-          const verticalMargin = 16; // tweak if needed
+          const verticalMargin = 16; // small safety
           const usableH = Math.max(0, availH - verticalMargin);
 
-          // Compute 16:9 player that also leaves room for chat on the right
+          // Compute 16:9 player next to fixed-width chat
           const chatW = CHAT_W;
-          const maxVidW = Math.max(0, availW - chatW); // width left for the 16:9 video
+          const maxVidW = Math.max(0, availW - chatW);
           const maxVidH_fromW = maxVidW / (16 / 9);
 
-          // Final video height is capped by viewport height and width constraint
           const videoH = Math.floor(Math.min(usableH, maxVidH_fromW));
           const videoW = Math.floor(videoH * (16 / 9));
 
@@ -1763,7 +1774,7 @@
           const chat = card.querySelector(".stream-chat");
           if (!video || !chat) return;
 
-          // If it really can't fit side-by-side (super narrow), gracefully fall back stacked
+          // If too small to fit side-by-side, bail out to default stacked
           if (videoH <= 0 || videoW <= 0) {
             resetSingleSizing(card);
             card.classList.remove("single");
@@ -1797,14 +1808,20 @@
           if (!grid) return;
 
           const cards = grid.querySelectorAll(".stream-item");
-          // Only apply when there is exactly one stream
           if (cards.length === 1) {
             const card = cards[0];
+            // ensure only this card is single
+            grid.querySelectorAll(".stream-item.single").forEach((c) => {
+              if (c !== card) {
+                resetSingleSizing(c);
+                c.classList.remove("single");
+              }
+            });
             card.classList.add("single");
             sizeSingle(card);
             window.addEventListener("resize", onSingleResize);
           } else {
-            // Remove single layout from any cards and reset sizing
+            // leaving single mode: clear inline sizes so 16:9 returns
             grid.querySelectorAll(".stream-item.single").forEach((card) => {
               resetSingleSizing(card);
               card.classList.remove("single");
@@ -1818,20 +1835,18 @@
           if (card) sizeSingle(card);
         }
 
-        // Keep layout correct whenever cards are added/removed/reordered
+        // Observe grid changes (add/remove/reorder) and re-apply layout
         document.addEventListener("DOMContentLoaded", () => {
           const grid = document.getElementById("streamsGrid");
           if (!grid) return;
 
-          // Observe card list changes and re-apply layout automatically
           const obs = new MutationObserver(applySingleOrGrid);
-          obs.observe(grid, { childList: true });
+          obs.observe(grid, { childList: true, subtree: false });
 
-          // First pass
           applySingleOrGrid();
         });
 
-        // Also expose a global in case you want to call it manually
+        // Expose for manual calls if needed
         window.applySingleOrGrid = applySingleOrGrid;
       })();
     </script>
