@@ -1,54 +1,8 @@
 import { state } from "./state.js";
 import { chunkArray, formatViewerCount } from "./helpers.js";
 
-export function loadDemoFollowedChannels() {
-  state.followedChannels = [
-    {
-      id: "1",
-      login: "ninja",
-      display_name: "Ninja",
-      profile_image_url:
-        "https://static-cdn.jtvnw.net/jtv_user_pictures/ninja-profile_image-6c7353c6142f9f26-300x300.png",
-      is_live: true,
-      game_name: "Fortnite",
-      viewer_count: 45732,
-    },
-    {
-      id: "2",
-      login: "pokimane",
-      display_name: "Pokimane",
-      profile_image_url:
-        "https://static-cdn.jtvnw.net/jtv_user_pictures/pokimane-profile_image-4de9767e2b2af4b3-300x300.png",
-      is_live: true,
-      game_name: "Just Chatting",
-      viewer_count: 28456,
-    },
-    {
-      id: "3",
-      login: "shroud",
-      display_name: "shroud",
-      profile_image_url:
-        "https://static-cdn.jtvnw.net/jtv_user_pictures/shroud-profile_image-7ca02ca7498710fc-300x300.png",
-      is_live: false,
-      game_name: "Offline",
-      viewer_count: 0,
-    },
-    {
-      id: "4",
-      login: "xqc",
-      display_name: "xQc",
-      profile_image_url:
-        "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-300x300.png",
-      is_live: true,
-      game_name: "Grand Theft Auto V",
-      viewer_count: 67234,
-    },
-  ];
-}
-
 export async function fetchRealFollowedChannels() {
   if (!state.user) {
-    loadDemoFollowedChannels();
     updateFollowedChannelsUI();
     return;
   }
@@ -159,7 +113,6 @@ export async function fetchRealFollowedChannels() {
     state.offlineVisibleCount = state.OFFLINE_PAGE_SIZE;
   } catch (err) {
     console.error("Follows/live error:", err);
-    loadDemoFollowedChannels();
   } finally {
     updateFollowedChannelsUI();
     if (refreshButton) {

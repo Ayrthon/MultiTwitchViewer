@@ -2,7 +2,6 @@ import { state } from "./state.js";
 import { loginToTwitch, checkAuthFromURL, updateUserInfo } from "./auth.js";
 import { loadStreams } from "./storage.js";
 import {
-  loadDemoFollowedChannels,
   updateFollowedChannelsUI,
   fetchRealFollowedChannels,
 } from "./follows.js";
@@ -17,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refreshButton").addEventListener("click", () => {
     if (state.user) fetchRealFollowedChannels();
     else {
-      loadDemoFollowedChannels();
       updateFollowedChannelsUI();
     }
   });
@@ -35,10 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStreams();
   updateUI();
   setupAutoSuggest();
-
-  if (!state.user) {
-    loadDemoFollowedChannels();
-  }
   updateFollowedChannelsUI();
   updateUserInfo();
 });
