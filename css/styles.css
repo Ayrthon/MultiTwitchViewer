@@ -184,7 +184,10 @@ body {
   }
 }
 .refresh-button {
-  margin: 1rem;
+  margin-top: 1rem;
+  margin-right: 1rem;
+  margin-bottom: 0px;
+  margin-left: 1rem;
   padding: 0.6rem 1rem;
   background: linear-gradient(45deg, #9146ff, #772ce8);
   border: 0;
@@ -199,7 +202,7 @@ body {
 #countdown {
   display: block; /* span takes a full line */
   text-align: center; /* centers the text */
-  margin-top: 0.5rem; /* space below the refresh button */
+  margin-bottom: 0.5rem; /* space below the refresh button */
   font-size: 0.9rem; /* optional styling */
   color: #888; /* optional styling */
 }
