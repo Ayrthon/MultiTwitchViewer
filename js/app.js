@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let countdownIntervalId = null;
 
   function updateCountdownDisplay() {
-    if (!countdownEl) return; // safely skip if not present
+    if (!countdownEl) return;
     const m = Math.floor(countdownSeconds / 60);
     const s = countdownSeconds % 60;
     countdownEl.textContent = `Next refresh in ${m}:${s
@@ -45,14 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
         updateFollowedChannelsUI();
       }
     } finally {
-      // whenever we refresh (manual or auto), reset the countdown
-      resetCountdown();
+      if (state.user) {
+        resetCountdown();
+      }
     }
   }
 
   function startAutoRefresh() {
-    // prevent duplicates if called multiple times
+    // prevent duplicates
     stopAutoRefresh();
+
+    if (!state.user) return; // only run when logged in
 
     autoRefreshId = setInterval(refreshFollowedChannels, REFRESH_EVERY_MS);
 
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateCountdownDisplay();
     }, 1000);
 
-    resetCountdown(); // initialize display
+    resetCountdown();
   }
 
   function stopAutoRefresh() {
@@ -73,16 +76,27 @@ document.addEventListener("DOMContentLoaded", () => {
       clearInterval(countdownIntervalId);
       countdownIntervalId = null;
     }
+    if (countdownEl) countdownEl.textContent = ""; // clear text
   }
 
-  // Manual button refresh (single listener)
+  // Manual button refresh
   if (refreshBtn) {
     refreshBtn.addEventListener("click", refreshFollowedChannels);
   }
 
-  // Kick it off
-  refreshFollowedChannels();
-  startAutoRefresh();
+  // ---- React to login/logout ----
+  function handleAuthChange() {
+    if (state.user) {
+      refreshFollowedChannels();
+      startAutoRefresh();
+    } else {
+      stopAutoRefresh();
+      updateFollowedChannelsUI();
+    }
+  }
+
+  // Initial boot
+  handleAuthChange();
 
   // ---- Other app boot wiring ----
   window.addEventListener("sidebar:addStream", (e) =>
@@ -96,4 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAutoSuggest();
   updateFollowedChannelsUI();
   updateUserInfo();
+
+  // Whenever you know login/logout state changes, call handleAuthChange()
+  // e.g. after loginToTwitch() resolves or after updating state.user
+  window.addEventListener("auth:changed", handleAuthChange);
 });
