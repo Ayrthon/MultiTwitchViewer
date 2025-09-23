@@ -13,67 +13,83 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("addStreamBtn").addEventListener("click", addStream);
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) loginBtn.addEventListener("click", loginToTwitch);
-  document.getElementById("refreshButton").addEventListener("click", () => {
-    if (state.user) fetchRealFollowedChannels();
-    else {
-      updateFollowedChannelsUI();
-    }
-  });
 
-  // Countdown variables
-  let countdownSeconds = 5 * 60; // 5 minutes
-  let countdownInterval;
+  const refreshBtn = document.getElementById("refreshButton");
+  const countdownEl = document.getElementById("countdown"); // OK if null
+
+  // ---- Refresh + countdown ----
+  const REFRESH_EVERY_MS = 5 * 60 * 1000;
+  let countdownSeconds = REFRESH_EVERY_MS / 1000;
+  let autoRefreshId = null;
+  let countdownIntervalId = null;
 
   function updateCountdownDisplay() {
-    const minutes = Math.floor(countdownSeconds / 60);
-    const seconds = countdownSeconds % 60;
-    document.getElementById(
-      "countdown"
-    ).textContent = `Next refresh in ${minutes}:${seconds
+    if (!countdownEl) return; // safely skip if not present
+    const m = Math.floor(countdownSeconds / 60);
+    const s = countdownSeconds % 60;
+    countdownEl.textContent = `Next refresh in ${m}:${s
       .toString()
       .padStart(2, "0")}`;
   }
 
   function resetCountdown() {
-    countdownSeconds = 5 * 60; // reset to 5 minutes
+    countdownSeconds = REFRESH_EVERY_MS / 1000;
     updateCountdownDisplay();
   }
 
-  // Start auto refresh and countdown
-  function startAutoRefresh() {
-    // Refresh every 5 minutes
-    setInterval(refreshFollowedChannels, 5 * 60 * 1000);
-
-    // Update countdown every second
-    countdownInterval = setInterval(() => {
-      countdownSeconds--;
-      if (countdownSeconds <= 0) {
-        countdownSeconds = 0;
+  async function refreshFollowedChannels() {
+    try {
+      if (state.user) {
+        await fetchRealFollowedChannels();
+      } else {
+        updateFollowedChannelsUI();
       }
+    } finally {
+      // whenever we refresh (manual or auto), reset the countdown
+      resetCountdown();
+    }
+  }
+
+  function startAutoRefresh() {
+    // prevent duplicates if called multiple times
+    stopAutoRefresh();
+
+    autoRefreshId = setInterval(refreshFollowedChannels, REFRESH_EVERY_MS);
+
+    countdownIntervalId = setInterval(() => {
+      countdownSeconds = Math.max(0, countdownSeconds - 1);
       updateCountdownDisplay();
     }, 1000);
 
     resetCountdown(); // initialize display
   }
 
-  // Manual button refresh
-  document
-    .getElementById("refreshButton")
-    .addEventListener("click", refreshFollowedChannels);
+  function stopAutoRefresh() {
+    if (autoRefreshId) {
+      clearInterval(autoRefreshId);
+      autoRefreshId = null;
+    }
+    if (countdownIntervalId) {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+    }
+  }
+
+  // Manual button refresh (single listener)
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", refreshFollowedChannels);
+  }
 
   // Kick it off
   refreshFollowedChannels();
   startAutoRefresh();
 
-  // Listen for sidebar actions
-  window.addEventListener("sidebar:addStream", (e) => {
-    addStreamFromSidebar(e.detail);
-  });
-
-  // Listen for Enter/addStream from search
+  // ---- Other app boot wiring ----
+  window.addEventListener("sidebar:addStream", (e) =>
+    addStreamFromSidebar(e.detail)
+  );
   window.addEventListener("ui:addStream", addStream);
 
-  // Boot
   checkAuthFromURL();
   loadStreams();
   updateUI();
