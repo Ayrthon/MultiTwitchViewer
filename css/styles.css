@@ -195,6 +195,15 @@ body {
   cursor: pointer;
   transition: 0.3s;
 }
+
+#countdown {
+  display: block; /* span takes a full line */
+  text-align: center; /* centers the text */
+  margin-top: 0.5rem; /* space below the refresh button */
+  font-size: 0.9rem; /* optional styling */
+  color: #888; /* optional styling */
+}
+
 .refresh-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(145, 70, 255, 0.4);
