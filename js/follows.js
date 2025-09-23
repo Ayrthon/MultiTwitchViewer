@@ -9,8 +9,8 @@ export async function fetchRealFollowedChannels() {
   const refreshButton = document.getElementById("refreshButton");
   if (refreshButton) {
     refreshButton.disabled = true;
-    refreshButton.textContent =
-      "<i class='fa-solid fa-arrows-rotate'></i> Loading follows...";
+    refreshButton.innerHTML =
+      "<i class='fa-solid fa-arrows-rotate fa-spin'></i> Loading follows...";
   }
   const token = localStorage.getItem("twitch_token");
   try {
@@ -118,7 +118,7 @@ export async function fetchRealFollowedChannels() {
     updateFollowedChannelsUI();
     if (refreshButton) {
       refreshButton.disabled = false;
-      refreshButton.textContent =
+      refreshButton.innerHTML =
         "<i class='fa-solid fa-arrows-rotate'></i> Refresh";
     }
   }
