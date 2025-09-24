@@ -86,10 +86,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---- React to login/logout ----
   function handleAuthChange() {
+    const refreshBtn = document.getElementById("refreshButton");
+    const countdownEl = document.getElementById("countdown");
+
     if (state.user) {
+      // Logged in → show button + start refresh
+      if (refreshBtn) refreshBtn.style.display = "inline-block";
+      if (countdownEl) countdownEl.style.display = "block";
+
       refreshFollowedChannels();
       startAutoRefresh();
     } else {
+      // Logged out → hide button + stop refresh
+      if (refreshBtn) refreshBtn.style.display = "none";
+      if (countdownEl) countdownEl.style.display = "none";
+
       stopAutoRefresh();
       updateFollowedChannelsUI();
     }
