@@ -106,7 +106,7 @@ export function updateUserInfo() {
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) logoutBtn.addEventListener("click", logout);
   } else {
-    userInfo.innerHTML = `<button class="login-btn" id="loginBtn">🎮 Login with Twitch</button>`;
+    userInfo.innerHTML = `<button class="login-btn" id="loginBtn"><i class="fa-brands fa-twitch"></i> Login with Twitch</button>`;
     const loginBtn = document.getElementById("loginBtn");
     if (loginBtn) loginBtn.addEventListener("click", loginToTwitch);
   }
