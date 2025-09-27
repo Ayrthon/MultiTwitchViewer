@@ -362,7 +362,7 @@ body.focus-mode .streams-grid {
 
 .stream-item:hover {
   border-color: #9146ff;
-  transform: translateY(-5px);
+  /* transform: translateY(-5px); */
   box-shadow: 0 15px 35px rgba(145, 70, 255, 0.2);
 }
 /* Focus-mode sizing using flex without DOM moves */
